@@ -1,9 +1,4 @@
 ﻿using GHI.Athens.Gadgeteer;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GHI.Athens.SocketProviders {
 	public class TheProfessor : SocketProvider {
@@ -47,7 +42,7 @@ namespace GHI.Athens.SocketProviders {
 			socket.AddGpioPinDefinition(SocketPinNumber.Seven, new GpioPinDefinition(s0, 65));
 			socket.AddGpioPinDefinition(SocketPinNumber.Eight, new GpioPinDefinition(s0, 88));
 			socket.AddGpioPinDefinition(SocketPinNumber.Nine, new GpioPinDefinition(s0, 89));
-			socket.I2CDeviceId = "";
+			socket.I2CDeviceId = @"\\?\ACPI#80860F41#6#{a11ee3c6-8421-4202-a3e7-b91ff90188e4}";
 		}
 	}
 }
