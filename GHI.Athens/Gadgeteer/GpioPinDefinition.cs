@@ -1,5 +1,4 @@
-﻿using System;
-using Windows.Devices.Enumeration;
+﻿using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 
 namespace GHI.Athens.Gadgeteer {
@@ -13,12 +12,7 @@ namespace GHI.Athens.Gadgeteer {
 		}
 
 		public static string GetDeviceIdFromFriendlyName(string friendlyName) {
-			var deviceId = GpioController.GetDeviceSelector(friendlyName);
-			var deviceInfosTask = DeviceInformation.FindAllAsync(deviceId, null).AsTask();
-			
-			deviceInfosTask.Wait();
-
-			return deviceInfosTask.Result[0].Id;
+			return DeviceInformation.FindAllAsync(GpioController.GetDeviceSelector(friendlyName), null).WaitForResults()[0].Id;
         }
 	}
 }

@@ -1,91 +1,38 @@
-﻿using System;
+﻿using GHI.Athens.Gadgeteer;
+using GHI.Athens.Modules;
+using GHI.Athens.SocketProviders;
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2C;
-using Windows.Devices.SerialCommunication;
-using Windows.Storage.Streams;
 using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
 
 namespace GHI.Athens.Demo {
-	public sealed partial class MainPage : Page {
-		private DispatcherTimer timer;
-		private GpioOutputPin led;
-		private GpioInputPin button;
-		private TempHumidSI70 temp;
-		private ADS7830 ads;
-		private IO60P16 io60;
+	public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
+		private Timer timer;
+		private SocketProvider mainboard;
+		private Button button;
+		private LEDStrip ledStrip;
 
 		public MainPage() {
 			this.InitializeComponent();
-			this.InitializeGpio();
 
-			//this.temp = new TempHumidSI70();
-			//this.ads = new ADS7830();
-			this.io60 = new IO60P16();
-			this.io60.Initialize();
+			this.timer = new Timer(this.Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
 
-			this.io60.SetIOMode(0, IO60P16.IOState.Output, IO60P16.ResistorMode.Floating);
-			this.io60.WriteDigital(0, true);
-
-			//Task.Run(() => this.DoSerial());
-
-			this.timer = new DispatcherTimer();
-			this.timer.Interval = TimeSpan.FromMilliseconds(250);
-			this.timer.Tick += Timer_Tick;
-			this.timer.Start();
+			Task.Run(async () => this.mainboard = await TheProfessor.Create())
+				.ContinueWith(async t => this.button = await Button.Create(this.mainboard.ProvidedSockets[1]))
+				.ContinueWith(async t => this.ledStrip = await LEDStrip.Create(this.mainboard.ProvidedSockets[3]))
+				.ContinueWith(t => this.timer.Change(500, 500));
 		}
 
-		private void Timer_Tick(object sender, object e) {
-			this.timer.Stop();
-
-			//this.led.Value = this.button.Value;
-
-			//Debug.WriteLine((await this.temp.TakeMeasurement()).ToString());
-			//Debug.WriteLine((await this.ads.ReadVoltage(0)).ToString());
-
-			this.io60.WriteDigital(0, this.button.Value == GpioPinValue.High);
-
-			this.timer.Start();
-		}
-
-		private async void DoSerial() {
-			var deviceId = SerialDevice.GetDeviceSelector("UART2");
-			var deviceInfos = await DeviceInformation.FindAllAsync(deviceId);
-			var device = await SerialDevice.FromIdAsync(deviceInfos[0].Id);
-
-			device.BaudRate = 9600;
-			device.DataBits = 8;
-			device.Handshake = SerialHandshake.None;
-			device.Parity = SerialParity.None;
-			device.StopBits = SerialStopBitCount.One;
-
-			var writer = new DataWriter(device.OutputStream);
-			var reader = new DataReader(device.InputStream);
-
-			while (true) {
-				writer.WriteByte(reader.ReadByte());
-				await writer.FlushAsync();
-			}
-		}
-
-		private async void InitializeGpio() {
-			var deviceId = GpioController.GetDeviceSelector("GPIO_S0");
-			var deviceInfos = await DeviceInformation.FindAllAsync(deviceId, null);
-			var controller = await GpioController.FromIdAsync(deviceInfos[0].Id);
-
-			GpioPinInfo ledInfo, buttonInfo;
-
-			//controller.Pins.TryGetValue(63, out ledInfo);
-			controller.Pins.TryGetValue(62, out buttonInfo);
-
-			//ledInfo.TryOpenOutput(GpioPinValue.High, GpioSharingMode.Exclusive, out this.led);
-			buttonInfo.TryOpenInput(GpioSharingMode.Exclusive, GpioInputDriveMode.HighImpedance, out this.button);
-
-			this.timer.Start();
+		private void Timer_Tick(object state) {
+			if (this.button.IsPressed())
+				this.ledStrip.TurnAllOn();
+			else
+				this.ledStrip.TurnAllOff();
 		}
 	}
 
@@ -125,9 +72,6 @@ namespace GHI.Athens.Demo {
 		}
 	}
 
-	/// <summary>
-	/// A TempHumidity module for Microsoft .NET Gadgeteer
-	/// </summary>
 	public class TempHumidSI70 {
 		private const byte MEASURE_HUMIDITY_HOLD = 0xE5;
 		private const byte READ_TEMP_FROM_PREVIOUS = 0xE0;

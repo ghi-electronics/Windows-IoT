@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GHI.Athens.Gadgeteer {
+﻿namespace GHI.Athens.Gadgeteer {
 	public abstract class Module {
-		public string Name { get; protected set; }
+		public abstract string Name { get; }
+		public abstract string Manufacturer { get; }
 
 		protected Module() {
 

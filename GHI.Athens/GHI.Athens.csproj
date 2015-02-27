@@ -110,14 +110,16 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <Folder Include="Modules\" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Gadgeteer\Helpers.cs" />
     <Compile Include="Gadgeteer\Module.cs" />
     <Compile Include="Gadgeteer\GpioPinDefinition.cs" />
     <Compile Include="Gadgeteer\SocketProvider.cs" />
     <Compile Include="Gadgeteer\Socket.cs" />
     <Compile Include="Gadgeteer\SocketInterfaces.cs" />
+    <Compile Include="Modules\Button.cs" />
+    <Compile Include="Modules\LEDStrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SocketProviders\TheProfessor.cs" />
   </ItemGroup>
