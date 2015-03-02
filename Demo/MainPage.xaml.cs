@@ -1,17 +1,17 @@
 ﻿using GHI.Athens.Gadgeteer;
 using GHI.Athens.Modules;
-using GHI.Athens.SocketProviders;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2C;
+using Windows.UI.Core;
+using Windows.UI.Xaml;
 
 namespace GHI.Athens.Demo {
 	public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
-		private Timer timer;
+		private DispatcherTimer timer;
 		private TheProfessor mainboard;
 		private Button button;
 		private LEDStrip ledStrip;
@@ -19,15 +19,20 @@ namespace GHI.Athens.Demo {
 		public MainPage() {
 			this.InitializeComponent();
 
-			this.timer = new Timer(this.Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
-
 			Task.Run(async () => this.mainboard = await Module.Create<TheProfessor>())
 				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.GetProvidedSocket(1)))
 				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.GetProvidedSocket(3)))
-				.ContinueWith(t => this.timer.Change(100, 100));
+				.ContinueWith(t => this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted));
 		}
 
-		private void Timer_Tick(object state) {
+		private void ProgramStarted() {
+			this.timer = new DispatcherTimer();
+			this.timer.Interval = TimeSpan.FromMilliseconds(100);
+			this.timer.Tick += this.Timer_Tick;
+			this.timer.Start();
+        }
+
+		private void Timer_Tick(object sender, object e) {
 			if (this.button.IsPressed())
 				this.ledStrip.TurnAllOn();
 			else

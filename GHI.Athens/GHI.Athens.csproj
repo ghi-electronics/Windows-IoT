@@ -120,7 +120,7 @@
     <Compile Include="Modules\Button.cs" />
     <Compile Include="Modules\LEDStrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SocketProviders\TheProfessor.cs" />
+    <Compile Include="Modules\TheProfessor.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,7 +1,7 @@
 ﻿using GHI.Athens.Gadgeteer;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.SocketProviders {
+namespace GHI.Athens.Modules {
 	public class TheProfessor : Module {
 		public override string Name { get; } = "The Professor";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
