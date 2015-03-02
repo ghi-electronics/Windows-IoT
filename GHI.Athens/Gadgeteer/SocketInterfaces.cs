@@ -11,8 +11,6 @@ namespace GHI.Athens.Gadgeteer {
 			public PinConfigurationException(string message, Exception inner) : base(message, inner) { }
 		}
 
-		public static GpioOutputPin pin { get; private set; }
-
 		public static async Task<GpioInputPin> CreateDigitalInputAsync(Socket socket, SocketPinNumber pinNumber, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
 			var gpioDefinition = socket.GpioPinDefinitions[pinNumber];
 			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);
