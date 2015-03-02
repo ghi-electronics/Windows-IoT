@@ -67,6 +67,7 @@ namespace GHI.Athens.Gadgeteer {
 		public DigitalInputCreator DigitalInputCreator { get; set; }
 		public DigitalOutputCreator DigitalOutputCreator { get; set; }
 		public DigitalInterruptCreator DigitalInterruptCreator { get; set; }
+		public AnalogInputCreator AnalogInputCreator { get; set; }
 		public I2CDeviceCreator I2CDeviceCreator { get; set; }
 
 		private async Task<GpioPinInfo> GetPinInfo(SocketPinNumber pinNumber) {
@@ -136,6 +137,15 @@ namespace GHI.Athens.Gadgeteer {
 				throw new SocketInterfaceCreationException("The pin could not be created.");
 
 			return new NativeInterfaces.DigitalInterrupt(pin);
+		}
+
+		public async Task<AnalogInput> CreateAnalogInputAsync(SocketPinNumber pinNumber) {
+			this.EnsureTypeIsSupported(SocketType.A);
+
+			if (this.AnalogInputCreator != null)
+				return await this.AnalogInputCreator(this, pinNumber);
+
+			throw new NotSupportedException();
 		}
 
 		public async Task<I2CDevice> CreateI2CDeviceAsync(Windows.Devices.I2C.I2CConnectionSettings connectionSettings) {

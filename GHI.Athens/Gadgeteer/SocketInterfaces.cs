@@ -7,6 +7,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode);
 	public delegate Task<DigitalOutput> DigitalOutputCreator(Socket socket, SocketPinNumber pinNumber, bool initialValue);
 	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode);
+	public delegate Task<AnalogInput> AnalogInputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
 
 	public abstract class DigitalOutput {
@@ -45,8 +46,24 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 		}
 	}
 
+	public abstract class AnalogInput {
+		public abstract double MaxVoltage { get; }
+
+		public abstract double ReadVoltage();
+
+		public double ReadProportion() {
+			return this.ReadVoltage() / this.MaxVoltage;
+		}
+	}
+
 	public abstract class I2CDevice {
 		public abstract I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred);
+
+		public I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer) {
+			uint transferred;
+
+			return this.WriteRead(writeBuffer, readBuffer, out transferred);
+		}
 
 		public I2CTransferStatus Write(byte[] buffer) {
 			uint transferred;

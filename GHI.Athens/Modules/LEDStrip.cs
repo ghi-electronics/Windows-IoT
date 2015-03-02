@@ -10,7 +10,7 @@ namespace GHI.Athens.Modules {
 		private DigitalOutput outputPin;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Six, false);
+			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Three, false);
 		}
 
 		public void TurnAllOn() {

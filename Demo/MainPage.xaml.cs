@@ -2,6 +2,7 @@
 using GHI.Athens.Modules;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
@@ -15,13 +16,15 @@ namespace GHI.Athens.Demo {
 		private TheProfessor mainboard;
 		private Button button;
 		private LEDStrip ledStrip;
+		private LightSense lightSense;
 
 		public MainPage() {
 			this.InitializeComponent();
 
 			Task.Run(async () => this.mainboard = await Module.Create<TheProfessor>())
 				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.GetProvidedSocket(1)))
-				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.GetProvidedSocket(3)))
+				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.GetProvidedSocket(2)))
+				.ContinueWith(async t => this.lightSense = await Module.Create<LightSense>(this.mainboard.GetProvidedSocket(3)))
 				.ContinueWith(t => this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted));
 		}
 
@@ -37,42 +40,8 @@ namespace GHI.Athens.Demo {
 				this.ledStrip.TurnAllOn();
 			else
 				this.ledStrip.TurnAllOff();
-		}
-	}
 
-	public class ADS7830 {
-		private const byte MAX_CHANNEL = 6;
-		private const byte CMD_SD_SE = 0x80;
-		private const byte CMD_PD_OFF = 0x00;
-		private const byte CMD_PD_ON = 0x04;
-		//private const byte I2C_ADDRESS = 0x4A;
-		private const byte I2C_ADDRESS = 0x48;
-
-		private I2CDevice i2c;
-
-		public ADS7830() {
-			this.i2c = null;
-		}
-
-		public async Task<double> ReadVoltage(byte channel) {
-			if (channel >= ADS7830.MAX_CHANNEL) throw new ArgumentOutOfRangeException("channel", "Invalid channel.");
-
-			if (this.i2c == null) {
-				var settings = new I2CConnectionSettings(ADS7830.I2C_ADDRESS, I2CBusSpeed.StandardMode, I2CAddressingMode.SevenBit);
-				var deviceId = I2CDevice.GetDeviceSelector();
-				var deviceInfos = await DeviceInformation.FindAllAsync(deviceId);
-
-				this.i2c = await I2CDevice.CreateDeviceAsync(deviceInfos[2].Id, settings);
-			}
-
-			byte[] command = new byte[1] { (byte)(ADS7830.CMD_SD_SE | ADS7830.CMD_PD_ON) };
-			byte[] read = new byte[1];
-
-			command[0] |= (byte)((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4);
-
-			if (this.i2c.TryWriteRead(command, read) != I2CTransferStatus.Success) return -1.0;
-
-			return (double)read[0] / 255 * 3.3;
+			Debug.WriteLine($"{this.lightSense.GetReading():N2}");
 		}
 	}
 
