@@ -5,6 +5,12 @@ using Windows.Devices.I2C;
 
 namespace GHI.Athens.Gadgeteer {
 	public class SocketInterfaces {
+		public class PinConfigurationException : Exception {
+			public PinConfigurationException() { }
+			public PinConfigurationException(string message) : base(message) { }
+			public PinConfigurationException(string message, Exception inner) : base(message, inner) { }
+		}
+
 		public static GpioOutputPin pin { get; private set; }
 
 		public static GpioInputPin CreateDigitalInput(Socket socket, SocketPinNumber pinNumber, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
@@ -31,10 +37,10 @@ namespace GHI.Athens.Gadgeteer {
 			GpioInputPin pin;
 
 			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsInputSupported)
-				throw new Exception();
+				throw new PinConfigurationException("The given pin does not support this mode.");
 
 			if (pinInfo.TryOpenInput(sharingMode, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new Exception();
+				throw new PinConfigurationException("The interface could not be created.");
 
 			return pin;
 		}
@@ -47,10 +53,10 @@ namespace GHI.Athens.Gadgeteer {
 			GpioOutputPin pin;
 
 			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsOutputSupported)
-				throw new Exception();
+				throw new PinConfigurationException("The given pin does not support this mode.");
 
 			if (pinInfo.TryOpenOutput(initialValue, sharingMode, out pin) != GpioOpenStatus.Success)
-				throw new Exception();
+				throw new PinConfigurationException("The interface could not be created.");
 
 			return pin;
 		}
@@ -63,10 +69,10 @@ namespace GHI.Athens.Gadgeteer {
 			GpioInterruptPin pin;
 
 			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsInterruptSupported)
-				throw new Exception();
+				throw new PinConfigurationException("The given pin does not support this mode.");
 
 			if (pinInfo.TryOpenInterrupt(interruptType, sharingMode, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new Exception();
+				throw new PinConfigurationException("The interface could not be created.");
 
 			return pin;
 		}
