@@ -9,16 +9,8 @@ namespace GHI.Athens.Modules {
 
 		private GpioOutputPin outputPin;
 
-		private LEDStrip() {
-
-		}
-
-		public async static Task<LEDStrip> Create(Socket socket) {
-			var module = new LEDStrip();
-
-			module.outputPin = await SocketInterfaces.CreateDigitalOutputAsync(socket, SocketPinNumber.Six, GpioPinValue.Low, GpioSharingMode.Exclusive);
-
-			return module;
+		protected async override Task Initialize(Socket socket) {
+			this.outputPin = await SocketInterfaces.CreateDigitalOutputAsync(socket, SocketPinNumber.Six, GpioPinValue.Low, GpioSharingMode.Exclusive);
 		}
 
 		public void TurnAllOn() {

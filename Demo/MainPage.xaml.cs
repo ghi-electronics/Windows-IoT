@@ -23,8 +23,8 @@ namespace GHI.Athens.Demo {
 			this.timer = new Timer(this.Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
 
 			Task.Run(async () => this.mainboard = await TheProfessor.Create())
-				.ContinueWith(async t => this.button = await Button.Create(this.mainboard.ProvidedSockets[1]))
-				.ContinueWith(async t => this.ledStrip = await LEDStrip.Create(this.mainboard.ProvidedSockets[3]))
+				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.ProvidedSockets[1]))
+				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.ProvidedSockets[3]))
 				.ContinueWith(t => this.timer.Change(500, 500));
 		}
 
