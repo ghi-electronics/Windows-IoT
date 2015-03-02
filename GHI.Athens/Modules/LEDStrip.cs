@@ -9,8 +9,8 @@ namespace GHI.Athens.Modules {
 
 		private GpioOutputPin outputPin;
 
-		protected async override Task Initialize(Socket socket) {
-			this.outputPin = await SocketInterfaces.CreateDigitalOutputAsync(socket, SocketPinNumber.Six, GpioPinValue.Low, GpioSharingMode.Exclusive);
+		protected async override Task Initialize(Socket parentSocket) {
+			this.outputPin = await SocketInterfaces.CreateDigitalOutputAsync(parentSocket, SocketPinNumber.Six, GpioPinValue.Low, GpioSharingMode.Exclusive);
 		}
 
 		public void TurnAllOn() {

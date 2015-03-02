@@ -13,22 +13,6 @@ namespace GHI.Athens.Gadgeteer {
 
 		public static GpioOutputPin pin { get; private set; }
 
-		public static GpioInputPin CreateDigitalInput(Socket socket, SocketPinNumber pinNumber, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
-			return SocketInterfaces.CreateDigitalInputAsync(socket, pinNumber, sharingMode, driveMode).WaitForResults();
-		}
-
-		public static GpioOutputPin CreateDigitalOutput(Socket socket, SocketPinNumber pinNumber, GpioPinValue initialValue, GpioSharingMode sharingMode) {
-			return SocketInterfaces.CreateDigitalOutputAsync(socket, pinNumber, initialValue, sharingMode).WaitForResults();
-		}
-
-		public static GpioInterruptPin CreateDigitalInterrupt(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
-			return SocketInterfaces.CreateDigitalInterruptAsync(socket, pinNumber, interruptType, sharingMode, driveMode).WaitForResults();
-		}
-
-		public static I2CDevice CreateI2CDevice(Socket socket, I2CConnectionSettings connectionSettings) {
-			return SocketInterfaces.CreateI2CDeviceAsync(socket, connectionSettings).WaitForResults();
-		}
-
 		public static async Task<GpioInputPin> CreateDigitalInputAsync(Socket socket, SocketPinNumber pinNumber, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
 			var gpioDefinition = socket.GpioPinDefinitions[pinNumber];
 			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);

@@ -8,12 +8,11 @@ using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2C;
-using Windows.UI.Xaml;
 
 namespace GHI.Athens.Demo {
 	public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
 		private Timer timer;
-		private SocketProvider mainboard;
+		private TheProfessor mainboard;
 		private Button button;
 		private LEDStrip ledStrip;
 
@@ -22,10 +21,10 @@ namespace GHI.Athens.Demo {
 
 			this.timer = new Timer(this.Timer_Tick, null, Timeout.Infinite, Timeout.Infinite);
 
-			Task.Run(async () => this.mainboard = await TheProfessor.Create())
-				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.ProvidedSockets[1]))
-				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.ProvidedSockets[3]))
-				.ContinueWith(t => this.timer.Change(500, 500));
+			Task.Run(async () => this.mainboard = await Module.Create<TheProfessor>())
+				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.GetProvidedSocket(1)))
+				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.GetProvidedSocket(3)))
+				.ContinueWith(t => this.timer.Change(100, 100));
 		}
 
 		private void Timer_Tick(object state) {

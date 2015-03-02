@@ -9,8 +9,8 @@ namespace GHI.Athens.Modules {
 
 		private GpioInputPin inputPin;
 
-		protected async override Task Initialize(Socket socket) {
-			this.inputPin = await SocketInterfaces.CreateDigitalInputAsync(socket, SocketPinNumber.Three, GpioSharingMode.Exclusive, GpioInputDriveMode.HighImpedance);
+		protected async override Task Initialize(Socket parentSocket) {
+			this.inputPin = await SocketInterfaces.CreateDigitalInputAsync(parentSocket, SocketPinNumber.Three, GpioSharingMode.Exclusive, GpioInputDriveMode.HighImpedance);
 		}
 
 		public bool IsPressed() {
