@@ -57,6 +57,8 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	}
 
 	public abstract class I2CDevice {
+		public abstract I2CTransferStatus Write(byte[] buffer, out uint transferred);
+		public abstract I2CTransferStatus Read(byte[] buffer, out uint transferred);
 		public abstract I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred);
 
 		public I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer) {
@@ -71,18 +73,10 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			return this.Write(buffer, out transferred);
 		}
 
-		public I2CTransferStatus Write(byte[] buffer, out uint transferred) {
-			return this.WriteRead(buffer, new byte[0], out transferred);
-		}
-
 		public I2CTransferStatus Read(byte[] buffer) {
 			uint transferred;
 
 			return this.Read(buffer, out transferred);
-		}
-
-		public I2CTransferStatus Read(byte[] buffer, out uint transferred) {
-			return this.WriteRead(new byte[0], buffer, out transferred);
 		}
 	}
 }

@@ -49,6 +49,14 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 			this.device = device;
 		}
 
+		public override Windows.Devices.I2C.I2CTransferStatus Write(byte[] buffer, out uint transferred) {
+			return this.device.TryWrite(buffer, out transferred);
+		}
+
+		public override Windows.Devices.I2C.I2CTransferStatus Read(byte[] buffer, out uint transferred) {
+			return this.device.TryRead(buffer, out transferred);
+		}
+
 		public override Windows.Devices.I2C.I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred) {
 			return this.device.TryWriteRead(writeBuffer, readBuffer, out transferred);
 		}
