@@ -113,6 +113,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Gadgeteer\DeviceIdFinder.cs" />
+    <Compile Include="Gadgeteer\Exceptions.cs" />
+    <Compile Include="Gadgeteer\NativeInterfaces.cs" />
     <Compile Include="Gadgeteer\Module.cs" />
     <Compile Include="Gadgeteer\GpioPinDefinition.cs" />
     <Compile Include="Gadgeteer\Socket.cs" />

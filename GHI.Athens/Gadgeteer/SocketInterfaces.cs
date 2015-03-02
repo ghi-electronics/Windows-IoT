@@ -1,66 +1,71 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2C;
+using Windows.Foundation;
 
-namespace GHI.Athens.Gadgeteer {
-	public class SocketInterfaces {
-		public class PinConfigurationException : Exception {
-			public PinConfigurationException() { }
-			public PinConfigurationException(string message) : base(message) { }
-			public PinConfigurationException(string message, Exception inner) : base(message, inner) { }
+namespace GHI.Athens.Gadgeteer.SocketInterfaces {
+	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode);
+	public delegate Task<DigitalOutput> DigitalOutputCreator(Socket socket, SocketPinNumber pinNumber, bool initialValue);
+	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode);
+	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
+
+	public abstract class DigitalOutput {
+		public abstract void Write(bool value);
+		public abstract bool Read();
+
+		public bool Value {
+			get {
+				return this.Read();
+			}
+			set {
+				this.Write(value);
+			}
+		}
+	}
+
+	public abstract class DigitalInput {
+		public abstract bool Read();
+
+		public bool Value {
+			get {
+				return this.Read();
+			}
 		}
 
-		public static async Task<GpioInputPin> CreateDigitalInputAsync(Socket socket, SocketPinNumber pinNumber, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
-			var gpioDefinition = socket.GpioPinDefinitions[pinNumber];
-			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);
+		public GpioInputDriveMode DriveMode { get; set; }
+	}
 
-			GpioPinInfo pinInfo;
-			GpioInputPin pin;
+	public abstract class DigitalInterrupt : DigitalInput {
+		public GpioInterruptType InterruptType { get; set; }
 
-			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsInputSupported)
-				throw new PinConfigurationException("The given pin does not support this mode.");
+		public event TypedEventHandler<DigitalInterrupt, GpioInterruptEventArgs> Interrupt;
 
-			if (pinInfo.TryOpenInput(sharingMode, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new PinConfigurationException("The interface could not be created.");
+		protected void OnInterrupt(GpioInterruptEventArgs e) {
+			this.Interrupt?.Invoke(this, e);
+		}
+	}
 
-			return pin;
+	public abstract class I2CDevice {
+		public abstract I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred);
+
+		public I2CTransferStatus Write(byte[] buffer) {
+			uint transferred;
+
+			return this.Write(buffer, out transferred);
 		}
 
-		public static async Task<GpioOutputPin> CreateDigitalOutputAsync(Socket socket, SocketPinNumber pinNumber, GpioPinValue initialValue, GpioSharingMode sharingMode) {
-			var gpioDefinition = socket.GpioPinDefinitions[pinNumber];
-			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);
-
-			GpioPinInfo pinInfo;
-			GpioOutputPin pin;
-
-			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsOutputSupported)
-				throw new PinConfigurationException("The given pin does not support this mode.");
-
-			if (pinInfo.TryOpenOutput(initialValue, sharingMode, out pin) != GpioOpenStatus.Success)
-				throw new PinConfigurationException("The interface could not be created.");
-
-			return pin;
+		public I2CTransferStatus Write(byte[] buffer, out uint transferred) {
+			return this.WriteRead(buffer, new byte[0], out transferred);
 		}
 
-		public static async Task<GpioInterruptPin> CreateDigitalInterruptAsync(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioSharingMode sharingMode, GpioInputDriveMode driveMode) {
-			var gpioDefinition = socket.GpioPinDefinitions[pinNumber];
-			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);
+		public I2CTransferStatus Read(byte[] buffer) {
+			uint transferred;
 
-			GpioPinInfo pinInfo;
-			GpioInterruptPin pin;
-
-			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo) || !pinInfo.Capabilities.IsInterruptSupported)
-				throw new PinConfigurationException("The given pin does not support this mode.");
-
-			if (pinInfo.TryOpenInterrupt(interruptType, sharingMode, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new PinConfigurationException("The interface could not be created.");
-
-			return pin;
+			return this.Read(buffer, out transferred);
 		}
 
-		public static async Task<I2CDevice> CreateI2CDeviceAsync(Socket socket, I2CConnectionSettings connectionSettings) {
-			return await I2CDevice.CreateDeviceAsync(socket.I2CDeviceId, connectionSettings);
+		public I2CTransferStatus Read(byte[] buffer, out uint transferred) {
+			return this.WriteRead(new byte[0], buffer, out transferred);
 		}
 	}
 }

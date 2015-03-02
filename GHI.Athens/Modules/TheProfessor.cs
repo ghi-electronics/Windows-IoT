@@ -42,7 +42,7 @@ namespace GHI.Athens.Modules {
 			socket.AddGpioPinDefinition(SocketPinNumber.Seven, new GpioPinDefinition(s0, 65));
 			socket.AddGpioPinDefinition(SocketPinNumber.Eight, new GpioPinDefinition(s0, 88));
 			socket.AddGpioPinDefinition(SocketPinNumber.Nine, new GpioPinDefinition(s0, 89));
-			socket.I2CDeviceId = await DeviceIdFinder.GetI2CId();
+			socket.NativeI2CDeviceId = await DeviceIdFinder.GetI2CId();
         }
 	}
 }

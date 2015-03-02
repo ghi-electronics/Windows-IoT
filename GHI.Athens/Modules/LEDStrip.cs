@@ -1,24 +1,24 @@
 ﻿using GHI.Athens.Gadgeteer;
+using GHI.Athens.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
-using Windows.Devices.Gpio;
 
 namespace GHI.Athens.Modules {
 	public class LEDStrip : Module {
 		public override string Name { get; } = "LED Strip";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private GpioOutputPin outputPin;
+		private DigitalOutput outputPin;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.outputPin = await SocketInterfaces.CreateDigitalOutputAsync(parentSocket, SocketPinNumber.Six, GpioPinValue.Low, GpioSharingMode.Exclusive);
+			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Six, false);
 		}
 
 		public void TurnAllOn() {
-			this.outputPin.Value = GpioPinValue.High;
+			this.outputPin.Value = true;
 		}
 
 		public void TurnAllOff() {
-			this.outputPin.Value = GpioPinValue.Low;
+			this.outputPin.Value = false;
 		}
 	}
 }
