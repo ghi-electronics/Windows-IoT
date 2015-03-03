@@ -46,12 +46,12 @@ namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
 			if (readBuffer == null) throw new ArgumentNullException(nameof(readBuffer));
 			if (writeBuffer == null) throw new ArgumentNullException(nameof(writeBuffer));
 
-			var result = this.Read(readBuffer, true, false, out transferred);
+			var result = this.Write(writeBuffer, true, false, out transferred);
 
 			if (result == Windows.Devices.I2C.I2CTransferStatus.Success) {
 				var soFar = transferred;
 
-				result = this.Write(writeBuffer, true, true, out transferred);
+				result = this.Read(readBuffer, true, true, out transferred);
 
 				transferred += soFar;
 			}
@@ -166,7 +166,7 @@ namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
 			if (sendStop)
 				this.SendStop();
 
-			return nack;
+			return !nack;
 		}
 
 		private byte Receive(bool sendAck, bool sendStop) {

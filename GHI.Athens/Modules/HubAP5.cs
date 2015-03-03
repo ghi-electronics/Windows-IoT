@@ -3,6 +3,7 @@ using GHI.Athens.Gadgeteer.SocketInterfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
+using System;
 
 namespace GHI.Athens.Modules {
 	public class HubAP5 : Module {
@@ -80,10 +81,12 @@ namespace GHI.Athens.Modules {
 		private class IndirectedDigitalInput : DigitalInput {
 			private IO60P16 io60;
 			private byte pin;
+			private GpioInputDriveMode driveMode;
 
 			public IndirectedDigitalInput(byte pin, GpioInputDriveMode resistorMode, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
+				this.driveMode = resistorMode;
 
 				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, resistorMode);
 			}
@@ -91,15 +94,28 @@ namespace GHI.Athens.Modules {
 			public override bool Read() {
 				return this.io60.ReadDigital(this.pin);
 			}
+
+			public override GpioInputDriveMode DriveMode {
+				get {
+					return this.driveMode;
+				}
+				set {
+					this.driveMode = value;
+
+					this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.driveMode);
+				}
+			}
 		}
 
 		private class IndirectedDigitalInputOutput : DigitalInputOutput {
 			private IO60P16 io60;
 			private byte pin;
+			private GpioInputDriveMode driveMode;
 
 			public IndirectedDigitalInputOutput(byte pin, bool initialState, bool isOutput, GpioInputDriveMode resistorMode, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
+				this.driveMode = resistorMode;
 
 				if (isOutput) {
 					this.Write(initialState);
@@ -110,23 +126,38 @@ namespace GHI.Athens.Modules {
 			}
 
 			public override bool Read() {
-				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.DriveMode);
+				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.driveMode);
 				return this.io60.ReadDigital(this.pin);
 			}
 
 			public override void Write(bool state) {
-				this.io60.SetIOMode(this.pin, IO60P16.IOState.Output, this.DriveMode);
+				this.io60.SetIOMode(this.pin, IO60P16.IOState.Output, this.driveMode);
 				this.io60.WriteDigital(this.pin, state);
+			}
+
+			public override GpioInputDriveMode DriveMode {
+				get {
+					return this.driveMode;
+				}
+				set {
+					this.driveMode = value;
+
+					this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.driveMode);
+				}
 			}
 		}
 
 		private class IndirectedDigitalInterrupt : DigitalInterrupt {
 			private IO60P16 io60;
 			private byte pin;
+			private GpioInputDriveMode driveMode;
+			private GpioInterruptType interruptType;
 
 			public IndirectedDigitalInterrupt(byte pin, GpioInputDriveMode resistorMode, GpioInterruptType interruptMode, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
+				this.driveMode = resistorMode;
+				this.interruptType = interruptMode;
 
 				this.io60.SetIOMode(this.pin, IO60P16.IOState.InputInterrupt, resistorMode);
 				this.io60.RegisterInterruptHandler(this.pin, interruptMode, this.OnInterrupt);
@@ -134,6 +165,26 @@ namespace GHI.Athens.Modules {
 
 			public override bool Read() {
 				return this.io60.ReadDigital(this.pin);
+			}
+
+			public override GpioInputDriveMode DriveMode {
+				get {
+					return this.driveMode;
+				}
+				set {
+					this.driveMode = value;
+
+					this.io60.SetIOMode(this.pin, IO60P16.IOState.InputInterrupt, this.driveMode);
+				}
+			}
+
+			public override GpioInterruptType InterruptType {
+				get {
+					return this.interruptType;
+                }
+				set {
+					throw new NotSupportedException();
+				}
 			}
 		}
 

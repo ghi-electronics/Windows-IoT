@@ -12,6 +12,15 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		public override bool Read() {
 			return this.pin.Value == GpioPinValue.High;
 		}
+
+		public override GpioInputDriveMode DriveMode {
+			get {
+				return this.pin.InputDriveMode;
+			}
+			set {
+				throw new NotSupportedException();
+			}
+		}
 	}
 
 	internal class DigitalOutput : SocketInterfaces.DigitalOutput {
@@ -41,17 +50,35 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		public override bool Read() {
 			return this.pin.Value == GpioPinValue.High;
 		}
+
+		public override GpioInputDriveMode DriveMode {
+			get {
+				return this.pin.InputDriveMode;
+			}
+			set {
+				throw new NotSupportedException();
+			}
+		}
+
+		public override GpioInterruptType InterruptType {
+			get {
+				return this.pin.InterruptType;
+			}
+			set {
+				throw new NotSupportedException();
+			}
+		}
 	}
 
 	internal class DigitalInputOutput : SocketInterfaces.DigitalInputOutput {
 		private GpioPinInfo pinInfo;
 		private GpioInputPin input;
 		private GpioOutputPin output;
+		private GpioInputDriveMode driveMode;
 
 		internal DigitalInputOutput(GpioPinInfo pinInfo, GpioInputDriveMode driveMode, bool isOutput, bool initialOutputValue) {
 			this.pinInfo = pinInfo;
-
-			this.DriveMode = driveMode;
+			this.driveMode = driveMode;
 
 			if (isOutput) {
 				this.Write(initialOutputValue);
@@ -63,10 +90,10 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 
 		public override bool Read() {
 			if (this.input == null) {
-				this.output.Dispose();
+				this.output?.Dispose();
 				this.output = null;
 
-				this.pinInfo.TryOpenInput(GpioSharingMode.Exclusive, this.DriveMode, out this.input);
+				this.pinInfo.TryOpenInput(GpioSharingMode.Exclusive, this.driveMode, out this.input);
 			}
 
 			return this.input.Value == GpioPinValue.High;
@@ -74,13 +101,22 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 
 		public override void Write(bool value) {
 			if (this.output == null) {
-				this.input.Dispose();
+				this.input?.Dispose();
 				this.input = null;
 
 				this.pinInfo.TryOpenOutput(value ? GpioPinValue.High : GpioPinValue.Low, GpioSharingMode.Exclusive, out this.output);
 			}
 			else {
 				this.output.Value = value ? GpioPinValue.High : GpioPinValue.Low;
+			}
+		}
+
+		public override GpioInputDriveMode DriveMode {
+			get {
+				return this.driveMode;
+			}
+			set {
+				this.driveMode = value;
 			}
 		}
 	}

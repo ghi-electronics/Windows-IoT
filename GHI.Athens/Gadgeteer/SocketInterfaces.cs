@@ -36,11 +36,11 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			}
 		}
 
-		public GpioInputDriveMode DriveMode { get; set; }
+		public abstract GpioInputDriveMode DriveMode { get; set; }
 	}
 
 	public abstract class DigitalInterrupt : DigitalInput {
-		public GpioInterruptType InterruptType { get; set; }
+		public abstract GpioInterruptType InterruptType { get; set; }
 
 		public event TypedEventHandler<DigitalInterrupt, GpioInterruptEventArgs> Interrupt;
 
@@ -62,7 +62,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			}
 		}
 
-		public GpioInputDriveMode DriveMode { get; set; }
+		public abstract GpioInputDriveMode DriveMode { get; set; }
 	}
 
 	public abstract class AnalogInput {
