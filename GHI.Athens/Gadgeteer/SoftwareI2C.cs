@@ -3,14 +3,14 @@ using System;
 using System.Threading.Tasks;
 
 namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
-	public class I2CDevice : SocketInterfaces.I2CDevice {
+	internal class I2CDevice : SocketInterfaces.I2CDevice {
 		private byte readAddress;
 		private byte writeAddress;
 		private DigitalInputOutput sda;
 		private DigitalInputOutput scl;
 		private bool start;
 
-		public I2CDevice(DigitalInputOutput sda, DigitalInputOutput scl, Windows.Devices.I2C.I2CConnectionSettings settings) {
+		internal I2CDevice(DigitalInputOutput sda, DigitalInputOutput scl, Windows.Devices.I2C.I2CConnectionSettings settings) {
 			if (settings.AddressingMode != Windows.Devices.I2C.I2CAddressingMode.SevenBit) throw new NotSupportedException("Only 7 bit addressing is supported.");
 
 			this.sda = sda;
