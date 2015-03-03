@@ -35,7 +35,7 @@ namespace GHI.Athens.Gadgeteer {
 			this.supportedTypes = new HashSet<SocketType>();
 
 			this.Number = socketNumber;
-        }
+		}
 
 		public void EnsureTypeIsSupported(SocketType type) {
 			if (!this.IsTypeSupported(type))
@@ -67,6 +67,7 @@ namespace GHI.Athens.Gadgeteer {
 		public DigitalInputCreator DigitalInputCreator { get; set; }
 		public DigitalOutputCreator DigitalOutputCreator { get; set; }
 		public DigitalInterruptCreator DigitalInterruptCreator { get; set; }
+		public DigitalInputOutputCreator DigitalInputOutputCreator { get; set; }
 		public AnalogInputCreator AnalogInputCreator { get; set; }
 		public I2CDeviceCreator I2CDeviceCreator { get; set; }
 
@@ -139,6 +140,20 @@ namespace GHI.Athens.Gadgeteer {
 			return new NativeInterfaces.DigitalInterrupt(pin);
 		}
 
+		public async Task<DigitalInputOutput> CreateDigitalInputOutputAsync(SocketPinNumber pinNumber, GpioInputDriveMode driveMode, bool isOutput, bool initialOutputValue) {
+			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
+
+			if (this.DigitalInputOutputCreator != null)
+				return await this.DigitalInputOutputCreator(this, pinNumber, driveMode, isOutput, initialOutputValue);
+
+			var pinInfo = await this.GetPinInfo(pinNumber);
+
+			if (!pinInfo.Capabilities.IsOutputSupported || !pinInfo.Capabilities.IsInputSupported)
+				throw new SocketInterfaceCreationException("The given pin does not support this mode.");
+
+			return new NativeInterfaces.DigitalInputOutput(pinInfo, driveMode, isOutput, initialOutputValue);
+		}
+
 		public async Task<AnalogInput> CreateAnalogInputAsync(SocketPinNumber pinNumber) {
 			this.EnsureTypeIsSupported(SocketType.A);
 
@@ -157,6 +172,17 @@ namespace GHI.Athens.Gadgeteer {
 			var device = await Windows.Devices.I2C.I2CDevice.CreateDeviceAsync(this.NativeI2CDeviceId, connectionSettings);
 
 			return new NativeInterfaces.I2CDevice(device);
+		}
+
+		public async Task<I2CDevice> CreateI2CDeviceAsync(SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber, Windows.Devices.I2C.I2CConnectionSettings connectionSettings) {
+			if (sdaPinNumber == SocketPinNumber.Eight && sclPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.I))
+				return await this.CreateI2CDeviceAsync(connectionSettings);
+
+			var sda = await this.CreateDigitalInputOutputAsync(sdaPinNumber, GpioInputDriveMode.PullUp, false, false);
+			var scl = await this.CreateDigitalInputOutputAsync(sclPinNumber, GpioInputDriveMode.PullUp, false, false);
+
+			return new SoftwareInterfaces.I2CDevice(sda, scl, connectionSettings);
+
 		}
 	}
 }

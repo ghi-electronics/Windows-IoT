@@ -42,6 +42,48 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		}
 	}
 
+	internal class DigitalInputOutput : SocketInterfaces.DigitalInputOutput {
+		private GpioPinInfo pinInfo;
+		private GpioInputPin input;
+		private GpioOutputPin output;
+
+		internal DigitalInputOutput(GpioPinInfo pinInfo, GpioInputDriveMode driveMode, bool isOutput, bool initialOutputValue) {
+			this.pinInfo = pinInfo;
+
+			this.DriveMode = driveMode;
+
+			if (isOutput) {
+				this.Write(initialOutputValue);
+			}
+			else {
+				this.Read();
+			}
+		}
+
+		public override bool Read() {
+			if (this.input == null) {
+				this.output.Dispose();
+				this.output = null;
+
+				this.pinInfo.TryOpenInput(GpioSharingMode.Exclusive, this.DriveMode, out this.input);
+			}
+
+			return this.input.Value == GpioPinValue.High;
+		}
+
+		public override void Write(bool value) {
+			if (this.output == null) {
+				this.input.Dispose();
+				this.input = null;
+
+				this.pinInfo.TryOpenOutput(value ? GpioPinValue.High : GpioPinValue.Low, GpioSharingMode.Exclusive, out this.output);
+			}
+			else {
+				this.output.Value = value ? GpioPinValue.High : GpioPinValue.Low;
+			}
+        }
+	}
+
 	internal class I2CDevice : SocketInterfaces.I2CDevice {
 		private Windows.Devices.I2C.I2CDevice device;
 

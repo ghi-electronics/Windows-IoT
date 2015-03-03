@@ -119,6 +119,7 @@
     <Compile Include="Gadgeteer\GpioPinDefinition.cs" />
     <Compile Include="Gadgeteer\Socket.cs" />
     <Compile Include="Gadgeteer\SocketInterfaces.cs" />
+    <Compile Include="Gadgeteer\SoftwareI2C.cs" />
     <Compile Include="Modules\LightSense.cs" />
     <Compile Include="Modules\Button.cs" />
     <Compile Include="Modules\LEDStrip.cs" />
