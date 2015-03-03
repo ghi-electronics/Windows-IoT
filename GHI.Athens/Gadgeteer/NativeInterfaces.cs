@@ -1,4 +1,5 @@
-﻿using Windows.Devices.Gpio;
+﻿using System;
+using Windows.Devices.Gpio;
 
 namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	internal class DigitalInput : SocketInterfaces.DigitalInput {
@@ -81,7 +82,33 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 			else {
 				this.output.Value = value ? GpioPinValue.High : GpioPinValue.Low;
 			}
-        }
+		}
+	}
+
+	internal class AnalogInput : SocketInterfaces.AnalogInput {
+		public override double MaxVoltage { get; } = 3.3;
+
+		public override double ReadVoltage() {
+			throw new NotImplementedException();
+		}
+	}
+
+	internal class AnalogOutput : SocketInterfaces.AnalogOutput {
+		public override double MaxVoltage { get; } = 3.3;
+
+		public override void WriteVoltage(double voltage) {
+			throw new NotImplementedException();
+		}
+	}
+
+	internal class PwmOutput : SocketInterfaces.PwmOutput {
+		protected override void SetEnabled(bool state) {
+			throw new NotImplementedException();
+		}
+
+		protected override void SetValues(double frequency, double dutyCycle) {
+			throw new NotImplementedException();
+		}
 	}
 
 	internal class I2CDevice : SocketInterfaces.I2CDevice {

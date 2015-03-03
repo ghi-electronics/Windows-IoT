@@ -123,6 +123,7 @@
     <Compile Include="Modules\LightSense.cs" />
     <Compile Include="Modules\Button.cs" />
     <Compile Include="Modules\LEDStrip.cs" />
+    <Compile Include="Modules\HubAP5.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Modules\TheProfessor.cs" />
   </ItemGroup>

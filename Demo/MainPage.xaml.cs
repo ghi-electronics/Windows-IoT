@@ -14,6 +14,7 @@ namespace GHI.Athens.Demo {
 	public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
 		private DispatcherTimer timer;
 		private TheProfessor mainboard;
+		private HubAP5 hub;
 		private Button button;
 		private LEDStrip ledStrip;
 		private LightSense lightSense;
@@ -22,9 +23,10 @@ namespace GHI.Athens.Demo {
 			this.InitializeComponent();
 
 			Task.Run(async () => this.mainboard = await Module.Create<TheProfessor>())
-				.ContinueWith(async t => this.button = await Module.Create<Button>(this.mainboard.GetProvidedSocket(1)))
-				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.mainboard.GetProvidedSocket(2)))
-				.ContinueWith(async t => this.lightSense = await Module.Create<LightSense>(this.mainboard.GetProvidedSocket(3)))
+				.ContinueWith(async t => this.hub = await Module.Create<HubAP5>(this.mainboard.GetProvidedSocket(3))).Unwrap()
+				.ContinueWith(async t => this.button = await Module.Create<Button>(this.hub.GetProvidedSocket(6))).Unwrap()
+				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.hub.GetProvidedSocket(8))).Unwrap()
+				.ContinueWith(async t => this.lightSense = await Module.Create<LightSense>(this.hub.GetProvidedSocket(1))).Unwrap()
 				.ContinueWith(t => this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted));
 		}
 

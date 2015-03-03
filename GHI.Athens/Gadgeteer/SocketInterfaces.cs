@@ -9,6 +9,8 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode);
 	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode, bool isOutput, bool initialOutputValue);
 	public delegate Task<AnalogInput> AnalogInputCreator(Socket socket, SocketPinNumber pinNumber);
+	public delegate Task<AnalogOutput> AnalogOutputCreator(Socket socket, SocketPinNumber pinNumber, double initialValue);
+	public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
 
 	public abstract class DigitalOutput {
@@ -70,6 +72,95 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 
 		public double ReadProportion() {
 			return this.ReadVoltage() / this.MaxVoltage;
+		}
+
+		public double Voltage {
+			get {
+				return this.ReadVoltage();
+			}
+		}
+
+		public double Proportion {
+			get {
+				return this.ReadProportion();
+			}
+		}
+	}
+
+	public abstract class AnalogOutput {
+		private double voltage = 0.0;
+
+		public abstract double MaxVoltage { get; }
+
+		public abstract void WriteVoltage(double voltage);
+
+		public void WriteProportion(double value) {
+			this.WriteVoltage(value / this.MaxVoltage);
+		}
+
+		public double Voltage {
+			get {
+				return this.voltage;
+			}
+			set {
+				this.voltage = value;
+
+				this.WriteVoltage(value);
+			}
+		}
+
+		public double Proportion {
+			get {
+				return this.Voltage / this.MaxVoltage;
+			}
+			set {
+				this.Voltage = this.MaxVoltage * value;
+			}
+		}
+	}
+
+	public abstract class PwmOutput {
+		private bool enabled;
+		private double frequency;
+		private double dutyCycle;
+
+		protected abstract void SetEnabled(bool state);
+		protected abstract void SetValues(double frequency, double dutyCycle);
+
+		public void Set(double frequency, double dutyCycle) {
+			this.SetValues(frequency, dutyCycle);
+
+			this.frequency = frequency;
+			this.dutyCycle = dutyCycle;
+		}
+
+		public bool Enabled {
+			get {
+				return this.enabled;
+			}
+			set {
+				this.SetEnabled(value);
+
+				this.Enabled = value;
+			}
+		}
+
+		public double Frequency {
+			get {
+				return this.frequency;
+			}
+			set {
+				this.Set(value, this.dutyCycle);
+			}
+		}
+
+		public double DutyCycle {
+			get {
+				return this.dutyCycle;
+			}
+			set {
+				this.Set(this.frequency, value);
+			}
 		}
 	}
 

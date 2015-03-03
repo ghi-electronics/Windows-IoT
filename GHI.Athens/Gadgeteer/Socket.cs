@@ -17,13 +17,14 @@ namespace GHI.Athens.Gadgeteer {
 	}
 
 	public enum SocketType {
-		X,
-		Y,
-		I,
 		A,
+		I,
+		O,
 		P,
 		S,
-		U
+		U,
+		X,
+		Y
 	}
 
 	public sealed class Socket {
@@ -69,6 +70,8 @@ namespace GHI.Athens.Gadgeteer {
 		public DigitalInterruptCreator DigitalInterruptCreator { get; set; }
 		public DigitalInputOutputCreator DigitalInputOutputCreator { get; set; }
 		public AnalogInputCreator AnalogInputCreator { get; set; }
+		public AnalogOutputCreator AnalogOutputCreator { get; set; }
+		public PwmOutputCreator PwmOutputCreator { get; set; }
 		public I2CDeviceCreator I2CDeviceCreator { get; set; }
 
 		private async Task<GpioPinInfo> GetPinInfo(SocketPinNumber pinNumber) {
@@ -160,7 +163,25 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.AnalogInputCreator != null)
 				return await this.AnalogInputCreator(this, pinNumber);
 
-			throw new NotSupportedException();
+			return new NativeInterfaces.AnalogInput();
+		}
+
+		public async Task<AnalogOutput> CreateAnalogOutputAsync(SocketPinNumber pinNumber, double initialValue) {
+			this.EnsureTypeIsSupported(SocketType.O);
+
+			if (this.AnalogOutputCreator != null)
+				return await this.AnalogOutputCreator(this, pinNumber, initialValue);
+
+			return new NativeInterfaces.AnalogOutput();
+		}
+
+		public async Task<PwmOutput> CreatePwmOutputAsync(SocketPinNumber pinNumber) {
+			this.EnsureTypeIsSupported(SocketType.P);
+
+			if (this.PwmOutputCreator != null)
+				return await this.PwmOutputCreator(this, pinNumber);
+
+			return new NativeInterfaces.PwmOutput();
 		}
 
 		public async Task<I2CDevice> CreateI2CDeviceAsync(Windows.Devices.I2C.I2CConnectionSettings connectionSettings) {
