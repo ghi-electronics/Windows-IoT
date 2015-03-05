@@ -7,12 +7,16 @@ namespace GHI.Athens.Modules {
 		private static byte CmdSdSe { get; } = 0x80;
 		private static byte CmdPdOff { get; } = 0x00;
 		private static byte CmdPdOn { get; } = 0x04;
-		private static byte Address { get; } = 0x4A;
+
+		private byte Address { get { return (byte)(0x48 | (this.A0 ? 1 : 0) | (this.A1 ? 2 : 0)); } }
+
+		public bool A0 { get; set; } = false;
+		public bool A1 { get; set; } = false;
 
 		private I2CDevice i2c;
 
 		public async Task Initialize(Socket socket) {
-			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(ADS7830.Address, Windows.Devices.I2C.I2CBusSpeed.StandardMode, Windows.Devices.I2C.I2CAddressingMode.SevenBit));
+			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(this.Address, Windows.Devices.I2C.I2CBusSpeed.StandardMode, Windows.Devices.I2C.I2CAddressingMode.SevenBit));
 		}
 
 		public double ReadVoltage(byte channel) {

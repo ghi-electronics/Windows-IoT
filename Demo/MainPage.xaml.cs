@@ -43,7 +43,7 @@ namespace GHI.Athens.Demo {
 			else
 				this.ledStrip.TurnAllOff();
 			
-			//Debug.WriteLine($"{this.lightSense.GetReading():N2}");
+			Debug.WriteLine($"{this.lightSense.GetReading():N2}");
 			//Debug.WriteLine($"{this.temp.TakeMeasurement()}");
 
 			this.timer.Start();

@@ -38,7 +38,7 @@ namespace GHI.Athens.Modules {
 				socket.DigitalInputCreator = (indirectedSocket, indirectedPin, driveMode) => Task.FromResult<DigitalInput>(new IndirectedDigitalInput(this.GetPin(indirectedSocket, indirectedPin), driveMode, this.cy8));
 				socket.DigitalOutputCreator = (indirectedSocket, indirectedPin, initialState) => Task.FromResult<DigitalOutput>(new IndirectedDigitalOutput(this.GetPin(indirectedSocket, indirectedPin), initialState, this.cy8));
 				socket.DigitalInputOutputCreator = (indirectedSocket, indirectedPin, mode, driveMode, initialOutputValue) => Task.FromResult<DigitalInputOutput>(new IndirectedDigitalInputOutput(this.GetPin(indirectedSocket, indirectedPin), mode, driveMode, initialOutputValue, this.cy8));
-				socket.AnalogInputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogInput>(new IndirectedAnalogInput(indirectedPin, this.GetPin(indirectedSocket, indirectedPin), this.ads, this.cy8));
+				socket.AnalogInputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogInput>(new IndirectedAnalogInput(this.GetChannel(indirectedSocket, indirectedPin), this.GetPin(indirectedSocket, indirectedPin), this.ads, this.cy8));
 				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(GetPin(indirectedSocket, indirectedPin), this.cy8));
 			}
 		}
@@ -121,6 +121,10 @@ namespace GHI.Athens.Modules {
 
 		private CY8C9560A.Pin GetPin(Socket socket, SocketPinNumber pin) {
 			return this.map[(int)socket.Number - 1][pin];
+		}
+
+		private byte GetChannel(Socket socket, SocketPinNumber pin) {
+			return (byte)((socket.Number - 1) * 3 + ((int)pin - 3));
 		}
 
 		private class IndirectedDigitalOutput : DigitalOutput {
@@ -223,17 +227,12 @@ namespace GHI.Athens.Modules {
 
 			public override double MaxVoltage { get; } = 3.3;
 
-			public IndirectedAnalogInput(SocketPinNumber pinNumber, CY8C9560A.Pin pin, ADS7830 ads, CY8C9560A cy8) {
+			public IndirectedAnalogInput(byte channel, CY8C9560A.Pin pin, ADS7830 ads, CY8C9560A cy8) {
 				this.ads = ads;
+				this.channel = channel;
 
 				this.cy8 = cy8;
 				this.cy8.SetInput(pin, GpioInputDriveMode.HighImpedance);
-
-				switch (pinNumber) {
-					case SocketPinNumber.Three: this.channel = 0; break;
-					case SocketPinNumber.Four: this.channel = 2; break;
-					case SocketPinNumber.Five: this.channel = 1; break;
-				}
 			}
 
 			public override double ReadVoltage() {

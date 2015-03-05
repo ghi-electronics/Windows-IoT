@@ -12,6 +12,7 @@ namespace GHI.Athens.Modules {
 
 		protected async override Task Initialize() {
 			this.ads = new ADS7830();
+			this.ads.A1 = true;
 
 			var s0 = await DeviceIdFinder.GetGpioIdAsync("GPIO_S0");
 			var s5 = await DeviceIdFinder.GetGpioIdAsync("GPIO_S5");
