@@ -8,11 +8,11 @@ namespace GHI.Athens.Modules {
 
 		public override string Name { get; } = "The Professor";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
-		protected override int RequiredSockets { get; } = 0;
+		public override int RequiredSockets { get; } = 0;
 
 		protected async override Task Initialize() {
-			var s0 = await DeviceIdFinder.GetGpioIdFromFriendlyName("GPIO_S0");
-			var s5 = await DeviceIdFinder.GetGpioIdFromFriendlyName("GPIO_S5");
+			var s0 = await DeviceIdFinder.GetGpioIdAsync("GPIO_S0");
+			var s5 = await DeviceIdFinder.GetGpioIdAsync("GPIO_S5");
 
 			Socket socket;
 
@@ -45,7 +45,7 @@ namespace GHI.Athens.Modules {
 			socket.AddGpioPinDefinition(SocketPinNumber.Seven, new GpioPinDefinition(s0, 65));
 			socket.AddGpioPinDefinition(SocketPinNumber.Eight, new GpioPinDefinition(s0, 88));
 			socket.AddGpioPinDefinition(SocketPinNumber.Nine, new GpioPinDefinition(s0, 89));
-			socket.NativeI2CDeviceId = await DeviceIdFinder.GetI2CId();
+			socket.NativeI2CDeviceId = await DeviceIdFinder.GetI2CIdAsync();
 			socket.AnalogInputCreator = (s, p) => Task.FromResult<AnalogInput>(new IndirectedAnalogInput(p, this.ads));
 
 			this.ads = new ADS7830();

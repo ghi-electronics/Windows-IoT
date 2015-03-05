@@ -19,12 +19,12 @@ namespace GHI.Athens.Demo {
 		public MainPage() {
 			this.InitializeComponent();
 
-			Task.Run(async () => this.mainboard = await Module.Create<TheProfessor>())
-				.ContinueWith(async t => this.hub = await Module.Create<HubAP5>(this.mainboard.GetProvidedSocket(3))).Unwrap()
-				.ContinueWith(async t => this.button = await Module.Create<Button>(this.hub.GetProvidedSocket(6))).Unwrap()
-				.ContinueWith(async t => this.ledStrip = await Module.Create<LEDStrip>(this.hub.GetProvidedSocket(8))).Unwrap()
-				.ContinueWith(async t => this.lightSense = await Module.Create<LightSense>(this.hub.GetProvidedSocket(1))).Unwrap()
-				.ContinueWith(async t => this.temp = await Module.Create<TempHumidSI70>(this.hub.GetProvidedSocket(4))).Unwrap()
+			Task.Run(async () => this.mainboard = await Module.CreateAsync<TheProfessor>())
+				.ContinueWith(async t => this.hub = await Module.CreateAsync<HubAP5>(this.mainboard.GetProvidedSocket(3))).Unwrap()
+				.ContinueWith(async t => this.button = await Module.CreateAsync<Button>(this.hub.GetProvidedSocket(6))).Unwrap()
+				.ContinueWith(async t => this.ledStrip = await Module.CreateAsync<LEDStrip>(this.hub.GetProvidedSocket(8))).Unwrap()
+				.ContinueWith(async t => this.lightSense = await Module.CreateAsync<LightSense>(this.hub.GetProvidedSocket(1))).Unwrap()
+				.ContinueWith(async t => this.temp = await Module.CreateAsync<TempHumidSI70>(this.hub.GetProvidedSocket(4))).Unwrap()
 				.ContinueWith(t => this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted));
 		}
 

@@ -208,4 +208,10 @@ namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
 			return Windows.Devices.I2C.I2CTransferStatus.Success;
 		}
 	}
+
+	internal class SpiDevice : SocketInterfaces.SpiDevice {
+		internal SpiDevice(DigitalOutput slaveSelect, DigitalOutput masterOut, DigitalInput masterIn, DigitalOutput clock) {
+
+		}
+	}
 }

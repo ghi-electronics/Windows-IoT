@@ -4,14 +4,22 @@ using Windows.Devices.I2C;
 using Windows.Foundation;
 
 namespace GHI.Athens.Gadgeteer.SocketInterfaces {
+	public enum DigitalInputOutputMode {
+		Input,
+		Output
+	}
+
 	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode);
 	public delegate Task<DigitalOutput> DigitalOutputCreator(Socket socket, SocketPinNumber pinNumber, bool initialValue);
 	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode);
-	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode, bool isOutput, bool initialOutputValue);
+	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, DigitalInputOutputMode mode, GpioInputDriveMode driveMode, bool initialOutputValue);
 	public delegate Task<AnalogInput> AnalogInputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<AnalogOutput> AnalogOutputCreator(Socket socket, SocketPinNumber pinNumber, double initialValue);
 	public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
+	public delegate Task<SpiDevice> SpiDeviceCreator(Socket socket);
+	public delegate Task<SerialDevice> SerialDeviceCreator(Socket socket);
+	public delegate Task<CanDevice> CanDeviceCreator(Socket socket);
 
 	public abstract class DigitalOutput {
 		public abstract void Write(bool value);
@@ -61,6 +69,8 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 				this.Write(value);
 			}
 		}
+
+		public DigitalInputOutputMode Mode { get; protected set; }
 
 		public abstract GpioInputDriveMode DriveMode { get; set; }
 	}
@@ -186,5 +196,17 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 
 			return this.Read(buffer, out transferred);
 		}
+	}
+
+	public abstract class SpiDevice {
+
+	}
+
+	public abstract class SerialDevice {
+
+	}
+
+	public abstract class CanDevice {
+
 	}
 }

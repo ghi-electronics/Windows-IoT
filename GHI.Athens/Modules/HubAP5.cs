@@ -44,10 +44,10 @@ namespace GHI.Athens.Modules {
 					socket.AddSupportedTypes(SocketType.P);
 				}
 
-				socket.DigitalInputCreator = (indirectedSocket, indirectedPin, resistorMode) => Task.FromResult<DigitalInput>(new IndirectedDigitalInput(this.GetPin(indirectedSocket, indirectedPin), resistorMode, this.io60));
+				socket.DigitalInputCreator = (indirectedSocket, indirectedPin, driveMode) => Task.FromResult<DigitalInput>(new IndirectedDigitalInput(this.GetPin(indirectedSocket, indirectedPin), driveMode, this.io60));
 				socket.DigitalOutputCreator = (indirectedSocket, indirectedPin, initialState) => Task.FromResult<DigitalOutput>(new IndirectedDigitalOutput(this.GetPin(indirectedSocket, indirectedPin), initialState, this.io60));
-				socket.DigitalInputOutputCreator = (indirectedSocket, indirectedPin, resistorMode, isOutput, initialOutputValue) => Task.FromResult<DigitalInputOutput>(new IndirectedDigitalInputOutput(this.GetPin(indirectedSocket, indirectedPin), initialOutputValue, isOutput, resistorMode, this.io60));
-				socket.DigitalInterruptCreator = (indirectedSocket, indirectedPin, interruptMode, resistorMode) => Task.FromResult<DigitalInterrupt>(new IndirectedDigitalInterrupt(this.GetPin(indirectedSocket, indirectedPin), resistorMode, interruptMode, this.io60));
+				socket.DigitalInputOutputCreator = (indirectedSocket, indirectedPin, mode, driveMode, initialOutputValue) => Task.FromResult<DigitalInputOutput>(new IndirectedDigitalInputOutput(this.GetPin(indirectedSocket, indirectedPin), mode, driveMode, initialOutputValue, this.io60));
+				socket.DigitalInterruptCreator = (indirectedSocket, indirectedPin, interruptMode, driveMode) => Task.FromResult<DigitalInterrupt>(new IndirectedDigitalInterrupt(this.GetPin(indirectedSocket, indirectedPin), driveMode, interruptMode, this.io60));
 				socket.AnalogInputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogInput>(new IndirectedAnalogInput(indirectedPin, this.GetPin(indirectedSocket, indirectedPin), this.ads, this.io60));
 				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(this.GetPin(indirectedSocket, indirectedPin), this.io60));
 			}
@@ -83,12 +83,12 @@ namespace GHI.Athens.Modules {
 			private byte pin;
 			private GpioInputDriveMode driveMode;
 
-			public IndirectedDigitalInput(byte pin, GpioInputDriveMode resistorMode, IO60P16 io60) {
+			public IndirectedDigitalInput(byte pin, GpioInputDriveMode driveMode, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
-				this.driveMode = resistorMode;
+				this.driveMode = driveMode;
 
-				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, resistorMode);
+				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, driveMode);
 			}
 
 			public override bool Read() {
@@ -112,13 +112,13 @@ namespace GHI.Athens.Modules {
 			private byte pin;
 			private GpioInputDriveMode driveMode;
 
-			public IndirectedDigitalInputOutput(byte pin, bool initialState, bool isOutput, GpioInputDriveMode resistorMode, IO60P16 io60) {
+			public IndirectedDigitalInputOutput(byte pin, DigitalInputOutputMode mode, GpioInputDriveMode driveMode, bool initalOutputState, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
-				this.driveMode = resistorMode;
+				this.driveMode = driveMode;
 
-				if (isOutput) {
-					this.Write(initialState);
+				if (mode == DigitalInputOutputMode.Output) {
+					this.Write(initalOutputState);
 				}
 				else {
 					this.Read();
@@ -126,12 +126,16 @@ namespace GHI.Athens.Modules {
 			}
 
 			public override bool Read() {
+				this.Mode = DigitalInputOutputMode.Input;
 				this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.driveMode);
+
 				return this.io60.ReadDigital(this.pin);
 			}
 
 			public override void Write(bool state) {
+				this.Mode = DigitalInputOutputMode.Output;
 				this.io60.SetIOMode(this.pin, IO60P16.IOState.Output, this.driveMode);
+
 				this.io60.WriteDigital(this.pin, state);
 			}
 
@@ -140,9 +144,7 @@ namespace GHI.Athens.Modules {
 					return this.driveMode;
 				}
 				set {
-					this.driveMode = value;
-
-					this.io60.SetIOMode(this.pin, IO60P16.IOState.Input, this.driveMode);
+					throw new NotSupportedException();
 				}
 			}
 		}
@@ -153,13 +155,13 @@ namespace GHI.Athens.Modules {
 			private GpioInputDriveMode driveMode;
 			private GpioInterruptType interruptType;
 
-			public IndirectedDigitalInterrupt(byte pin, GpioInputDriveMode resistorMode, GpioInterruptType interruptMode, IO60P16 io60) {
+			public IndirectedDigitalInterrupt(byte pin, GpioInputDriveMode driveMode, GpioInterruptType interruptMode, IO60P16 io60) {
 				this.io60 = io60;
 				this.pin = pin;
-				this.driveMode = resistorMode;
+				this.driveMode = driveMode;
 				this.interruptType = interruptMode;
 
-				this.io60.SetIOMode(this.pin, IO60P16.IOState.InputInterrupt, resistorMode);
+				this.io60.SetIOMode(this.pin, IO60P16.IOState.InputInterrupt, driveMode);
 				this.io60.RegisterInterruptHandler(this.pin, interruptMode, this.OnInterrupt);
 			}
 
@@ -387,7 +389,7 @@ namespace GHI.Athens.Modules {
 					this.interruptHandlers.Add(reg);
 			}
 
-			public void SetIOMode(byte pin, IOState state, GpioInputDriveMode resistorMode) {
+			public void SetIOMode(byte pin, IOState state, GpioInputDriveMode driveMode) {
 				this.WriteRegister(IO60P16.PORT_SELECT_REGISTER, this.GetPort(pin));
 
 				byte mask = this.GetMask(pin);
@@ -424,7 +426,7 @@ namespace GHI.Athens.Modules {
 
 						byte resistorValue = 0;
 
-						switch (resistorMode) {
+						switch (driveMode) {
 							case GpioInputDriveMode.HighImpedance: resistorValue = IO60P16.PIN_HIGH_IMPEDENCE; break;
 							case GpioInputDriveMode.PullDown: resistorValue = IO60P16.PIN_PULL_DOWN; break;
 							case GpioInputDriveMode.PullUp: resistorValue = IO60P16.PIN_PULL_UP; break;

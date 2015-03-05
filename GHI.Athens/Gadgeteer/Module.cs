@@ -8,22 +8,22 @@ namespace GHI.Athens.Gadgeteer {
 
 		public abstract string Name { get; }
 		public abstract string Manufacturer { get; }
-		protected virtual int RequiredSockets { get; } = 1;
+		public virtual int RequiredSockets { get; } = 1;
 
 		protected Module() {
 			this.providedSockets = new Dictionary<uint, Socket>();
 		}
 
 		protected virtual Task Initialize() {
-			throw new InvalidOperationException("This module is not defined properly.");
+			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
 		protected virtual Task Initialize(Socket parentSocket) {
-			throw new InvalidOperationException("This module is not defined properly.");
+			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
 		protected virtual Task Initialize(params Socket[] parentSockets) {
-			throw new InvalidOperationException("This module is not defined properly.");
+			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
 		protected Socket AddProvidedSocket(uint socketNumber) {
@@ -41,11 +41,11 @@ namespace GHI.Athens.Gadgeteer {
 			return this.providedSockets[socketNumber];
 		}
 
-		public static async Task<T> Create<T>(params Socket[] parentSockets) where T : Module, new() {
+		public static async Task<T> CreateAsync<T>(params Socket[] parentSockets) where T : Module, new() {
 			var module = new T();
 
 			if (module.RequiredSockets != parentSockets.Length)
-				throw new ArgumentException("Invalid number of sockets passed.", nameof(parentSockets));
+				throw new ArgumentException($"Invalid number of sockets passed. Expected {module.RequiredSockets}.", nameof(parentSockets));
 
 			if (module.RequiredSockets == 0)
 				await module.Initialize();
