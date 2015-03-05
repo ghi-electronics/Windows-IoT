@@ -33,6 +33,14 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 				this.Write(value);
 			}
 		}
+
+		public void SetHigh() {
+			this.Write(true);
+		}
+
+		public void SetLow() {
+			this.Write(false);
+		}
 	}
 
 	public abstract class DigitalInput {
@@ -175,9 +183,19 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	}
 
 	public abstract class I2CDevice {
+		private byte[] write1;
+		private byte[] write2;
+		private byte[] read1;
+
 		public abstract I2CTransferStatus Write(byte[] buffer, out uint transferred);
 		public abstract I2CTransferStatus Read(byte[] buffer, out uint transferred);
 		public abstract I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred);
+
+		protected I2CDevice() {
+			this.write1 = new byte[1];
+			this.write2 = new byte[2];
+			this.read1 = new byte[1];
+		}
 
 		public I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer) {
 			uint transferred;
@@ -195,6 +213,47 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			uint transferred;
 
 			return this.Read(buffer, out transferred);
+		}
+
+		public I2CTransferStatus WriteRegister(byte register, byte value) {
+			this.write2[0] = register;
+			this.write2[1] = value;
+
+			return this.Write(this.write2);
+		}
+
+		public byte ReadRegister(byte register) {
+			this.write1[0] = register;
+
+			this.WriteRead(this.write1, this.read1);
+
+			return read1[0];
+		}
+
+		public I2CTransferStatus ReadRegister(byte register, out byte value) {
+			this.write1[0] = register;
+
+			var result = this.WriteRead(this.write1, this.read1);
+
+			value = read1[0];
+
+			return result;
+		}
+
+		public byte[] ReadRegisters(byte register, uint count) {
+			var result = new byte[count];
+
+			this.write1[0] = register;
+
+			this.WriteRead(this.write1, result);
+
+			return result;
+		}
+
+		public I2CTransferStatus ReadRegisters(byte register, byte[] values) {
+			this.write1[0] = register;
+
+			return this.WriteRead(this.write1, values);
 		}
 	}
 

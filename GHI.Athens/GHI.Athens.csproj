@@ -120,6 +120,8 @@
     <Compile Include="Gadgeteer\Socket.cs" />
     <Compile Include="Gadgeteer\SocketInterfaces.cs" />
     <Compile Include="Gadgeteer\SoftwareInterfaces.cs" />
+    <Compile Include="Modules\ADS7830.cs" />
+    <Compile Include="Modules\CY8C9560A.cs" />
     <Compile Include="Modules\TempHumidSI70.cs" />
     <Compile Include="Modules\LightSense.cs" />
     <Compile Include="Modules\Button.cs" />

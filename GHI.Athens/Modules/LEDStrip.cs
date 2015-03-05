@@ -7,18 +7,31 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "LED Strip";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private DigitalOutput outputPin;
+		private DigitalOutput[] outputPins;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Three, false);
+			this.outputPins = new DigitalOutput[7];
+
+			for (var i = 0; i < 7; i++)
+				this.outputPins[i] = await parentSocket.CreateDigitalOutputAsync((SocketPinNumber)(i + 3), false);
 		}
 
 		public void TurnAllOn() {
-			this.outputPin.Value = true;
+			foreach (var p in this.outputPins)
+				p.SetHigh();
 		}
 
 		public void TurnAllOff() {
-			this.outputPin.Value = false;
+			foreach (var p in this.outputPins)
+				p.SetLow();
+		}
+
+		public void TurnOn(uint led) {
+			this.outputPins[led].SetHigh();
+		}
+
+		public void TurnOff(uint led) {
+			this.outputPins[led].SetLow();
 		}
 	}
 }

@@ -9,7 +9,7 @@ using Windows.UI.Xaml;
 namespace GHI.Athens.Demo {
 	public sealed partial class MainPage : Windows.UI.Xaml.Controls.Page {
 		private DispatcherTimer timer;
-		private TheProfessor mainboard;
+		private TheProfessor hat;
 		private HubAP5 hub;
 		private Button button;
 		private LEDStrip ledStrip;
@@ -19,8 +19,8 @@ namespace GHI.Athens.Demo {
 		public MainPage() {
 			this.InitializeComponent();
 
-			Task.Run(async () => this.mainboard = await Module.CreateAsync<TheProfessor>())
-				.ContinueWith(async t => this.hub = await Module.CreateAsync<HubAP5>(this.mainboard.GetProvidedSocket(3))).Unwrap()
+			Task.Run(async () => this.hat = await Module.CreateAsync<TheProfessor>())
+				.ContinueWith(async t => this.hub = await Module.CreateAsync<HubAP5>(this.hat.GetProvidedSocket(3))).Unwrap()
 				.ContinueWith(async t => this.button = await Module.CreateAsync<Button>(this.hub.GetProvidedSocket(6))).Unwrap()
 				.ContinueWith(async t => this.ledStrip = await Module.CreateAsync<LEDStrip>(this.hub.GetProvidedSocket(8))).Unwrap()
 				.ContinueWith(async t => this.lightSense = await Module.CreateAsync<LightSense>(this.hub.GetProvidedSocket(1))).Unwrap()
@@ -30,7 +30,7 @@ namespace GHI.Athens.Demo {
 
 		private void ProgramStarted() {
 			this.timer = new DispatcherTimer();
-			this.timer.Interval = TimeSpan.FromMilliseconds(1000);
+			this.timer.Interval = TimeSpan.FromMilliseconds(250);
 			this.timer.Tick += this.Timer_Tick;
 			this.timer.Start();
         }
@@ -38,13 +38,13 @@ namespace GHI.Athens.Demo {
 		private void Timer_Tick(object sender, object e) {
 			this.timer.Stop();
 
-			//if (this.button.IsPressed())
-			//	this.ledStrip.TurnAllOn();
-			//else
-			//	this.ledStrip.TurnAllOff();
-			//
+			if (this.button.IsPressed())
+				this.ledStrip.TurnAllOn();
+			else
+				this.ledStrip.TurnAllOff();
+			
 			//Debug.WriteLine($"{this.lightSense.GetReading():N2}");
-			Debug.WriteLine($"{this.temp.TakeMeasurement()}");
+			//Debug.WriteLine($"{this.temp.TakeMeasurement()}");
 
 			this.timer.Start();
 		}
