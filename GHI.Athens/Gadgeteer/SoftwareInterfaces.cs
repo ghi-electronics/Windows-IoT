@@ -248,11 +248,11 @@ namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
 				byte mask = 0x80;
 
 				for (int j = 0; j < 8; j++) {
-					this.clock.Write(!this.configuration.ClockIdleHigh);
+					this.clock.Write(this.configuration.ClockIdleHigh);
 
 					this.masterOut.Write((w & mask) != 0);
 
-					this.clock.Write(this.configuration.ClockIdleHigh);
+					this.clock.Write(!this.configuration.ClockIdleHigh);
 
 					if (readBuffer != null)
 						readBuffer[i] |= (this.masterIn.Read() ? mask : (byte)0x00);
