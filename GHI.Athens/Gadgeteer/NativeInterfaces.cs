@@ -174,7 +174,13 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	}
 
 	internal class SpiDevice : SocketInterfaces.SpiDevice {
+		internal SpiDevice(SocketInterfaces.SpiConfiguration configuration, SocketInterfaces.DigitalOutput slaveSelect) {
 
+		}
+
+		public override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
+			throw new NotImplementedException();
+		}
 	}
 
 	internal class SerialDevice : SocketInterfaces.SerialDevice {

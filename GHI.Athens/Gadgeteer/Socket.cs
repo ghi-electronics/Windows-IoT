@@ -203,6 +203,9 @@ namespace GHI.Athens.Gadgeteer {
 		}
 
 		public async Task<I2CDevice> CreateI2CDeviceAsync(Windows.Devices.I2C.I2CConnectionSettings connectionSettings) {
+			if (this.IsTypeSupported(SocketType.Y) && !this.IsTypeSupported(SocketType.I))
+				return await this.CreateI2CDeviceAsync(connectionSettings, SocketPinNumber.Eight, SocketPinNumber.Nine);
+
 			this.EnsureTypeIsSupported(SocketType.I);
 
 			if (this.I2CDeviceCreator != null)
@@ -223,25 +226,30 @@ namespace GHI.Athens.Gadgeteer {
 			return new SoftwareInterfaces.I2CDevice(sda, scl, connectionSettings);
 		}
 
-		public async Task<SpiDevice> CreateSpiDeviceAsync() {
+		public async Task<SpiDevice> CreateSpiDeviceAsync(SpiConfiguration configuration, SocketPinNumber slaveSelectPinNumber) {
+			if (this.IsTypeSupported(SocketType.Y) && ! this.IsTypeSupported(SocketType.S))
+				return await this.CreateSpiDeviceAsync(configuration, SocketPinNumber.Six, SocketPinNumber.Seven, SocketPinNumber.Eight, SocketPinNumber.Nine);
+
 			this.EnsureTypeIsSupported(SocketType.S);
 
 			if (this.SpiDeviceCreator != null)
 				return await this.SpiDeviceCreator(this);
 
-			return new NativeInterfaces.SpiDevice();
+			var slaveSelect = await this.CreateDigitalOutputAsync(slaveSelectPinNumber, !configuration.SlaveSelectActiveHigh);
+
+			return new NativeInterfaces.SpiDevice(configuration, slaveSelect);
 		}
 
-		public async Task<SpiDevice> CreateSpiDeviceAsync(SocketPinNumber slaveSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber) {
+		public async Task<SpiDevice> CreateSpiDeviceAsync(SpiConfiguration configuration, SocketPinNumber slaveSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber) {
 			if (slaveSelectPinNumber == SocketPinNumber.Six && masterOutPinNumber == SocketPinNumber.Seven && masterInPinNumber == SocketPinNumber.Eight && clockPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.S))
-				return await this.CreateSpiDeviceAsync();
+				return await this.CreateSpiDeviceAsync(configuration, slaveSelectPinNumber);
 
 			var slaveSelect = await this.CreateDigitalOutputAsync(slaveSelectPinNumber, false);
 			var masterOut = await this.CreateDigitalOutputAsync(masterOutPinNumber, false);
 			var masterIn = await this.CreateDigitalInputAsync(masterInPinNumber, GpioInputDriveMode.HighImpedance);
 			var clock = await this.CreateDigitalOutputAsync(clockPinNumber, false);
 
-			return new SoftwareInterfaces.SpiDevice(slaveSelect, masterOut, masterIn, clock);
+			return new SoftwareInterfaces.SpiDevice(configuration, slaveSelect, masterOut, masterIn, clock);
 		}
 
 		public async Task<SerialDevice> CreateSerialDeviceAsync() {

@@ -21,6 +21,15 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	public delegate Task<SerialDevice> SerialDeviceCreator(Socket socket);
 	public delegate Task<CanDevice> CanDeviceCreator(Socket socket);
 
+	public struct SpiConfiguration {
+		public bool SlaveSelectActiveHigh { get; set; }
+		public uint SlaveSelectSetupTime { get; set; }
+		public uint SlaveSelectHoldTime { get; set; }
+		public bool ClockIdleHigh { get; set; }
+		public bool ClockSampleOnRising { get; set; }
+		public uint ClockRate { get; set; }
+	}
+
 	public abstract class DigitalOutput {
 		public abstract void Write(bool value);
 		public abstract bool Read();
@@ -258,7 +267,15 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	}
 
 	public abstract class SpiDevice {
+		public abstract void WriteRead(byte[] writeBuffer, byte[] readBuffer);
 
+		public void Write(byte[] buffer) {
+			this.WriteRead(buffer, null);
+		}
+
+		public void Read(byte[] buffer) {
+			this.WriteRead(null, buffer);
+		}
 	}
 
 	public abstract class SerialDevice {

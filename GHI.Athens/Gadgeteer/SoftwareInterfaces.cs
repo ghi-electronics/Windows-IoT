@@ -210,8 +210,64 @@ namespace GHI.Athens.Gadgeteer.SoftwareInterfaces {
 	}
 
 	internal class SpiDevice : SocketInterfaces.SpiDevice {
-		internal SpiDevice(DigitalOutput slaveSelect, DigitalOutput masterOut, DigitalInput masterIn, DigitalOutput clock) {
+		private DigitalOutput slaveSelect;
+		private DigitalOutput masterOut;
+		private DigitalInput masterIn;
+		private DigitalOutput clock;
+		private SpiConfiguration configuration;
 
+        internal SpiDevice(SpiConfiguration configuration, DigitalOutput slaveSelect, DigitalOutput masterOut, DigitalInput masterIn, DigitalOutput clock) {
+			this.slaveSelect = slaveSelect;
+			this.masterOut = masterOut;
+			this.masterIn = masterIn;
+			this.clock = clock;
+			this.configuration = configuration;
+		}
+
+		public override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
+			var writeLength = writeBuffer.Length;
+			var readLength = 0;
+
+			if (readBuffer != null) {
+				readLength = readBuffer.Length;
+
+				for (int i = 0; i < readLength; i++)
+					readBuffer[i] = 0;
+			}
+
+			this.slaveSelect.Write(this.configuration.SlaveSelectActiveHigh);
+
+			Task.Delay((int)this.configuration.SlaveSelectSetupTime).Wait();
+
+			for (var i = 0; i < (writeLength < readLength ? readLength : writeLength); i++) {
+				byte w = 0;
+
+				if (i < writeLength)
+					w = writeBuffer[i];
+
+				byte mask = 0x80;
+
+				for (int j = 0; j < 8; j++) {
+					this.clock.Write(!this.configuration.ClockIdleHigh);
+
+					this.masterOut.Write((w & mask) != 0);
+
+					this.clock.Write(this.configuration.ClockIdleHigh);
+
+					if (readBuffer != null)
+						readBuffer[i] |= (this.masterIn.Read() ? mask : (byte)0x00);
+
+					mask >>= 1;
+				}
+
+				this.masterOut.Write(false);
+
+				this.clock.Write(this.configuration.ClockIdleHigh);
+			}
+
+			Task.Delay((int)this.configuration.SlaveSelectHoldTime).Wait();
+
+			this.slaveSelect.Write(!this.configuration.SlaveSelectActiveHigh);
 		}
 	}
 }

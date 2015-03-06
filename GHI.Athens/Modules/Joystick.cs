@@ -1,0 +1,65 @@
+﻿using GHI.Athens.Gadgeteer;
+using GHI.Athens.Gadgeteer.SocketInterfaces;
+using System.Threading.Tasks;
+
+namespace GHI.Athens.Modules {
+	public class Joystick : Module {
+		private double offsetX;
+		private double offsetY;
+		private AnalogInput x;
+		private AnalogInput y;
+		private DigitalInput input;
+
+		public override string Name { get; } = "Joystick";
+		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+
+		public int SampleCount { get; set; } = 5;
+
+		protected async override Task Initialize(Socket parentSocket) {
+			this.x = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Four);
+			this.y = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Five);
+			this.input = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioInputDriveMode.PullUp);
+		}
+
+		public bool IsPressed {
+			get {
+				return !this.input.Read();
+			}
+		}
+
+		public double X {
+			get {
+				return this.Read(this.x) * 2.0 - 1.0 - this.offsetX;
+			}
+		}
+
+		public double Y {
+			get {
+				return (1.0 - this.Read(this.y)) * 2.0 - 1.0 - this.offsetX;
+			}
+		}
+
+		public Position GetPosition() {
+			return new Position() { X = this.X, Y = this.Y };
+		}
+
+		public void Calibrate() {
+			this.offsetX = this.X;
+			this.offsetY = this.Y;
+		}
+
+		public struct Position {
+			public double X { get; set; }
+			public double Y { get; set; }
+		}
+
+		private double Read(AnalogInput input) {
+			var total = 0.0;
+
+			for (var i = 0; i < this.SampleCount; i++)
+				total += input.ReadProportion();
+
+			return total / this.SampleCount;
+		}
+	}
+}
