@@ -8,7 +8,7 @@ namespace GHI.Athens.Modules {
 
 		public override string Name { get; } = "The Professor";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
-		public override int RequiredSockets { get; } = 0;
+		public override uint RequiredSockets { get; } = 0;
 
 		protected async override Task Initialize() {
 			this.ads = new ADS7830();

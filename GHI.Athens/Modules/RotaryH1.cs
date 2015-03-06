@@ -25,7 +25,7 @@ namespace GHI.Athens.Modules {
 			this.write2 = new byte[2];
 			this.read5 = new byte[5];
 
-			this.spi = await this.socket.CreateSpiDeviceAsync(new SpiConfiguration() { ClockRate = 1000, SlaveSelectActiveHigh = false, ClockIdleHigh = true, ClockSampleOnRising = true }, SocketPinNumber.Six);
+			this.spi = await this.socket.CreateSpiDeviceAsync(new SpiConfiguration() { ClockRate = 1000, SlaveSelectActiveHigh = false, ClockIdleHigh = false, ClockSampleOnRising = true }, SocketPinNumber.Six);
 			this.enable = await this.socket.CreateDigitalOutputAsync(SocketPinNumber.Five, true);
 
 			this.Write(Command.Clear, Register.Mode0);

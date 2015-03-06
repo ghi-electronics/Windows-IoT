@@ -8,7 +8,8 @@ namespace GHI.Athens.Gadgeteer {
 
 		public abstract string Name { get; }
 		public abstract string Manufacturer { get; }
-		public virtual int RequiredSockets { get; } = 1;
+		public virtual uint RequiredSockets { get; } = 1;
+		public uint ProvidedSockets { get { return (uint)this.providedSockets.Count; } }
 
 		protected Module() {
 			this.providedSockets = new Dictionary<uint, Socket>();

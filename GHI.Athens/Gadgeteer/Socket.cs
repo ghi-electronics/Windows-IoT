@@ -244,10 +244,10 @@ namespace GHI.Athens.Gadgeteer {
 			if (slaveSelectPinNumber == SocketPinNumber.Six && masterOutPinNumber == SocketPinNumber.Seven && masterInPinNumber == SocketPinNumber.Eight && clockPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.S))
 				return await this.CreateSpiDeviceAsync(configuration, slaveSelectPinNumber);
 
-			var slaveSelect = await this.CreateDigitalOutputAsync(slaveSelectPinNumber, false);
+			var slaveSelect = await this.CreateDigitalOutputAsync(slaveSelectPinNumber, !configuration.SlaveSelectActiveHigh);
 			var masterOut = await this.CreateDigitalOutputAsync(masterOutPinNumber, false);
 			var masterIn = await this.CreateDigitalInputAsync(masterInPinNumber, GpioInputDriveMode.HighImpedance);
-			var clock = await this.CreateDigitalOutputAsync(clockPinNumber, false);
+			var clock = await this.CreateDigitalOutputAsync(clockPinNumber, configuration.ClockIdleHigh);
 
 			return new SoftwareInterfaces.SpiDevice(configuration, slaveSelect, masterOut, masterIn, clock);
 		}
