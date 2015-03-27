@@ -1,49 +1,34 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<Package
-  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
-  xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
-  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
-  IgnorableNamespaces="uap mp">
+<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
 
-  <Identity
-    Name="Demo"
-    Publisher="CN=GHI"
-    Version="1.0.0.0" />
+  <Identity Name="GHI.Athens.Demo" Publisher="CN=GHI" Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="fed23be8-95ad-4c40-b53e-04beec07033d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Demo</DisplayName>
-    <PublisherDisplayName>GHI</PublisherDisplayName>
-    <Logo>Assets\StoreLogo.png</Logo>
+	<DisplayName>GHI.Athens.Demo</DisplayName>
+	<PublisherDisplayName>GHI</PublisherDisplayName>
+	<Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
-    <TargetPlatform Name="Windows.Universal" MinVersion="0.0.0.0" MaxVersionTested="10.0.0.0" />
+	<TargetPlatform Name="Windows.Universal" MinVersion="0.0.0.0" MaxVersionTested="10.0.0.0" />
   </Dependencies>
 
   <Resources>
-    <Resource Language="x-generate"/>
+	<Resource Language="x-generate"/>
   </Resources>
 
   <Applications>
-    <Application Id="App"
-      Executable="$targetnametoken$.exe"
-      EntryPoint="Demo.App">
-      <uap:VisualElements
-        DisplayName="Demo"
-        Square150x150Logo="Assets\Logo.png"
-        Square44x44Logo="Assets\SmallLogo.png"
-        Description="Demo"
-        ForegroundText="light"
-        BackgroundColor="#464646">
-        <uap:SplashScreen Image="Assets\SplashScreen.png" />
-      </uap:VisualElements>
-    </Application>
+	<Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="GHI.Athens.Demo.App">
+	  <uap:VisualElements DisplayName="GHI.Athens.Demo" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" Description="Demo" ForegroundText="light" BackgroundColor="#464646">
+		<uap:SplashScreen Image="Assets\SplashScreen.png" />
+	  </uap:VisualElements>
+	</Application>
   </Applications>
 
   <Capabilities>
-    <Capability Name="internetClient" />
+	<Capability Name="internetClient" />
   </Capabilities>
 </Package>
