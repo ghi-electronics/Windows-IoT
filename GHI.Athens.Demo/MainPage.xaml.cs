@@ -33,7 +33,7 @@ namespace GHI.Athens.Demo {
 			this.timer.Interval = TimeSpan.FromMilliseconds(250);
 			this.timer.Tick += this.Timer_Tick;
 			this.timer.Start();
-        }
+		}
 
 		private void Timer_Tick(object sender, object e) {
 			this.timer.Stop();
@@ -42,7 +42,7 @@ namespace GHI.Athens.Demo {
 				this.ledStrip.TurnAllOn();
 			else
 				this.ledStrip.TurnAllOff();
-			
+
 			Debug.WriteLine($"{this.lightSense.GetReading():N2}");
 			//Debug.WriteLine($"{this.temp.TakeMeasurement()}");
 

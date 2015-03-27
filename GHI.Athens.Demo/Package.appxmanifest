@@ -8,14 +8,14 @@
 
   <Identity
     Name="Demo"
-    Publisher="CN=John"
+    Publisher="CN=GHI"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="2934613a-a4e2-4158-b8ed-52917e8b1ef2" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="fed23be8-95ad-4c40-b53e-04beec07033d" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>Demo</DisplayName>
-    <PublisherDisplayName>John</PublisherDisplayName>
+    <PublisherDisplayName>GHI</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
@@ -30,7 +30,7 @@
   <Applications>
     <Application Id="App"
       Executable="$targetnametoken$.exe"
-      EntryPoint="GHI.Athens.Demo.App">
+      EntryPoint="Demo.App">
       <uap:VisualElements
         DisplayName="Demo"
         Square150x150Logo="Assets\Logo.png"
