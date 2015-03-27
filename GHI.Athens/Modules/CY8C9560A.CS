@@ -13,16 +13,20 @@ namespace GHI.Athens.Modules {
 		private static byte InterruptMaskRegister { get; } = 0x19;
 		private static byte PinDirectionRegister { get; } = 0x1C;
 		private static byte PwmEnableRegister { get; } = 0x1A;
+		private static byte PinPullUpRegister { get; } = 0x1D;
+		private static byte PinPullDownRegister { get; } = 0x1E;
+		private static byte PinStrongDriveRegister { get; } = 0x21;
+		private static byte PinHighImpedanceRegister { get; } = 0x23;
 		private static byte PwmSelectRegister { get; } = 0x28;
 		private static byte PwmConfigRegister { get; } = 0x29;
-		private static byte PwmPulseWidthRegister { get; } = 0x2B;
 		private static byte PwmPeriodRegister { get; } = 0x2A;
+		private static byte PwmPulseWidthRegister { get; } = 0x2B;
 
-		private static byte PinPullUp { get; } = 0x1D;
-		private static byte PinPullDown { get; } = 0x1E;
-		private static byte PinStrongDrive { get; } = 0x21;
-		private static byte PinHighImpedance { get; } = 0x23;
-		private static byte PwmClockSource { get; } = 0x03;
+		private static byte PwmClockSource32KHz { get; } = 0x00;
+		private static byte PwmClockSource24MHz { get; } = 0x01;
+		private static byte PwmClockSource1MHz { get; } = 0x02;
+		private static byte PwmClockSource94KHz { get; } = 0x03;
+		private static byte PwmClockSource367Hz { get; } = 0x04;
 
 		private I2CDevice i2c;
 
@@ -39,29 +43,49 @@ namespace GHI.Athens.Modules {
 		public void SetPwm(Pin pin, double frequency, double dutyCycle) {
 			this.i2c.WriteRegister(CY8C9560A.PortSelectRegister, pin.Port);
 
-			var mask = pin.Mask;
-
-			var val = this.i2c.ReadRegister(CY8C9560A.PwmEnableRegister);
-			this.i2c.WriteRegister(CY8C9560A.PwmEnableRegister, (byte)(val | mask));
-
-			this.WriteDigital(pin, true);
-
-			var pwm = pin.PinNumber;
-
-			if (pin.Port == 7)
-				pwm = (byte)(pin.PinNumber + 8);
-
-			this.i2c.WriteRegister(CY8C9560A.PwmSelectRegister, pwm);
-			this.i2c.WriteRegister(CY8C9560A.PwmConfigRegister, CY8C9560A.PwmClockSource);
-
-			val = this.i2c.ReadRegister(CY8C9560A.PinStrongDrive);
-			this.i2c.WriteRegister(CY8C9560A.PinStrongDrive, (byte)(val | mask));
+			var val = this.i2c.ReadRegister(CY8C9560A.PinStrongDriveRegister);
+			this.i2c.WriteRegister(CY8C9560A.PinStrongDriveRegister, (byte)(val | pin.Mask));
 
 			val = this.i2c.ReadRegister(CY8C9560A.InterruptMaskRegister);
-			this.i2c.WriteRegister(CY8C9560A.InterruptMaskRegister, (byte)(val | mask));
+			this.i2c.WriteRegister(CY8C9560A.InterruptMaskRegister, (byte)(val | pin.Mask));
+			
+			this.WriteDigital(pin, true);
 
-			var period = (byte)(93750 / frequency);
+			val = this.i2c.ReadRegister(CY8C9560A.PwmEnableRegister);
+			this.i2c.WriteRegister(CY8C9560A.PwmEnableRegister, (byte)(val | pin.Mask));
+			
+			var period = 0.0;
+			byte clockSource = 0;
 
+			if (frequency <= 1.45) {
+				throw new ArgumentOutOfRangeException("frequency", "The frequency is too low.");
+			}
+			else if (frequency <= 125.5) {
+				period = 367.6 / frequency;
+				clockSource = CY8C9560A.PwmClockSource367Hz;
+			}
+			else if (frequency <= 367.7) {
+				period = 32000.0 / frequency;
+				clockSource = CY8C9560A.PwmClockSource32KHz;
+			}
+			else if (frequency <= 5882.4) {
+				period = 93750.0 / frequency;
+				clockSource = CY8C9560A.PwmClockSource94KHz;
+			}
+			else if (frequency <= 94117.7) {
+				period = 1500000.0 / frequency;
+				clockSource = CY8C9560A.PwmClockSource1MHz;
+			}
+			else if (frequency <= 12000000.0) {
+				period = 24000000.0 / frequency;
+				clockSource = CY8C9560A.PwmClockSourceMHz;
+			}
+			else {
+				throw new ArgumentOutOfRangeException(nameof(frequency), "The frequency is too high.");
+			}
+
+			this.i2c.WriteRegister(CY8C9560A.PwmSelectRegister, pin.PinNumber + (pin.Port == 7 ? 8 : 0));
+			this.i2c.WriteRegister(CY8C9560A.PwmConfigRegister, clockSource);
 			this.i2c.WriteRegister(CY8C9560A.PwmPeriodRegister, period);
 			this.i2c.WriteRegister(CY8C9560A.PwmPulseWidthRegister, (byte)(period * dutyCycle));
 		}
@@ -77,8 +101,8 @@ namespace GHI.Athens.Modules {
 			val = this.i2c.ReadRegister(CY8C9560A.PinDirectionRegister);
 			this.i2c.WriteRegister(CY8C9560A.PinDirectionRegister, (byte)(val & ~mask));
 
-			val = this.i2c.ReadRegister(CY8C9560A.PinStrongDrive);
-			this.i2c.WriteRegister(CY8C9560A.PinStrongDrive, (byte)(val | mask));
+			val = this.i2c.ReadRegister(CY8C9560A.PinStrongDriveRegister);
+			this.i2c.WriteRegister(CY8C9560A.PinStrongDriveRegister, (byte)(val | mask));
 
 			val = this.i2c.ReadRegister(CY8C9560A.InterruptMaskRegister);
 			this.i2c.WriteRegister(CY8C9560A.InterruptMaskRegister, (byte)(val | mask));
@@ -98,9 +122,9 @@ namespace GHI.Athens.Modules {
 			byte resistorValue = 0;
 
 			switch (driveMode) {
-				case GpioInputDriveMode.HighImpedance: resistorValue = CY8C9560A.PinHighImpedance; break;
-				case GpioInputDriveMode.PullDown: resistorValue = CY8C9560A.PinPullDown; break;
-				case GpioInputDriveMode.PullUp: resistorValue = CY8C9560A.PinPullUp; break;
+				case GpioInputDriveMode.HighImpedance: resistorValue = CY8C9560A.PinHighImpedanceRegister; break;
+				case GpioInputDriveMode.PullDown: resistorValue = CY8C9560A.PinPullDownRegister; break;
+				case GpioInputDriveMode.PullUp: resistorValue = CY8C9560A.PinPullUpRegister; break;
 			}
 
 			val = this.i2c.ReadRegister(resistorValue);
