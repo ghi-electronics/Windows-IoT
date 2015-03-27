@@ -16,7 +16,7 @@ namespace GHI.Athens.Modules {
 		private I2CDevice i2c;
 
 		public async Task Initialize(Socket socket) {
-			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(this.Address, Windows.Devices.I2C.I2CBusSpeed.StandardMode, Windows.Devices.I2C.I2CAddressingMode.SevenBit));
+			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(this.Address));
 		}
 
 		public double ReadVoltage(byte channel) {

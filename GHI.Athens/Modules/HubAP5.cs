@@ -152,9 +152,9 @@ namespace GHI.Athens.Modules {
 		private class IndirectedDigitalInput : DigitalInput {
 			private CY8C9560A cy8;
 			private CY8C9560A.Pin pin;
-			private GpioInputDriveMode driveMode;
+			private GpioPinDriveMode driveMode;
 
-			public IndirectedDigitalInput(CY8C9560A.Pin pin, GpioInputDriveMode driveMode, CY8C9560A cy8) {
+			public IndirectedDigitalInput(CY8C9560A.Pin pin, GpioPinDriveMode driveMode, CY8C9560A cy8) {
 				this.pin = pin;
 				this.driveMode = driveMode;
 
@@ -166,7 +166,7 @@ namespace GHI.Athens.Modules {
 				return this.cy8.ReadDigital(this.pin);
 			}
 
-			public override GpioInputDriveMode DriveMode {
+			public override GpioPinDriveMode DriveMode {
 				get {
 					return this.driveMode;
 				}
@@ -179,9 +179,9 @@ namespace GHI.Athens.Modules {
 		private class IndirectedDigitalInputOutput : DigitalInputOutput {
 			private CY8C9560A cy8;
 			private CY8C9560A.Pin pin;
-			private GpioInputDriveMode driveMode;
+			private GpioPinDriveMode driveMode;
 
-			public IndirectedDigitalInputOutput(CY8C9560A.Pin pin, DigitalInputOutputMode mode, GpioInputDriveMode driveMode, bool initalOutputState, CY8C9560A cy8) {
+			public IndirectedDigitalInputOutput(CY8C9560A.Pin pin, DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initalOutputState, CY8C9560A cy8) {
 				this.cy8 = cy8;
 				this.pin = pin;
 				this.driveMode = driveMode;
@@ -210,7 +210,7 @@ namespace GHI.Athens.Modules {
 				this.cy8.WriteDigital(this.pin, state);
 			}
 
-			public override GpioInputDriveMode DriveMode {
+			public override GpioPinDriveMode DriveMode {
 				get {
 					return this.driveMode;
 				}
@@ -232,7 +232,7 @@ namespace GHI.Athens.Modules {
 				this.channel = channel;
 
 				this.cy8 = cy8;
-				this.cy8.SetInput(pin, GpioInputDriveMode.HighImpedance);
+				this.cy8.SetInput(pin, GpioPinDriveMode.Input);
 			}
 
 			public override double ReadVoltage() {
@@ -254,7 +254,7 @@ namespace GHI.Athens.Modules {
 					this.cy8.SetPwm(this.pin, this.Frequency, this.DutyCycle);
 				}
 				else {
-					this.cy8.SetInput(this.pin, GpioInputDriveMode.HighImpedance);
+					this.cy8.SetInput(this.pin, GpioPinDriveMode.Input);
 				}
 			}
 

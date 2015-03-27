@@ -3,81 +3,86 @@ using Windows.Devices.Gpio;
 
 namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	internal class DigitalInput : SocketInterfaces.DigitalInput {
-		private GpioInputPin pin;
+		private GpioPin pin;
 
-		internal DigitalInput(GpioInputPin pin) {
+		internal DigitalInput(GpioPin pin, GpioPinDriveMode driveMode) {
 			this.pin = pin;
+
+			this.DriveMode = driveMode;
 		}
 
 		public override bool Read() {
-			return this.pin.Value == GpioPinValue.High;
+			return this.pin.Read() == GpioPinValue.High;
 		}
 
-		public override GpioInputDriveMode DriveMode {
+		public override GpioPinDriveMode DriveMode {
 			get {
-				return this.pin.InputDriveMode;
+				return this.pin.GetDriveMode();
 			}
 			set {
-				throw new NotSupportedException();
+				this.pin.SetDriveMode(value);
 			}
 		}
 	}
 
 	internal class DigitalOutput : SocketInterfaces.DigitalOutput {
-		private GpioOutputPin pin;
+		private GpioPin pin;
 
-		internal DigitalOutput(GpioOutputPin pin) {
+		internal DigitalOutput(GpioPin pin, bool initialValue) {
 			this.pin = pin;
+
+			this.Write(initialValue);
 		}
 
 		public override bool Read() {
-			return this.pin.Value == GpioPinValue.High;
+			return this.pin.Read() == GpioPinValue.High;
 		}
 
 		public override void Write(bool value) {
-			this.pin.Value = value ? GpioPinValue.High : GpioPinValue.Low;
+			this.pin.Write(value ? GpioPinValue.High : GpioPinValue.Low);
 		}
 	}
 
 	internal class DigitalInterrupt : SocketInterfaces.DigitalInterrupt {
-		private GpioInterruptPin pin;
+		private GpioPin pin;
 
-		internal DigitalInterrupt(GpioInterruptPin pin) {
+		internal DigitalInterrupt(GpioPin pin, GpioPinEdge interruptType, GpioPinDriveMode driveMode) {
 			this.pin = pin;
-			this.pin.InterruptRaised += (a, b) => this.OnInterrupt(b);
+			this.pin.ValueChanged += (a, b) => this.OnInterrupt(b);
+
+			this.InterruptType = interruptType;
+			this.DriveMode = driveMode;
 		}
 
 		public override bool Read() {
-			return this.pin.Value == GpioPinValue.High;
+			return this.pin.Read() == GpioPinValue.High;
 		}
 
-		public override GpioInputDriveMode DriveMode {
+		public override GpioPinDriveMode DriveMode {
 			get {
-				return this.pin.InputDriveMode;
+				return this.pin.GetDriveMode();
 			}
 			set {
-				throw new NotSupportedException();
+				this.pin.SetDriveMode(value);
 			}
 		}
 
-		public override GpioInterruptType InterruptType {
+		public override GpioPinEdge InterruptType {
 			get {
-				return this.pin.InterruptType;
+				return this.InterruptType;
 			}
 			set {
-				throw new NotSupportedException();
+				this.InterruptType = value;
 			}
 		}
 	}
 
 	internal class DigitalInputOutput : SocketInterfaces.DigitalInputOutput {
-		private GpioPinInfo pinInfo;
-		private GpioInputPin input;
-		private GpioOutputPin output;
-		private GpioInputDriveMode driveMode;
+		private GpioPin pin;
+		private GpioPinDriveMode driveMode;
 
-		internal DigitalInputOutput(GpioPinInfo pinInfo, SocketInterfaces.DigitalInputOutputMode mode, GpioInputDriveMode driveMode, bool initialOutputValue) {
-			this.pinInfo = pinInfo;
+		internal DigitalInputOutput(GpioPin pin, SocketInterfaces.DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initialOutputValue) {
+			this.pin = pin;
 			this.driveMode = driveMode;
 
 			this.Mode = mode;
@@ -91,38 +96,19 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		}
 
 		public override bool Read() {
-			if (this.Mode == SocketInterfaces.DigitalInputOutputMode.Output) {
-				this.output?.Dispose();
-				this.output = null;
-
-				this.pinInfo.TryOpenInput(GpioSharingMode.Exclusive, this.driveMode, out this.input);
-
-				this.Mode = SocketInterfaces.DigitalInputOutputMode.Input;
-			}
-
-			return this.input.Value == GpioPinValue.High;
+			return this.pin.Read() == GpioPinValue.High;
 		}
 
 		public override void Write(bool value) {
-			if (this.Mode == SocketInterfaces.DigitalInputOutputMode.Input) {
-				this.input?.Dispose();
-				this.input = null;
-
-				this.pinInfo.TryOpenOutput(value ? GpioPinValue.High : GpioPinValue.Low, GpioSharingMode.Exclusive, out this.output);
-
-				this.Mode = SocketInterfaces.DigitalInputOutputMode.Output;
-			}
-			else {
-				this.output.Value = value ? GpioPinValue.High : GpioPinValue.Low;
-			}
+			this.pin.Write(value ? GpioPinValue.High : GpioPinValue.Low);
 		}
 
-		public override GpioInputDriveMode DriveMode {
+		public override GpioPinDriveMode DriveMode {
 			get {
-				return this.driveMode;
+				return this.pin.GetDriveMode();
 			}
 			set {
-				throw new NotSupportedException();
+				this.pin.SetDriveMode(value);
 			}
 		}
 	}

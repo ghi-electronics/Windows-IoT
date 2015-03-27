@@ -18,7 +18,7 @@ namespace GHI.Athens.Modules {
 		protected async override Task Initialize(Socket parentSocket) {
 			this.x = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Four);
 			this.y = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Five);
-			this.input = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioInputDriveMode.PullUp);
+			this.input = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinDriveMode.Input);
 		}
 
 		public bool IsPressed {

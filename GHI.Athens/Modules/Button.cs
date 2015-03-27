@@ -12,7 +12,7 @@ namespace GHI.Athens.Modules {
 		private DigitalOutput outputPin;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.inputPin = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, GpioInputDriveMode.HighImpedance);
+			this.inputPin = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, GpioPinDriveMode.Input);
 			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Four, false);
 		}
 

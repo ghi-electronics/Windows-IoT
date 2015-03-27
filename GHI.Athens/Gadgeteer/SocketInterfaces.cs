@@ -9,10 +9,10 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 		Output
 	}
 
-	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioInputDriveMode driveMode);
+	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioPinDriveMode driveMode);
 	public delegate Task<DigitalOutput> DigitalOutputCreator(Socket socket, SocketPinNumber pinNumber, bool initialValue);
-	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode);
-	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, DigitalInputOutputMode mode, GpioInputDriveMode driveMode, bool initialOutputValue);
+	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioPinEdge interruptType, GpioPinDriveMode driveMode);
+	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initialOutputValue);
 	public delegate Task<AnalogInput> AnalogInputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<AnalogOutput> AnalogOutputCreator(Socket socket, SocketPinNumber pinNumber, double initialValue);
 	public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);
@@ -61,16 +61,17 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			}
 		}
 
-		public abstract GpioInputDriveMode DriveMode { get; set; }
+		public abstract GpioPinDriveMode DriveMode { get; set; }
 	}
 
 	public abstract class DigitalInterrupt : DigitalInput {
-		public abstract GpioInterruptType InterruptType { get; set; }
+		public abstract GpioPinEdge InterruptType { get; set; }
 
-		public event TypedEventHandler<DigitalInterrupt, GpioInterruptEventArgs> Interrupt;
+		public event TypedEventHandler<DigitalInterrupt, GpioPinValueChangedEventArgs> Interrupt;
 
-		protected void OnInterrupt(GpioInterruptEventArgs e) {
-			this.Interrupt?.Invoke(this, e);
+		protected void OnInterrupt(GpioPinValueChangedEventArgs e) {
+			if (e.Edge == this.InterruptType)
+				this.Interrupt?.Invoke(this, e);
 		}
 	}
 
@@ -89,7 +90,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 
 		public DigitalInputOutputMode Mode { get; protected set; }
 
-		public abstract GpioInputDriveMode DriveMode { get; set; }
+		public abstract GpioPinDriveMode DriveMode { get; set; }
 	}
 
 	public abstract class AnalogInput {

@@ -29,11 +29,11 @@ namespace GHI.Athens.Gadgeteer {
 	}
 
 	public sealed class Socket {
-		private Dictionary<SocketPinNumber, GpioPinDefinition> nativePinDefinitions;
+		private Dictionary<SocketPinNumber, int> nativePins;
 		private HashSet<SocketType> supportedTypes;
 
 		internal Socket(uint socketNumber) {
-			this.nativePinDefinitions = new Dictionary<SocketPinNumber, GpioPinDefinition>();
+			this.nativePins = new Dictionary<SocketPinNumber, int>();
 			this.supportedTypes = new HashSet<SocketType>();
 
 			this.Number = socketNumber;
@@ -53,11 +53,12 @@ namespace GHI.Athens.Gadgeteer {
 				this.supportedTypes.Add(t);
 		}
 
-		public void AddGpioPinDefinition(SocketPinNumber pinNumber, GpioPinDefinition pinDefinition) {
-			this.nativePinDefinitions[pinNumber] = pinDefinition;
+		public void SetNativePin(SocketPinNumber pinNumber, int nativePinNumber) {
+			this.nativePins[pinNumber] = nativePinNumber;
 		}
 
-		public IReadOnlyList<SocketType> SupportedTypes { get { return this.supportedTypes.ToList(); } }
+		public IReadOnlyCollection<SocketType> SupportedTypes { get { return this.supportedTypes.ToList(); } }
+		public IReadOnlyDictionary<SocketPinNumber, int> Pins { get { return this.nativePins; } }
 
 		public string NativeI2CDeviceId { get; set; }
 		public string NativeSpiDeviceId { get; set; }
@@ -78,35 +79,19 @@ namespace GHI.Athens.Gadgeteer {
 		public SerialDeviceCreator SerialDeviceCreator { get; set; }
 		public CanDeviceCreator CanDeviceCreator { get; set; }
 
-		private async Task<GpioPinInfo> GetPinInfo(SocketPinNumber pinNumber) {
-			var gpioDefinition = this.nativePinDefinitions[pinNumber];
-			var controller = await GpioController.FromIdAsync(gpioDefinition.ControllerDeviceId);
+		private async Task<GpioPin> CreatePin(int pinNumber) {
+			var controller = await GpioController.GetDefaultAsync();
 
-			GpioPinInfo pinInfo;
-
-			if (!controller.Pins.TryGetValue(gpioDefinition.PinNumber, out pinInfo))
-				throw new SocketInterfaceCreationException("Error when querying the native pin controller.");
-
-			return pinInfo;
+			return controller.OpenPin(pinNumber);
 		}
 
-		public async Task<DigitalInput> CreateDigitalInputAsync(SocketPinNumber pinNumber, GpioInputDriveMode driveMode) {
+		public async Task<DigitalInput> CreateDigitalInputAsync(SocketPinNumber pinNumber, GpioPinDriveMode driveMode) {
 			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
 
 			if (this.DigitalInputCreator != null)
 				return await this.DigitalInputCreator(this, pinNumber, driveMode);
 
-			GpioInputPin pin;
-
-			var pinInfo = await this.GetPinInfo(pinNumber);
-
-			if (!pinInfo.Capabilities.IsInputSupported)
-				throw new UnsupportedPinModeException();
-
-			if (pinInfo.TryOpenInput(GpioSharingMode.Shared, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new SocketInterfaceCreationException("The pin could not be opened.");
-
-			return new NativeInterfaces.DigitalInput(pin);
+			return new NativeInterfaces.DigitalInput(await this.CreatePin(this.Pins[pinNumber]), driveMode);
 		}
 
 		public async Task<DigitalOutput> CreateDigitalOutputAsync(SocketPinNumber pinNumber, bool initialValue) {
@@ -115,64 +100,34 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.DigitalInputCreator != null)
 				return await this.DigitalOutputCreator(this, pinNumber, initialValue);
 
-			GpioOutputPin pin;
-
-			var pinInfo = await this.GetPinInfo(pinNumber);
-
-			if (!pinInfo.Capabilities.IsOutputSupported)
-				throw new UnsupportedPinModeException();
-
-			if (pinInfo.TryOpenOutput(initialValue ? GpioPinValue.High : GpioPinValue.Low, GpioSharingMode.Shared, out pin) != GpioOpenStatus.Success)
-				throw new SocketInterfaceCreationException("The pin could not be opened.");
-
-			return new NativeInterfaces.DigitalOutput(pin);
+			return new NativeInterfaces.DigitalOutput(await this.CreatePin(this.Pins[pinNumber]), initialValue);
 		}
 
-		public async Task<DigitalInterrupt> CreateDigitalInterruptAsync(SocketPinNumber pinNumber, GpioInterruptType interruptType, GpioInputDriveMode driveMode) {
+		public async Task<DigitalInterrupt> CreateDigitalInterruptAsync(SocketPinNumber pinNumber, GpioPinEdge interruptType, GpioPinDriveMode driveMode) {
 			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
 
 			if (this.DigitalInputCreator != null)
 				return await this.DigitalInterruptCreator(this, pinNumber, interruptType, driveMode);
 
-			GpioInterruptPin pin;
-
-			var pinInfo = await this.GetPinInfo(pinNumber);
-
-			if (!pinInfo.Capabilities.IsInterruptSupported)
-				throw new UnsupportedPinModeException();
-
-			if (pinInfo.TryOpenInterrupt(interruptType, GpioSharingMode.Shared, driveMode, out pin) != GpioOpenStatus.Success)
-				throw new SocketInterfaceCreationException("The pin could not be opened.");
-
-			return new NativeInterfaces.DigitalInterrupt(pin);
+			return new NativeInterfaces.DigitalInterrupt(await this.CreatePin(this.Pins[pinNumber]), interruptType, driveMode);
 		}
 
-		public async Task<DigitalInputOutput> CreateDigitalInputOutputAsync(SocketPinNumber pinNumber, GpioInputDriveMode driveMode) {
+		public async Task<DigitalInputOutput> CreateDigitalInputOutputAsync(SocketPinNumber pinNumber, GpioPinDriveMode driveMode) {
 			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
 
 			if (this.DigitalInputOutputCreator != null)
 				return await this.DigitalInputOutputCreator(this, pinNumber, DigitalInputOutputMode.Input, driveMode, false);
 
-			var pinInfo = await this.GetPinInfo(pinNumber);
-
-			if (!pinInfo.Capabilities.IsOutputSupported || !pinInfo.Capabilities.IsInputSupported)
-				throw new UnsupportedPinModeException();
-
-			return new NativeInterfaces.DigitalInputOutput(pinInfo, DigitalInputOutputMode.Input, driveMode, false);
+			return new NativeInterfaces.DigitalInputOutput(await this.CreatePin(this.Pins[pinNumber]), DigitalInputOutputMode.Input, driveMode, false);
 		}
 
 		public async Task<DigitalInputOutput> CreateDigitalInputOutputAsync(SocketPinNumber pinNumber, bool initialOutputValue) {
 			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
 
 			if (this.DigitalInputOutputCreator != null)
-				return await this.DigitalInputOutputCreator(this, pinNumber, DigitalInputOutputMode.Output, GpioInputDriveMode.HighImpedance, initialOutputValue);
+				return await this.DigitalInputOutputCreator(this, pinNumber, DigitalInputOutputMode.Output, GpioPinDriveMode.Output, initialOutputValue);
 
-			var pinInfo = await this.GetPinInfo(pinNumber);
-
-			if (!pinInfo.Capabilities.IsOutputSupported || !pinInfo.Capabilities.IsInputSupported)
-				throw new UnsupportedPinModeException();
-
-			return new NativeInterfaces.DigitalInputOutput(pinInfo, DigitalInputOutputMode.Output, GpioInputDriveMode.HighImpedance, initialOutputValue);
+			return new NativeInterfaces.DigitalInputOutput(await this.CreatePin(this.Pins[pinNumber]), DigitalInputOutputMode.Input, GpioPinDriveMode.Output, initialOutputValue);
 		}
 
 		public async Task<AnalogInput> CreateAnalogInputAsync(SocketPinNumber pinNumber) {
@@ -211,7 +166,8 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.I2CDeviceCreator != null)
 				return await this.I2CDeviceCreator(this);
 
-			var device = await Windows.Devices.I2C.I2CDevice.CreateDeviceAsync(this.NativeI2CDeviceId, connectionSettings);
+			var infos = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.I2C.I2CBus.GetDeviceSelector(this.NativeI2CDeviceId));
+			var device = await Windows.Devices.I2C.I2CBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
 
 			return new NativeInterfaces.I2CDevice(device);
 		}
@@ -220,8 +176,8 @@ namespace GHI.Athens.Gadgeteer {
 			if (sdaPinNumber == SocketPinNumber.Eight && sclPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.I))
 				return await this.CreateI2CDeviceAsync(connectionSettings);
 
-			var sda = await this.CreateDigitalInputOutputAsync(sdaPinNumber, GpioInputDriveMode.PullUp);
-			var scl = await this.CreateDigitalInputOutputAsync(sclPinNumber, GpioInputDriveMode.PullUp);
+			var sda = await this.CreateDigitalInputOutputAsync(sdaPinNumber, GpioPinDriveMode.Output);
+			var scl = await this.CreateDigitalInputOutputAsync(sclPinNumber, GpioPinDriveMode.Output);
 
 			return new SoftwareInterfaces.I2CDevice(sda, scl, connectionSettings);
 		}
@@ -246,7 +202,7 @@ namespace GHI.Athens.Gadgeteer {
 
 			var slaveSelect = await this.CreateDigitalOutputAsync(slaveSelectPinNumber, !configuration.SlaveSelectActiveHigh);
 			var masterOut = await this.CreateDigitalOutputAsync(masterOutPinNumber, false);
-			var masterIn = await this.CreateDigitalInputAsync(masterInPinNumber, GpioInputDriveMode.HighImpedance);
+			var masterIn = await this.CreateDigitalInputAsync(masterInPinNumber, GpioPinDriveMode.Input);
 			var clock = await this.CreateDigitalOutputAsync(clockPinNumber, configuration.ClockIdleHigh);
 
 			return new SoftwareInterfaces.SpiDevice(configuration, slaveSelect, masterOut, masterIn, clock);

@@ -25,7 +25,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(TempHumidSI70.I2CAddress, Windows.Devices.I2C.I2CBusSpeed.StandardMode, Windows.Devices.I2C.I2CAddressingMode.SevenBit), SocketPinNumber.Five, SocketPinNumber.Four);
+			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(TempHumidSI70.I2CAddress), SocketPinNumber.Five, SocketPinNumber.Four);
 		}
 
 		public Measurement TakeMeasurement() {

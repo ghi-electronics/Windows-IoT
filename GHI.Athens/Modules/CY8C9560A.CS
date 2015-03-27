@@ -1,5 +1,6 @@
 ﻿using GHI.Athens.Gadgeteer;
 using GHI.Athens.Gadgeteer.SocketInterfaces;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
@@ -37,7 +38,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		public async Task Initialize(Socket socket) {
-			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20, Windows.Devices.I2C.I2CBusSpeed.StandardMode, Windows.Devices.I2C.I2CAddressingMode.SevenBit));
+			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20));
 		}
 
 		public void SetPwm(Pin pin, double frequency, double dutyCycle) {
@@ -78,15 +79,15 @@ namespace GHI.Athens.Modules {
 			}
 			else if (frequency <= 12000000.0) {
 				period = 24000000.0 / frequency;
-				clockSource = CY8C9560A.PwmClockSourceMHz;
+				clockSource = CY8C9560A.PwmClockSource1MHz;
 			}
 			else {
 				throw new ArgumentOutOfRangeException(nameof(frequency), "The frequency is too high.");
 			}
 
-			this.i2c.WriteRegister(CY8C9560A.PwmSelectRegister, pin.PinNumber + (pin.Port == 7 ? 8 : 0));
+			this.i2c.WriteRegister(CY8C9560A.PwmSelectRegister, (byte)(pin.PinNumber + (pin.Port == 7 ? 8 : 0)));
 			this.i2c.WriteRegister(CY8C9560A.PwmConfigRegister, clockSource);
-			this.i2c.WriteRegister(CY8C9560A.PwmPeriodRegister, period);
+			this.i2c.WriteRegister(CY8C9560A.PwmPeriodRegister, (byte)period);
 			this.i2c.WriteRegister(CY8C9560A.PwmPulseWidthRegister, (byte)(period * dutyCycle));
 		}
 
@@ -108,7 +109,7 @@ namespace GHI.Athens.Modules {
 			this.i2c.WriteRegister(CY8C9560A.InterruptMaskRegister, (byte)(val | mask));
 		}
 
-		public void SetInput(Pin pin, GpioInputDriveMode driveMode) {
+		public void SetInput(Pin pin, GpioPinDriveMode driveMode) {
 			this.i2c.WriteRegister(CY8C9560A.PortSelectRegister, pin.Port);
 
 			var mask = pin.Mask;
@@ -121,11 +122,11 @@ namespace GHI.Athens.Modules {
 
 			byte resistorValue = 0;
 
-			switch (driveMode) {
-				case GpioInputDriveMode.HighImpedance: resistorValue = CY8C9560A.PinHighImpedanceRegister; break;
-				case GpioInputDriveMode.PullDown: resistorValue = CY8C9560A.PinPullDownRegister; break;
-				case GpioInputDriveMode.PullUp: resistorValue = CY8C9560A.PinPullUpRegister; break;
-			}
+			//switch (driveMode) {
+			//	case GpioInputDriveMode.HighImpedance: resistorValue = CY8C9560A.PinHighImpedanceRegister; break;
+			//	case GpioInputDriveMode.PullDown: resistorValue = CY8C9560A.PinPullDownRegister; break;
+			//	case GpioInputDriveMode.PullUp: resistorValue = CY8C9560A.PinPullUpRegister; break;
+			//}
 
 			val = this.i2c.ReadRegister(resistorValue);
 			this.i2c.WriteRegister(resistorValue, (byte)(val | mask));
