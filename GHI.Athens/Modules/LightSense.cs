@@ -7,10 +7,10 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "LightSense";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private AnalogInput input;
+		private AnalogIO input;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.input = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Three);
+			this.input = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Three);
 		}
 
 		public double GetReading() {

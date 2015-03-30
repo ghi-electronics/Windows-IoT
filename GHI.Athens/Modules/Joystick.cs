@@ -6,9 +6,9 @@ namespace GHI.Athens.Modules {
 	public class Joystick : Module {
 		private double offsetX;
 		private double offsetY;
-		private AnalogInput x;
-		private AnalogInput y;
-		private DigitalInput input;
+		private AnalogIO x;
+		private AnalogIO y;
+		private DigitalIO input;
 
 		public override string Name { get; } = "Joystick";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
@@ -16,9 +16,9 @@ namespace GHI.Athens.Modules {
 		public int SampleCount { get; set; } = 5;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.x = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Four);
-			this.y = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Five);
-			this.input = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinDriveMode.Input);
+			this.x = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Four);
+			this.y = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Five);
+			this.input = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);
 		}
 
 		public bool IsPressed {
@@ -57,7 +57,7 @@ namespace GHI.Athens.Modules {
 			}
 		}
 
-		private double Read(AnalogInput input) {
+		private double Read(AnalogIO input) {
 			var total = 0.0;
 
 			for (var i = 0; i < this.SampleCount; i++)

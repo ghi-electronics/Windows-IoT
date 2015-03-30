@@ -7,13 +7,13 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "LED Strip";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private DigitalOutput[] outputPins;
+		private DigitalIO[] outputPins;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.outputPins = new DigitalOutput[7];
+			this.outputPins = new DigitalIO[7];
 
 			for (var i = 0; i < 7; i++)
-				this.outputPins[i] = await parentSocket.CreateDigitalOutputAsync((SocketPinNumber)(i + 3), false);
+				this.outputPins[i] = await parentSocket.CreateDigitalIOAsync((SocketPinNumber)(i + 3), false);
 		}
 
 		public void TurnAllOn() {

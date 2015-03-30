@@ -10,10 +10,10 @@ namespace GHI.Athens.Modules {
 
 		public uint SampleCount { get; set; } = 10;
 
-		private AnalogInput input;
+		private AnalogIO input;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.input = await parentSocket.CreateAnalogInputAsync(SocketPinNumber.Five);
+			this.input = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Five);
 		}
 
 		public double ReadACCurrent() {

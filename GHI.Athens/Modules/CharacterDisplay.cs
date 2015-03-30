@@ -11,13 +11,13 @@ namespace GHI.Athens.Modules {
 		private static uint CursorHomeCommand { get; } = 0x02;
 		private static uint SetCursorCommand { get; } = 0x80;
 
-		private DigitalOutput lcdRS;
-		private DigitalOutput lcdE;
-		private DigitalOutput lcdD4;
-		private DigitalOutput lcdD5;
-		private DigitalOutput lcdD6;
-		private DigitalOutput lcdD7;
-		private DigitalOutput backlight;
+		private DigitalIO lcdRS;
+		private DigitalIO lcdE;
+		private DigitalIO lcdD4;
+		private DigitalIO lcdD5;
+		private DigitalIO lcdD6;
+		private DigitalIO lcdD7;
+		private DigitalIO backlight;
 
 		private uint currentRow;
 
@@ -25,13 +25,13 @@ namespace GHI.Athens.Modules {
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.lcdRS = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Four, false);
-			this.lcdE = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Three, false);
-			this.lcdD4 = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Five, false);
-			this.lcdD5 = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Seven, false);
-			this.lcdD6 = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Nine, false);
-			this.lcdD7 = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Six, false);
-			this.backlight = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Eight, true);
+			this.lcdRS = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
+			this.lcdE = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
+			this.lcdD4 = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Five, false);
+			this.lcdD5 = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Seven, false);
+			this.lcdD6 = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Nine, false);
+			this.lcdD7 = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Six, false);
+			this.backlight = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Eight, true);
 
 			this.currentRow = 0;
 

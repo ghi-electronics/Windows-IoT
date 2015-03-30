@@ -10,7 +10,7 @@ namespace GHI.Athens.Modules {
 		private byte[] read5;
 
 		private SpiDevice spi;
-		private DigitalOutput enable;
+		private DigitalIO enable;
 		private CountMode mode;
 
 		protected Socket socket;
@@ -25,8 +25,8 @@ namespace GHI.Athens.Modules {
 			this.write2 = new byte[2];
 			this.read5 = new byte[5];
 
-			this.spi = await this.socket.CreateSpiDeviceAsync(new SpiConfiguration() { ClockRate = 1000, SlaveSelectActiveHigh = false, ClockIdleHigh = false, ClockSampleOnRising = true }, SocketPinNumber.Six);
-			this.enable = await this.socket.CreateDigitalOutputAsync(SocketPinNumber.Five, true);
+			this.spi = await this.socket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(0) { Mode = Windows.Devices.Spi.SpiMode.Mode2, ClockInHz = 1000 });
+			this.enable = await this.socket.CreateDigitalIOAsync(SocketPinNumber.Five, true);
 
 			this.Write(Command.Clear, Register.Mode0);
 			this.Write(Command.Clear, Register.Mode1);
@@ -75,7 +75,7 @@ namespace GHI.Athens.Modules {
 		private int Read4(Command command, Register register) {
 			this.write1[0] = (byte)((byte)command | (byte)register);
 
-			this.spi.WriteRead(this.write1, this.read5);
+			this.spi.TransferFullDuplex(this.write1, this.read5);
 
 			return (this.read5[1] << 24) + (this.read5[2] << 16) + (this.read5[3] << 8) + this.read5[4];
 		}
@@ -83,21 +83,21 @@ namespace GHI.Athens.Modules {
 		private void Write(Command command, Register register) {
 			this.write1[0] = (byte)((byte)command | (byte)register);
 
-			this.spi.WriteRead(this.write1, null);
+			this.spi.Write(this.write1);
 		}
 
 		private void Write(Command command, Register register, Mode0 mode) {
 			this.write2[0] = (byte)((byte)command | (byte)register);
 			this.write2[1] = (byte)mode;
 
-			this.spi.WriteRead(this.write2, null);
+			this.spi.Write(this.write2);
 		}
 
 		private void Write(Command command, Register register, Mode1 mode) {
 			this.write2[0] = (byte)((byte)command | (byte)register);
 			this.write2[1] = (byte)mode;
 
-			this.spi.WriteRead(this.write2, null);
+			this.spi.Write(this.write2);
 		}
 
 		public enum Direction : byte {

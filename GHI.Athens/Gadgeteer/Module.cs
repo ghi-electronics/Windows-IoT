@@ -27,7 +27,7 @@ namespace GHI.Athens.Gadgeteer {
 			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
-		protected Socket AddProvidedSocket(uint socketNumber) {
+		protected Socket CreateSocket(uint socketNumber) {
 			var socket = new Socket(socketNumber);
 
 			this.providedSockets.Add(socket.Number, socket);
@@ -48,12 +48,15 @@ namespace GHI.Athens.Gadgeteer {
 			if (module.RequiredSockets != parentSockets.Length)
 				throw new ArgumentException($"Invalid number of sockets passed. Expected {module.RequiredSockets}.", nameof(parentSockets));
 
-			if (module.RequiredSockets == 0)
+			if (module.RequiredSockets == 0) {
 				await module.Initialize();
-			else if (module.RequiredSockets == 1)
+			}
+			else if (module.RequiredSockets == 1) {
 				await module.Initialize(parentSockets[0]);
-			else
+			}
+			else {
 				await module.Initialize(parentSockets);
+			}
 
 			return module;
 		}

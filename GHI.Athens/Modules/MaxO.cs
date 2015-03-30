@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 namespace GHI.Athens.Modules {
 	public class MaxO : Module {
 		private SpiDevice spi;
-		private DigitalOutput enable;
-		private DigitalOutput clr;
+		private DigitalIO enable;
+		private DigitalIO clr;
 		private byte[] data;
 		private int boards;
 
@@ -22,9 +22,9 @@ namespace GHI.Athens.Modules {
 			this.boards = 0;
 			this.data = null;
 
-			this.spi = await parentSocket.CreateSpiDeviceAsync(new SpiConfiguration() { SlaveSelectActiveHigh = false, ClockIdleHigh = false, ClockSampleOnRising = true, ClockRate = 1000 }, SocketPinNumber.Five);
-			this.enable = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Three, false);
-			this.clr = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Four, true);
+			this.spi = await parentSocket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(0) { Mode = Windows.Devices.Spi.SpiMode.Mode2, ClockInHz = 1000 });
+			this.enable = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
+			this.clr = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, true);
 		}
 
 		public int Boards {

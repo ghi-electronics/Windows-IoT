@@ -25,7 +25,7 @@ namespace GHI.Athens.Modules {
 
 			Socket socket;
 			for (var i = 0U; i < 8; i++) {
-				socket = this.AddProvidedSocket(i + 1);
+				socket = this.CreateSocket(i + 1);
 				socket.AddSupportedTypes(SocketType.Y);
 
 				if (i < 2) {
@@ -35,11 +35,9 @@ namespace GHI.Athens.Modules {
 					socket.AddSupportedTypes(SocketType.P);
 				}
 
-				socket.DigitalInputCreator = (indirectedSocket, indirectedPin, driveMode) => Task.FromResult<DigitalInput>(new IndirectedDigitalInput(this.GetPin(indirectedSocket, indirectedPin), driveMode, this.cy8));
-				socket.DigitalOutputCreator = (indirectedSocket, indirectedPin, initialState) => Task.FromResult<DigitalOutput>(new IndirectedDigitalOutput(this.GetPin(indirectedSocket, indirectedPin), initialState, this.cy8));
-				socket.DigitalInputOutputCreator = (indirectedSocket, indirectedPin, mode, driveMode, initialOutputValue) => Task.FromResult<DigitalInputOutput>(new IndirectedDigitalInputOutput(this.GetPin(indirectedSocket, indirectedPin), mode, driveMode, initialOutputValue, this.cy8));
-				socket.AnalogInputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogInput>(new IndirectedAnalogInput(this.GetChannel(indirectedSocket, indirectedPin), this.GetPin(indirectedSocket, indirectedPin), this.ads, this.cy8));
-				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(GetPin(indirectedSocket, indirectedPin), this.cy8));
+				socket.DigitalIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<DigitalIO>(new IndirectedDigitalIO(this.GetPin(indirectedSocket, indirectedPin), this.cy8));
+				socket.AnalogIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogIO>(new IndirectedAnalogIO(this.GetChannel(indirectedSocket, indirectedPin), this.GetPin(indirectedSocket, indirectedPin), this.ads, this.cy8));
+				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(this.GetPin(indirectedSocket, indirectedPin), this.cy8));
 			}
 		}
 
@@ -127,86 +125,23 @@ namespace GHI.Athens.Modules {
 			return (byte)((socket.Number - 1) * 3 + ((int)pin - 3));
 		}
 
-		private class IndirectedDigitalOutput : DigitalOutput {
-			private CY8C9560A cy8;
-			private CY8C9560A.Pin pin;
-
-			public IndirectedDigitalOutput(CY8C9560A.Pin pin, bool initialState, CY8C9560A cy8) {
-				this.pin = pin;
-
-				this.cy8 = cy8;
-				this.cy8.SetOutput(this.pin);
-
-				this.Write(initialState);
-			}
-
-			public override bool Read() {
-				return this.cy8.ReadDigital(this.pin);
-			}
-
-			public override void Write(bool state) {
-				this.cy8.WriteDigital(this.pin, state);
-			}
-		}
-
-		private class IndirectedDigitalInput : DigitalInput {
+		private class IndirectedDigitalIO : DigitalIO {
 			private CY8C9560A cy8;
 			private CY8C9560A.Pin pin;
 			private GpioPinDriveMode driveMode;
 
-			public IndirectedDigitalInput(CY8C9560A.Pin pin, GpioPinDriveMode driveMode, CY8C9560A cy8) {
+			public IndirectedDigitalIO(CY8C9560A.Pin pin, CY8C9560A cy8) {
 				this.pin = pin;
-				this.driveMode = driveMode;
 
 				this.cy8 = cy8;
-				this.cy8.SetInput(this.pin, driveMode);
-			}
-
-			public override bool Read() {
-				return this.cy8.ReadDigital(this.pin);
-			}
-
-			public override GpioPinDriveMode DriveMode {
-				get {
-					return this.driveMode;
-				}
-				set {
-					throw new NotSupportedException();
-				}
-			}
-		}
-
-		private class IndirectedDigitalInputOutput : DigitalInputOutput {
-			private CY8C9560A cy8;
-			private CY8C9560A.Pin pin;
-			private GpioPinDriveMode driveMode;
-
-			public IndirectedDigitalInputOutput(CY8C9560A.Pin pin, DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initalOutputState, CY8C9560A cy8) {
-				this.cy8 = cy8;
-				this.pin = pin;
-				this.driveMode = driveMode;
-
-				if (mode == DigitalInputOutputMode.Output) {
-					this.Write(initalOutputState);
-				}
-				else {
-					this.Read();
-				}
-			}
-
-			public override bool Read() {
-				this.Mode = DigitalInputOutputMode.Input;
-
-				this.cy8.SetInput(this.pin, this.driveMode);
-
-				return this.cy8.ReadDigital(this.pin);
-			}
-
-			public override void Write(bool state) {
-				this.Mode = DigitalInputOutputMode.Output;
-
 				this.cy8.SetOutput(this.pin);
+			}
 
+			protected override bool ReadInternal() {
+				return this.cy8.ReadDigital(this.pin);
+			}
+
+			protected override void WriteInternal(bool state) {
 				this.cy8.WriteDigital(this.pin, state);
 			}
 
@@ -215,28 +150,50 @@ namespace GHI.Athens.Modules {
 					return this.driveMode;
 				}
 				set {
-					throw new NotSupportedException();
+					this.driveMode = value;
+					
+					if (value == GpioPinDriveMode.Input) {
+						this.cy8.SetInput(this.pin);
+					}
+					else {
+						this.cy8.SetOutput(this.pin);
+					}
 				}
 			}
 		}
 
-		private class IndirectedAnalogInput : AnalogInput {
+		private class IndirectedAnalogIO : AnalogIO {
 			private byte channel;
 			private ADS7830 ads;
 			private CY8C9560A cy8;
 
 			public override double MaxVoltage { get; } = 3.3;
 
-			public IndirectedAnalogInput(byte channel, CY8C9560A.Pin pin, ADS7830 ads, CY8C9560A cy8) {
+			public IndirectedAnalogIO(byte channel, CY8C9560A.Pin pin, ADS7830 ads, CY8C9560A cy8) {
 				this.ads = ads;
 				this.channel = channel;
 
 				this.cy8 = cy8;
-				this.cy8.SetInput(pin, GpioPinDriveMode.Input);
+				this.cy8.SetInput(pin);
 			}
 
-			public override double ReadVoltage() {
+			protected override double ReadInternal() {
 				return this.ads.ReadVoltage(this.channel);
+			}
+
+			protected override void WriteInternal(double voltage) {
+				throw new NotSupportedException();
+			}
+
+			public override GpioPinDriveMode DriveMode {
+				get {
+					return GpioPinDriveMode.Input;
+				}
+
+				set {
+					if (value != GpioPinDriveMode.Input)
+						throw new NotSupportedException();
+				}
 			}
 		}
 
@@ -254,7 +211,7 @@ namespace GHI.Athens.Modules {
 					this.cy8.SetPwm(this.pin, this.Frequency, this.DutyCycle);
 				}
 				else {
-					this.cy8.SetInput(this.pin, GpioPinDriveMode.Input);
+					this.cy8.SetInput(this.pin);
 				}
 			}
 

@@ -6,8 +6,8 @@ namespace GHI.Athens.Modules {
 	public class PulseCount : RotaryH1 {
 		public override string Name { get; } = "PulseCount";
 
-		public async Task<DigitalInput> CreateInput(Windows.Devices.Gpio.GpioPinDriveMode driveMode) {
-			return await this.socket.CreateDigitalInputAsync(SocketPinNumber.Three, driveMode);
+		public async Task<DigitalIO> CreateInput() {
+			return await this.socket.CreateDigitalIOAsync(SocketPinNumber.Three);
 		}
 	}
 }

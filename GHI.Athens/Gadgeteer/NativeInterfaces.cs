@@ -2,104 +2,19 @@
 using Windows.Devices.Gpio;
 
 namespace GHI.Athens.Gadgeteer.NativeInterfaces {
-	internal class DigitalInput : SocketInterfaces.DigitalInput {
+	internal class DigitalIO : SocketInterfaces.DigitalIO {
 		private GpioPin pin;
 
-		internal DigitalInput(GpioPin pin, GpioPinDriveMode driveMode) {
+		internal DigitalIO(GpioPin pin) {
 			this.pin = pin;
-
-			this.DriveMode = driveMode;
+			this.pin.ValueChanged += (a, b) => this.OnValueChanged(b);
 		}
 
-		public override bool Read() {
+		protected override bool ReadInternal() {
 			return this.pin.Read() == GpioPinValue.High;
 		}
 
-		public override GpioPinDriveMode DriveMode {
-			get {
-				return this.pin.GetDriveMode();
-			}
-			set {
-				this.pin.SetDriveMode(value);
-			}
-		}
-	}
-
-	internal class DigitalOutput : SocketInterfaces.DigitalOutput {
-		private GpioPin pin;
-
-		internal DigitalOutput(GpioPin pin, bool initialValue) {
-			this.pin = pin;
-
-			this.Write(initialValue);
-		}
-
-		public override bool Read() {
-			return this.pin.Read() == GpioPinValue.High;
-		}
-
-		public override void Write(bool value) {
-			this.pin.Write(value ? GpioPinValue.High : GpioPinValue.Low);
-		}
-	}
-
-	internal class DigitalInterrupt : SocketInterfaces.DigitalInterrupt {
-		private GpioPin pin;
-
-		internal DigitalInterrupt(GpioPin pin, GpioPinEdge interruptType, GpioPinDriveMode driveMode) {
-			this.pin = pin;
-			this.pin.ValueChanged += (a, b) => this.OnInterrupt(b);
-
-			this.InterruptType = interruptType;
-			this.DriveMode = driveMode;
-		}
-
-		public override bool Read() {
-			return this.pin.Read() == GpioPinValue.High;
-		}
-
-		public override GpioPinDriveMode DriveMode {
-			get {
-				return this.pin.GetDriveMode();
-			}
-			set {
-				this.pin.SetDriveMode(value);
-			}
-		}
-
-		public override GpioPinEdge InterruptType {
-			get {
-				return this.InterruptType;
-			}
-			set {
-				this.InterruptType = value;
-			}
-		}
-	}
-
-	internal class DigitalInputOutput : SocketInterfaces.DigitalInputOutput {
-		private GpioPin pin;
-		private GpioPinDriveMode driveMode;
-
-		internal DigitalInputOutput(GpioPin pin, SocketInterfaces.DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initialOutputValue) {
-			this.pin = pin;
-			this.driveMode = driveMode;
-
-			this.Mode = mode;
-
-			if (mode == SocketInterfaces.DigitalInputOutputMode.Output) {
-				this.Write(initialOutputValue);
-			}
-			else {
-				this.Read();
-			}
-		}
-
-		public override bool Read() {
-			return this.pin.Read() == GpioPinValue.High;
-		}
-
-		public override void Write(bool value) {
+		protected override void WriteInternal(bool value) {
 			this.pin.Write(value ? GpioPinValue.High : GpioPinValue.Low);
 		}
 
@@ -113,18 +28,15 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		}
 	}
 
-	internal class AnalogInput : SocketInterfaces.AnalogInput {
+	internal class AnalogIO : SocketInterfaces.AnalogIO {
 		public override double MaxVoltage { get; } = 3.3;
+		public override GpioPinDriveMode DriveMode { get; set; }
 
-		public override double ReadVoltage() {
+		protected override double ReadInternal() {
 			throw new NotImplementedException();
 		}
-	}
 
-	internal class AnalogOutput : SocketInterfaces.AnalogOutput {
-		public override double MaxVoltage { get; } = 3.3;
-
-		public override void WriteVoltage(double voltage) {
+		protected override void WriteInternal(double voltage) {
 			throw new NotImplementedException();
 		}
 	}
@@ -146,26 +58,36 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 			this.device = device;
 		}
 
-		public override Windows.Devices.I2C.I2CTransferStatus Write(byte[] buffer, out uint transferred) {
-			return this.device.TryWrite(buffer, out transferred);
+		public override void Write(byte[] buffer) {
+			this.device.Write(buffer);
 		}
 
-		public override Windows.Devices.I2C.I2CTransferStatus Read(byte[] buffer, out uint transferred) {
-			return this.device.TryRead(buffer, out transferred);
+		public override void Read(byte[] buffer) {
+			this.device.Read(buffer);
 		}
 
-		public override Windows.Devices.I2C.I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred) {
-			return this.device.TryWriteRead(writeBuffer, readBuffer, out transferred);
+		public override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
+			this.device.WriteRead(writeBuffer, readBuffer);
 		}
 	}
 
 	internal class SpiDevice : SocketInterfaces.SpiDevice {
-		internal SpiDevice(SocketInterfaces.SpiConfiguration configuration, SocketInterfaces.DigitalOutput slaveSelect) {
+		private Windows.Devices.Spi.SpiDevice device;
 
+		internal SpiDevice(Windows.Devices.Spi.SpiDevice device) {
+			this.device = device;
 		}
 
-		public override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
-			throw new NotImplementedException();
+		protected override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
+			if (writeBuffer != null && readBuffer != null) {
+				this.device.TransferFullDuplex(writeBuffer, readBuffer);
+			}
+			else if (writeBuffer != null) {
+				this.device.Write(writeBuffer);
+			}
+			else if (readBuffer != null) {
+				this.device.Read(readBuffer);
+			}
 		}
 	}
 

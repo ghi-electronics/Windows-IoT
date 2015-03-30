@@ -7,9 +7,9 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "LED7C";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private DigitalOutput red;
-		private DigitalOutput green;
-		private DigitalOutput blue;
+		private DigitalIO red;
+		private DigitalIO green;
+		private DigitalIO blue;
 
 		public enum Color {
 			Off,
@@ -23,9 +23,9 @@ namespace GHI.Athens.Modules {
 		}
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.red = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Four, false);
-			this.green = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Five, false);
-			this.blue = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Three, false);
+			this.red = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
+			this.green = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Five, false);
+			this.blue = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
 		}
 		public void SetColor(Color color) {
 			int c = (int)color;

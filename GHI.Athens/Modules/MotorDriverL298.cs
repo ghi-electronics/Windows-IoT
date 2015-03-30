@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace GHI.Athens.Modules {
 	public class MotorDriverL298 : Module {
 		private PwmOutput[] pwms;
-		private DigitalOutput[] directions;
+		private DigitalIO[] directions;
 
 		public override string Name { get; } = "MotorDriverL298";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
@@ -19,9 +19,9 @@ namespace GHI.Athens.Modules {
 				await parentSocket.CreatePwmOutputAsync(SocketPinNumber.Seven)
 			};
 
-			this.directions = new DigitalOutput[] {
-				await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Six, false),
-				await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Nine, false)
+			this.directions = new DigitalIO[] {
+				await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Six, false),
+				await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Nine, false)
 			};
 
 			this.StopAll();

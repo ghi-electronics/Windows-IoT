@@ -1,110 +1,102 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using Windows.Devices.Gpio;
-using Windows.Devices.I2C;
 using Windows.Foundation;
 
 namespace GHI.Athens.Gadgeteer.SocketInterfaces {
-	public enum DigitalInputOutputMode {
-		Input,
-		Output
-	}
-
-	public delegate Task<DigitalInput> DigitalInputCreator(Socket socket, SocketPinNumber pinNumber, GpioPinDriveMode driveMode);
-	public delegate Task<DigitalOutput> DigitalOutputCreator(Socket socket, SocketPinNumber pinNumber, bool initialValue);
-	public delegate Task<DigitalInterrupt> DigitalInterruptCreator(Socket socket, SocketPinNumber pinNumber, GpioPinEdge interruptType, GpioPinDriveMode driveMode);
-	public delegate Task<DigitalInputOutput> DigitalInputOutputCreator(Socket socket, SocketPinNumber pinNumber, DigitalInputOutputMode mode, GpioPinDriveMode driveMode, bool initialOutputValue);
-	public delegate Task<AnalogInput> AnalogInputCreator(Socket socket, SocketPinNumber pinNumber);
-	public delegate Task<AnalogOutput> AnalogOutputCreator(Socket socket, SocketPinNumber pinNumber, double initialValue);
+	public delegate Task<DigitalIO> DigitalIOCreator(Socket socket, SocketPinNumber pinNumber);
+	public delegate Task<AnalogIO> AnalogIOCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
 	public delegate Task<SpiDevice> SpiDeviceCreator(Socket socket);
 	public delegate Task<SerialDevice> SerialDeviceCreator(Socket socket);
 	public delegate Task<CanDevice> CanDeviceCreator(Socket socket);
 
-	public struct SpiConfiguration {
-		public bool SlaveSelectActiveHigh { get; set; }
-		public uint SlaveSelectSetupTime { get; set; }
-		public uint SlaveSelectHoldTime { get; set; }
-		public bool ClockIdleHigh { get; set; }
-		public bool ClockSampleOnRising { get; set; }
-		public uint ClockRate { get; set; }
-	}
+	public abstract class DigitalIO {
+		protected abstract bool ReadInternal();
+		protected abstract void WriteInternal(bool value);
 
-	public abstract class DigitalOutput {
-		public abstract void Write(bool value);
-		public abstract bool Read();
+		public abstract GpioPinDriveMode DriveMode { get; set; }
+		public GpioPinEdge InterruptType { get; set; }
+
+		public event TypedEventHandler<DigitalIO, GpioPinValueChangedEventArgs> ValueChanged;
+
+		public bool Read() {
+			this.DriveMode = GpioPinDriveMode.Input;
+
+			return this.ReadInternal();
+		}
+
+		public void Write(bool value) {
+			this.DriveMode = GpioPinDriveMode.Output;
+
+			this.WriteInternal(value);
+		}
 
 		public bool Value {
 			get {
-				return this.Read();
+				return this.ReadInternal();
 			}
 			set {
-				this.Write(value);
+				this.WriteInternal(value);
 			}
 		}
 
 		public void SetHigh() {
-			this.Write(true);
+			this.WriteInternal(true);
 		}
 
 		public void SetLow() {
-			this.Write(false);
-		}
-	}
-
-	public abstract class DigitalInput {
-		public abstract bool Read();
-
-		public bool Value {
-			get {
-				return this.Read();
-			}
+			this.WriteInternal(false);
 		}
 
-		public abstract GpioPinDriveMode DriveMode { get; set; }
-	}
+		public bool IsHigh() {
+			return this.ReadInternal();
+		}
 
-	public abstract class DigitalInterrupt : DigitalInput {
-		public abstract GpioPinEdge InterruptType { get; set; }
+		public bool IsLow() {
+			return !this.ReadInternal();
+		}
 
-		public event TypedEventHandler<DigitalInterrupt, GpioPinValueChangedEventArgs> Interrupt;
-
-		protected void OnInterrupt(GpioPinValueChangedEventArgs e) {
+		protected void OnValueChanged(GpioPinValueChangedEventArgs e) {
 			if (e.Edge == this.InterruptType)
-				this.Interrupt?.Invoke(this, e);
+				this.ValueChanged?.Invoke(this, e);
 		}
 	}
 
-	public abstract class DigitalInputOutput {
-		public abstract void Write(bool value);
-		public abstract bool Read();
+	public abstract class AnalogIO {
+		protected abstract double ReadInternal();
+		protected abstract void WriteInternal(double voltage);
 
-		public bool Value {
-			get {
-				return this.Read();
-			}
-			set {
-				this.Write(value);
-			}
-		}
-
-		public DigitalInputOutputMode Mode { get; protected set; }
-
-		public abstract GpioPinDriveMode DriveMode { get; set; }
-	}
-
-	public abstract class AnalogInput {
 		public abstract double MaxVoltage { get; }
+		public abstract GpioPinDriveMode DriveMode { get; set; }
 
-		public abstract double ReadVoltage();
+		public double ReadVoltage() {
+			this.DriveMode = GpioPinDriveMode.Input;
+
+			return this.ReadInternal();
+		}
+
+		public void WriteVoltage(double value) {
+			this.DriveMode = GpioPinDriveMode.Output;
+
+			this.WriteInternal(value);
+		}
 
 		public double ReadProportion() {
-			return this.ReadVoltage() / this.MaxVoltage;
+			return this.ReadInternal() / this.MaxVoltage;
+		}
+
+		public void WriteProportion(double value) {
+			this.WriteInternal(value / this.MaxVoltage);
 		}
 
 		public double Voltage {
 			get {
-				return this.ReadVoltage();
+				return this.ReadInternal();
+			}
+			set {
+				this.WriteInternal(value);
 			}
 		}
 
@@ -112,37 +104,8 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			get {
 				return this.ReadProportion();
 			}
-		}
-	}
-
-	public abstract class AnalogOutput {
-		private double voltage = 0.0;
-
-		public abstract double MaxVoltage { get; }
-
-		public abstract void WriteVoltage(double voltage);
-
-		public void WriteProportion(double value) {
-			this.WriteVoltage(value / this.MaxVoltage);
-		}
-
-		public double Voltage {
-			get {
-				return this.voltage;
-			}
 			set {
-				this.voltage = value;
-
-				this.WriteVoltage(value);
-			}
-		}
-
-		public double Proportion {
-			get {
-				return this.Voltage / this.MaxVoltage;
-			}
-			set {
-				this.Voltage = this.MaxVoltage * value;
+				this.WriteProportion(value);
 			}
 		}
 	}
@@ -169,7 +132,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			set {
 				this.SetEnabled(value);
 
-				this.Enabled = value;
+				this.enabled = value;
 			}
 		}
 
@@ -197,9 +160,9 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 		private byte[] write2;
 		private byte[] read1;
 
-		public abstract I2CTransferStatus Write(byte[] buffer, out uint transferred);
-		public abstract I2CTransferStatus Read(byte[] buffer, out uint transferred);
-		public abstract I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer, out uint transferred);
+		public abstract void Write(byte[] buffer);
+		public abstract void Read(byte[] buffer);
+		public abstract void WriteRead(byte[] writeBuffer, byte[] readBuffer);
 
 		protected I2CDevice() {
 			this.write1 = new byte[1];
@@ -207,29 +170,21 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			this.read1 = new byte[1];
 		}
 
-		public I2CTransferStatus WriteRead(byte[] writeBuffer, byte[] readBuffer) {
-			uint transferred;
-
-			return this.WriteRead(writeBuffer, readBuffer, out transferred);
-		}
-
-		public I2CTransferStatus Write(byte[] buffer) {
-			uint transferred;
-
-			return this.Write(buffer, out transferred);
-		}
-
-		public I2CTransferStatus Read(byte[] buffer) {
-			uint transferred;
-
-			return this.Read(buffer, out transferred);
-		}
-
-		public I2CTransferStatus WriteRegister(byte register, byte value) {
+		public void WriteRegister(byte register, byte value) {
 			this.write2[0] = register;
 			this.write2[1] = value;
 
-			return this.Write(this.write2);
+			this.Write(this.write2);
+		}
+
+		public void WriteRegisters(byte register, byte[] values) {
+			var buffer = new byte[values.Length + 1];
+
+			buffer[0] = register;
+
+			Array.Copy(values, 0, buffer, 1, values.Length);
+
+			this.Write(buffer);
 		}
 
 		public byte ReadRegister(byte register) {
@@ -240,14 +195,10 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			return read1[0];
 		}
 
-		public I2CTransferStatus ReadRegister(byte register, out byte value) {
+		public void ReadRegisters(byte register, byte[] values) {
 			this.write1[0] = register;
 
-			var result = this.WriteRead(this.write1, this.read1);
-
-			value = read1[0];
-
-			return result;
+			this.WriteRead(this.write1, values);
 		}
 
 		public byte[] ReadRegisters(byte register, uint count) {
@@ -259,16 +210,10 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 
 			return result;
 		}
-
-		public I2CTransferStatus ReadRegisters(byte register, byte[] values) {
-			this.write1[0] = register;
-
-			return this.WriteRead(this.write1, values);
-		}
 	}
 
 	public abstract class SpiDevice {
-		public abstract void WriteRead(byte[] writeBuffer, byte[] readBuffer);
+		protected abstract void WriteRead(byte[] writeBuffer, byte[] readBuffer);
 
 		public void Write(byte[] buffer) {
 			this.WriteRead(buffer, null);
@@ -276,6 +221,15 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 
 		public void Read(byte[] buffer) {
 			this.WriteRead(null, buffer);
+		}
+
+		public void TransferFullDuplex(byte[] writeBuffer, byte[] readBuffer) {
+			this.WriteRead(writeBuffer, readBuffer);
+		}
+
+		public void TransferSequential(byte[] writeBuffer, byte[] readBuffer) {
+			this.WriteRead(writeBuffer, null);
+			this.WriteRead(null, readBuffer);
 		}
 	}
 

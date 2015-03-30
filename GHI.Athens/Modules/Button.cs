@@ -8,12 +8,12 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "Button";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		private DigitalInput inputPin;
-		private DigitalOutput outputPin;
+		private DigitalIO inputPin;
+		private DigitalIO outputPin;
 
 		protected async override Task Initialize(Socket parentSocket) {
-			this.inputPin = await parentSocket.CreateDigitalInputAsync(SocketPinNumber.Three, GpioPinDriveMode.Input);
-			this.outputPin = await parentSocket.CreateDigitalOutputAsync(SocketPinNumber.Four, false);
+			this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);
+			this.outputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
 		}
 
 		public bool IsPressed() {
