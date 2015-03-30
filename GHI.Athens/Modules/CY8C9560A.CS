@@ -120,16 +120,16 @@ namespace GHI.Athens.Modules {
 			val = this.i2c.ReadRegister(CY8C9560A.PinDirectionRegister);
 			this.i2c.WriteRegister(CY8C9560A.PinDirectionRegister, (byte)(val | mask));
 
-			byte resistorValue = 0;
-
+			//byte resistorRegister = 0;
+			//
 			//switch (driveMode) {
-			//	case GpioInputDriveMode.HighImpedance: resistorValue = CY8C9560A.PinHighImpedanceRegister; break;
-			//	case GpioInputDriveMode.PullDown: resistorValue = CY8C9560A.PinPullDownRegister; break;
-			//	case GpioInputDriveMode.PullUp: resistorValue = CY8C9560A.PinPullUpRegister; break;
+			//	case GpioInputDriveMode.HighImpedance: resistorRegister = CY8C9560A.PinHighImpedanceRegister; break;
+			//	case GpioInputDriveMode.PullDown: resistorRegister = CY8C9560A.PinPullDownRegister; break;
+			//	case GpioInputDriveMode.PullUp: resistorRegister = CY8C9560A.PinPullUpRegister; break;
 			//}
 
-			val = this.i2c.ReadRegister(resistorValue);
-			this.i2c.WriteRegister(resistorValue, (byte)(val | mask));
+			val = this.i2c.ReadRegister(CY8C9560A.PinHighImpedanceRegister);
+			this.i2c.WriteRegister(CY8C9560A.PinHighImpedanceRegister, (byte)(val | mask));
 
 			val = this.i2c.ReadRegister(CY8C9560A.InterruptMaskRegister);
 			this.i2c.WriteRegister(CY8C9560A.InterruptMaskRegister, (byte)(val | mask));
