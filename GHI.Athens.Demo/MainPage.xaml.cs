@@ -19,13 +19,16 @@ namespace GHI.Athens.Demo {
 		public MainPage() {
 			this.InitializeComponent();
 
-			Task.Run(async () => this.hat = await Module.CreateAsync<TheProfessor>())
-				.ContinueWith(async t => this.hub = await Module.CreateAsync<HubAP5>(this.hat.GetProvidedSocket(3))).Unwrap()
-				.ContinueWith(async t => this.button = await Module.CreateAsync<Button>(this.hub.GetProvidedSocket(6))).Unwrap()
-				.ContinueWith(async t => this.ledStrip = await Module.CreateAsync<LEDStrip>(this.hub.GetProvidedSocket(8))).Unwrap()
-				.ContinueWith(async t => this.lightSense = await Module.CreateAsync<LightSense>(this.hub.GetProvidedSocket(1))).Unwrap()
-				.ContinueWith(async t => this.temp = await Module.CreateAsync<TempHumidSI70>(this.hub.GetProvidedSocket(4))).Unwrap()
-				.ContinueWith(t => this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted));
+			Task.Run(async () => {
+				this.hat = await Module.CreateAsync<TheProfessor>();
+				this.hub = await Module.CreateAsync<HubAP5>(this.hat.GetProvidedSocket(3));
+				this.button = await Module.CreateAsync<Button>(this.hub.GetProvidedSocket(6));
+				this.ledStrip = await Module.CreateAsync<LEDStrip>(this.hub.GetProvidedSocket(8));
+				this.lightSense = await Module.CreateAsync<LightSense>(this.hub.GetProvidedSocket(1));
+				this.temp = await Module.CreateAsync<TempHumidSI70>(this.hub.GetProvidedSocket(4));
+
+				await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted);
+            });
 		}
 
 		private void ProgramStarted() {
