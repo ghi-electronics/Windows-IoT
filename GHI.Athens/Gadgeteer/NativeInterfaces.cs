@@ -7,7 +7,18 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 
 		internal DigitalIO(GpioPin pin) {
 			this.pin = pin;
-			this.pin.ValueChanged += (a, b) => this.OnValueChanged(b);
+		}
+
+		private void OnInterrupt(GpioPin sender, GpioPinValueChangedEventArgs e) {
+			this.OnValueChanged(e.Edge == GpioPinEdge.RisingEdge);
+		}
+
+		protected override void AddInterrupt() {
+			this.pin.ValueChanged += this.OnInterrupt;
+		}
+
+		protected override void RemoveInterrupt() {
+			this.pin.ValueChanged -= this.OnInterrupt;
 		}
 
 		protected override bool ReadInternal() {

@@ -12,14 +12,34 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	public delegate Task<SerialDevice> SerialDeviceCreator(Socket socket);
 	public delegate Task<CanDevice> CanDeviceCreator(Socket socket);
 
+	public class DigitalIOValueChangedEventArgs : EventArgs {
+		public DateTime When { get; set; }
+		public bool Value { get; set; }
+	}
+
 	public abstract class DigitalIO {
+		private TypedEventHandler<DigitalIO, DigitalIOValueChangedEventArgs> valueChanged;
+
 		protected abstract bool ReadInternal();
 		protected abstract void WriteInternal(bool value);
+		protected abstract void AddInterrupt();
+		protected abstract void RemoveInterrupt();
 
 		public abstract GpioPinDriveMode DriveMode { get; set; }
 		public GpioPinEdge InterruptType { get; set; }
 
-		public event TypedEventHandler<DigitalIO, GpioPinValueChangedEventArgs> ValueChanged;
+		public event TypedEventHandler<DigitalIO, DigitalIOValueChangedEventArgs> ValueChanged {
+			add {
+				this.valueChanged += value;
+
+				this.AddInterrupt();
+			}
+			remove {
+				this.valueChanged -= value;
+
+				this.RemoveInterrupt();
+			}
+		}
 
 		public bool Read() {
 			this.DriveMode = GpioPinDriveMode.Input;
@@ -58,9 +78,9 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 			return !this.ReadInternal();
 		}
 
-		protected void OnValueChanged(GpioPinValueChangedEventArgs e) {
-			if (e.Edge == this.InterruptType)
-				this.ValueChanged?.Invoke(this, e);
+		protected void OnValueChanged(bool e) {
+			if ((e && this.InterruptType == GpioPinEdge.RisingEdge) || (!e && this.InterruptType == GpioPinEdge.FallingEdge))
+				this.valueChanged?.Invoke(this, new DigitalIOValueChangedEventArgs() { When = DateTime.UtcNow, Value = e });
 		}
 	}
 

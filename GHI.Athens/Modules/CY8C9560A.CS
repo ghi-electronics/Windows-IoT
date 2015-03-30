@@ -1,6 +1,7 @@
 ﻿using GHI.Athens.Gadgeteer;
 using GHI.Athens.Gadgeteer.SocketInterfaces;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GHI.Athens.Modules {
@@ -31,24 +32,56 @@ namespace GHI.Athens.Modules {
 			Hz367 = 0x04,
 		}
 
-		private I2CDevice i2c;
-
 		public struct Pin {
 			public byte Port { get; set; }
 			public byte PinNumber { get; set; }
 			public byte Mask { get { return (byte)(1 << this.PinNumber); } }
+
+			public Pin(byte port, byte pinNumber) {
+				this.Port = port;
+				this.PinNumber = pinNumber;
+			}
+
+			public static bool operator ==(Pin left, Pin right) {
+				return left.PinNumber == right.PinNumber && left.Port == right.Port;
+			}
+
+			public static bool operator !=(Pin left, Pin right) {
+				return !(left == right);
+			}
+
+			public override bool Equals(object o) {
+				return o is Pin && this == (Pin)o;
+			}
+
+			public override int GetHashCode() {
+				return (this.Port << 8) | this.PinNumber;
+			}
 		}
 
+		private I2CDevice i2c;
+		private DigitalIO interrupt;
+		private Dictionary<Pin, Action<bool>> interruptRegistrations;
+		private byte[] shadowRegisters;
+
 		public async Task Initialize(Socket socket) {
+			this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
+			this.shadowRegisters = new byte[0x2D - 0x08];
+
 			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20));
+
+			this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
+			this.interrupt.ValueChanged += this.OnInterrupt;
+
+			this.i2c.ReadRegisters(0x08, this.shadowRegisters);
 		}
 
 		public void SetPwm(Pin pin, double frequency, double dutyCycle) {
 			this.WriteRegister(Register.PortSelect, pin.Port);
 
-			this.OrRegister(Register.PinStrongDrive, pin.Mask);
-			this.OrRegister(Register.InterruptMask, pin.Mask);
-			this.OrRegister(Register.SelectPwmForOutput, pin.Mask);
+			this.SetBits(Register.PinStrongDrive, pin.Mask);
+			this.SetBits(Register.InterruptMask, pin.Mask);
+			this.SetBits(Register.SelectPwmForOutput, pin.Mask);
 
 			this.WriteDigital(pin, true);
 
@@ -91,19 +124,30 @@ namespace GHI.Athens.Modules {
 		public void SetOutput(Pin pin) {
 			this.WriteRegister(Register.PortSelect, pin.Port);
 
-			this.AndRegister(Register.SelectPwmForOutput, ~pin.Mask);
-			this.AndRegister(Register.PinDirection, ~pin.Mask);
-			this.OrRegister(Register.PinStrongDrive, pin.Mask);
-			this.OrRegister(Register.InterruptMask, pin.Mask);
+			this.ClearBits(Register.SelectPwmForOutput, pin.Mask);
+			this.ClearBits(Register.PinDirection, pin.Mask);
+			this.SetBits(Register.PinStrongDrive, pin.Mask);
+			this.SetBits(Register.InterruptMask, pin.Mask);
 		}
 
 		public void SetInput(Pin pin) {
 			this.WriteRegister(Register.PortSelect, pin.Port);
 
-			this.AndRegister(Register.SelectPwmForOutput, ~pin.Mask);
-			this.OrRegister(Register.PinDirection, pin.Mask);
-			this.OrRegister(Register.PinHighImpedance, pin.Mask);
-			this.OrRegister(Register.InterruptMask, pin.Mask);
+			this.ClearBits(Register.SelectPwmForOutput, pin.Mask);
+			this.SetBits(Register.PinDirection, pin.Mask);
+			this.SetBits(Register.PinHighImpedance, pin.Mask);
+			this.SetBits(Register.InterruptMask, pin.Mask);
+
+			if (this.interruptRegistrations.ContainsKey(pin))
+				this.interruptRegistrations.Remove(pin);
+		}
+
+		public void SetInterrupt(Pin pin, Action<bool> onInterrupt) {
+			this.SetInput(pin);
+
+			this.ClearBits(Register.InterruptMask, pin.Mask);
+
+			this.interruptRegistrations[pin] = onInterrupt;
 		}
 
 		public bool ReadDigital(Pin pin) {
@@ -112,27 +156,50 @@ namespace GHI.Athens.Modules {
 
 		public void WriteDigital(Pin pin, bool value) {
 			if (value) {
-				this.OrRegister(Register.OutputPort0 + pin.Port, pin.Mask);
+				this.SetBits(Register.OutputPort0 + pin.Port, pin.Mask);
 			}
 			else {
-				this.AndRegister(Register.OutputPort0 + pin.Port, ~pin.Mask);
+				this.ClearBits(Register.OutputPort0 + pin.Port, pin.Mask);
 			}
 		}
 
+		private void OnInterrupt(DigitalIO sender, DigitalIOValueChangedEventArgs e) {
+			var ports = this.i2c.ReadRegisters((byte)Register.InterruptPort0, 8);
+
+			for (byte i = 0; i < 8; i++) {
+				for (byte j = 0; j < 8; j++) {
+					var pin = new Pin(i, j);
+
+					if (this.interruptRegistrations.ContainsKey(pin) && (ports[i] & (1 << j)) != 0)
+						this.interruptRegistrations[pin](this.ReadDigital(pin));
+				}
+			}
+		}
+
+		private bool IsShadowed(Register register) {
+			return ((int)register >= 0x08 && (int)register < 0x10) || ((int)register >= 0x18 && (int)register < 0x2D);
+        }
+
 		private byte ReadRegister(Register register) {
+			if (this.IsShadowed(register))
+                return this.shadowRegisters[(int)register - 0x08];
+
 			return this.i2c.ReadRegister((byte)register);
 		}
 
 		private void WriteRegister(Register register, int value) {
+			if (this.IsShadowed(register))
+				this.shadowRegisters[(int)register - 0x08] = (byte)value;
+
 			this.i2c.WriteRegister((byte)register, (byte)value);
 		}
 
-		private void OrRegister(Register register, int mask) {
+		private void SetBits(Register register, int mask) {
 			this.WriteRegister(register, (byte)(this.ReadRegister(register) | mask));
 		}
 
-		private void AndRegister(Register register, int mask) {
-			this.WriteRegister(register, (byte)(this.ReadRegister(register) & mask));
+		private void ClearBits(Register register, int mask) {
+			this.WriteRegister(register, (byte)(this.ReadRegister(register) & ~mask));
 		}
 	}
 }

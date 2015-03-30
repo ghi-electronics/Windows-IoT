@@ -43,76 +43,76 @@ namespace GHI.Athens.Modules {
 
 		private List<Dictionary<SocketPinNumber, CY8C9560A.Pin>> CreatePinMap() {
 			var s1 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s1.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 5, PinNumber = 0 });
-			s1.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 5, PinNumber = 1 });
-			s1.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 5, PinNumber = 2 });
-			s1.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 5, PinNumber = 3 });
-			s1.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 5, PinNumber = 4 });
-			s1.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 5, PinNumber = 5 });
-			s1.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 5, PinNumber = 6 });
+			s1.Add(SocketPinNumber.Three, new CY8C9560A.Pin(5, 0));
+			s1.Add(SocketPinNumber.Four, new CY8C9560A.Pin(5, 1));
+			s1.Add(SocketPinNumber.Five, new CY8C9560A.Pin(5, 2));
+			s1.Add(SocketPinNumber.Six, new CY8C9560A.Pin(5, 3));
+			s1.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(5, 4));
+			s1.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(5, 5));
+			s1.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(5, 6));
 
 			var s2 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s2.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 4, PinNumber = 0 });
-			s2.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 4, PinNumber = 1 });
-			s2.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 4, PinNumber = 2 });
-			s2.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 4, PinNumber = 3 });
-			s2.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 4, PinNumber = 4 });
-			s2.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 4, PinNumber = 5 });
-			s2.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 4, PinNumber = 6 });
+			s2.Add(SocketPinNumber.Three, new CY8C9560A.Pin(4, 0));
+			s2.Add(SocketPinNumber.Four, new CY8C9560A.Pin(4, 1));
+			s2.Add(SocketPinNumber.Five, new CY8C9560A.Pin(4, 2));
+			s2.Add(SocketPinNumber.Six, new CY8C9560A.Pin(4, 3));
+			s2.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(4, 4));
+			s2.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(4, 5));
+			s2.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(4, 6));
 
 			var s3 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s3.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 3, PinNumber = 0 });
-			s3.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 3, PinNumber = 1 });
-			s3.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 3, PinNumber = 2 });
-			s3.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 3, PinNumber = 3 });
-			s3.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 3, PinNumber = 4 });
-			s3.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 3, PinNumber = 5 });
-			s3.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 3, PinNumber = 6 });
+			s3.Add(SocketPinNumber.Three, new CY8C9560A.Pin(3, 0));
+			s3.Add(SocketPinNumber.Four, new CY8C9560A.Pin(3, 1));
+			s3.Add(SocketPinNumber.Five, new CY8C9560A.Pin(3, 2));
+			s3.Add(SocketPinNumber.Six, new CY8C9560A.Pin(3, 3));
+			s3.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(3, 4));
+			s3.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(3, 5));
+			s3.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(3, 6));
 
 			var s4 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s4.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 2, PinNumber = 0 });
-			s4.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 2, PinNumber = 1 });
-			s4.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 2, PinNumber = 2 });
-			s4.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 2, PinNumber = 3 });
-			s4.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 7, PinNumber = 4 });
-			s4.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 7, PinNumber = 5 });
-			s4.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 7, PinNumber = 6 });
+			s4.Add(SocketPinNumber.Three, new CY8C9560A.Pin(2, 0));
+			s4.Add(SocketPinNumber.Four, new CY8C9560A.Pin(2, 1));
+			s4.Add(SocketPinNumber.Five, new CY8C9560A.Pin(2, 2));
+			s4.Add(SocketPinNumber.Six, new CY8C9560A.Pin(2, 3));
+			s4.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(7, 4));
+			s4.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(7, 5));
+			s4.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(7, 6));
 
 			var s5 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s5.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 1, PinNumber = 4 });
-			s5.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 1, PinNumber = 5 });
-			s5.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 1, PinNumber = 6 });
-			s5.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 1, PinNumber = 7 });
-			s5.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 7, PinNumber = 1 });
-			s5.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 7, PinNumber = 2 });
-			s5.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 7, PinNumber = 3 });
+			s5.Add(SocketPinNumber.Three, new CY8C9560A.Pin(1, 4));
+			s5.Add(SocketPinNumber.Four, new CY8C9560A.Pin(1, 5));
+			s5.Add(SocketPinNumber.Five, new CY8C9560A.Pin(1, 6));
+			s5.Add(SocketPinNumber.Six, new CY8C9560A.Pin(1, 7));
+			s5.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(7, 1));
+			s5.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(7, 2));
+			s5.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(7, 3));
 
 			var s6 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s6.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 1, PinNumber = 0 });
-			s6.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 1, PinNumber = 1 });
-			s6.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 1, PinNumber = 2 });
-			s6.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 1, PinNumber = 3 });
-			s6.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 6, PinNumber = 6 });
-			s6.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 6, PinNumber = 7 });
-			s6.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 6, PinNumber = 0 });
+			s6.Add(SocketPinNumber.Three, new CY8C9560A.Pin(1, 0));
+			s6.Add(SocketPinNumber.Four, new CY8C9560A.Pin(1, 1));
+			s6.Add(SocketPinNumber.Five, new CY8C9560A.Pin(1, 2));
+			s6.Add(SocketPinNumber.Six, new CY8C9560A.Pin(1, 3));
+			s6.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(6, 6));
+			s6.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(6, 7));
+			s6.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(6, 0));
 
 			var s7 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s7.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 0, PinNumber = 4 });
-			s7.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 0, PinNumber = 5 });
-			s7.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 0, PinNumber = 6 });
-			s7.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 0, PinNumber = 7 });
-			s7.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 6, PinNumber = 3 });
-			s7.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 6, PinNumber = 4 });
-			s7.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 6, PinNumber = 5 });
+			s7.Add(SocketPinNumber.Three, new CY8C9560A.Pin(0, 4));
+			s7.Add(SocketPinNumber.Four, new CY8C9560A.Pin(0, 5));
+			s7.Add(SocketPinNumber.Five, new CY8C9560A.Pin(0, 6));
+			s7.Add(SocketPinNumber.Six, new CY8C9560A.Pin(0, 7));
+			s7.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(6, 3));
+			s7.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(6, 4));
+			s7.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(6, 5));
 
 			var s8 = new Dictionary<SocketPinNumber, CY8C9560A.Pin>();
-			s8.Add(SocketPinNumber.Three, new CY8C9560A.Pin() { Port = 0, PinNumber = 0 });
-			s8.Add(SocketPinNumber.Four, new CY8C9560A.Pin() { Port = 0, PinNumber = 1 });
-			s8.Add(SocketPinNumber.Five, new CY8C9560A.Pin() { Port = 0, PinNumber = 2 });
-			s8.Add(SocketPinNumber.Six, new CY8C9560A.Pin() { Port = 0, PinNumber = 3 });
-			s8.Add(SocketPinNumber.Seven, new CY8C9560A.Pin() { Port = 6, PinNumber = 0 });
-			s8.Add(SocketPinNumber.Eight, new CY8C9560A.Pin() { Port = 6, PinNumber = 1 });
-			s8.Add(SocketPinNumber.Nine, new CY8C9560A.Pin() { Port = 6, PinNumber = 2 });
+			s8.Add(SocketPinNumber.Three, new CY8C9560A.Pin(0, 0));
+			s8.Add(SocketPinNumber.Four, new CY8C9560A.Pin(0, 1));
+			s8.Add(SocketPinNumber.Five, new CY8C9560A.Pin(0, 2));
+			s8.Add(SocketPinNumber.Six, new CY8C9560A.Pin(0, 3));
+			s8.Add(SocketPinNumber.Seven, new CY8C9560A.Pin(6, 0));
+			s8.Add(SocketPinNumber.Eight, new CY8C9560A.Pin(6, 1));
+			s8.Add(SocketPinNumber.Nine, new CY8C9560A.Pin(6, 2));
 
 			return new List<Dictionary<SocketPinNumber, CY8C9560A.Pin>>() { s1, s2, s3, s4, s5, s6, s7, s8 };
 		}
@@ -129,12 +129,24 @@ namespace GHI.Athens.Modules {
 			private CY8C9560A cy8;
 			private CY8C9560A.Pin pin;
 			private GpioPinDriveMode driveMode;
+			private bool isInterrupt;
 
 			public IndirectedDigitalIO(CY8C9560A.Pin pin, CY8C9560A cy8) {
 				this.pin = pin;
+				this.isInterrupt = false;
 
 				this.cy8 = cy8;
 				this.cy8.SetOutput(this.pin);
+			}
+
+			protected override void AddInterrupt() {
+				this.isInterrupt = true;
+				this.cy8.SetInterrupt(this.pin, this.OnValueChanged);
+			}
+
+			protected override void RemoveInterrupt() {
+				this.isInterrupt = false;
+				this.cy8.SetInput(this.pin);
 			}
 
 			protected override bool ReadInternal() {
@@ -153,7 +165,12 @@ namespace GHI.Athens.Modules {
 					this.driveMode = value;
 					
 					if (value == GpioPinDriveMode.Input) {
-						this.cy8.SetInput(this.pin);
+						if (this.isInterrupt) {
+							this.cy8.SetInterrupt(this.pin, this.OnValueChanged);
+						}
+						else {
+							this.cy8.SetInput(this.pin);
+						}
 					}
 					else {
 						this.cy8.SetOutput(this.pin);
