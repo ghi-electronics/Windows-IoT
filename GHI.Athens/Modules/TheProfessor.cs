@@ -21,13 +21,15 @@ namespace GHI.Athens.Modules {
 			socket = this.CreateSocket(1);
 			socket.AddSupportedTypes(SocketType.S, SocketType.U, SocketType.Y);
 			socket.SetNativePin(SocketPinNumber.Three, 3);
-			socket.NativeSpiDeviceId = "";
+			socket.NativeSpiDeviceId = "SPI1";
+			socket.NativeSerialDeviceId = "UART2";
 
 			socket = this.CreateSocket(2);
 			socket.AddSupportedTypes(SocketType.P, SocketType.U, SocketType.Y);
 			socket.SetNativePin(SocketPinNumber.Three, 9);
 			socket.SetNativePin(SocketPinNumber.Eight, 7);
 			socket.SetNativePin(SocketPinNumber.Nine, 8);
+			socket.NativeSerialDeviceId = "UART1";
 
 			socket = this.CreateSocket(3);
 			socket.AddSupportedTypes(SocketType.A, SocketType.I, SocketType.Y);
