@@ -216,7 +216,10 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.SerialDeviceCreator != null)
 				return await this.SerialDeviceCreator(this);
 
-			return new NativeInterfaces.SerialDevice();
+			var infos = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.SerialCommunication.SerialDevice.GetDeviceSelector(this.NativeSerialDeviceId));
+			var device = await Windows.Devices.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
+
+			return new NativeInterfaces.SerialDevice(device);
 		}
 
 		public async Task<CanDevice> CreateCanDeviceAsync() {

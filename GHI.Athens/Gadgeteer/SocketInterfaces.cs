@@ -254,7 +254,15 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	}
 
 	public abstract class SerialDevice {
+		public abstract string PortName { get; }
+		public abstract uint BaudRate { get; set; }
+		public abstract ushort DataBits { get; set; }
+		public abstract Windows.Devices.SerialCommunication.SerialHandshake Handshake { get; set; }
+		public abstract Windows.Devices.SerialCommunication.SerialParity Parity { get; set; }
+		public abstract Windows.Devices.SerialCommunication.SerialStopBitCount StopBits { get; set; }
 
+		public abstract void Write(byte[] buffer);
+		public abstract void Read(byte[] buffer);
 	}
 
 	public abstract class CanDevice {

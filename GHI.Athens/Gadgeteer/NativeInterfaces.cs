@@ -1,16 +1,17 @@
 ﻿using System;
-using Windows.Devices.Gpio;
+using Windows.Storage.Streams;
+using WD = Windows.Devices;
 
 namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	internal class DigitalIO : SocketInterfaces.DigitalIO {
-		private GpioPin pin;
+		private WD.Gpio.GpioPin pin;
 
-		internal DigitalIO(GpioPin pin) {
+		internal DigitalIO(WD.Gpio.GpioPin pin) {
 			this.pin = pin;
 		}
 
-		private void OnInterrupt(GpioPin sender, GpioPinValueChangedEventArgs e) {
-			this.OnValueChanged(e.Edge == GpioPinEdge.RisingEdge);
+		private void OnInterrupt(WD.Gpio.GpioPin sender, WD.Gpio.GpioPinValueChangedEventArgs e) {
+			this.OnValueChanged(e.Edge == WD.Gpio.GpioPinEdge.RisingEdge);
 		}
 
 		protected override void AddInterrupt() {
@@ -22,14 +23,14 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		}
 
 		protected override bool ReadInternal() {
-			return this.pin.Read() == GpioPinValue.High;
+			return this.pin.Read() == WD.Gpio.GpioPinValue.High;
 		}
 
 		protected override void WriteInternal(bool value) {
-			this.pin.Write(value ? GpioPinValue.High : GpioPinValue.Low);
+			this.pin.Write(value ? WD.Gpio.GpioPinValue.High : WD.Gpio.GpioPinValue.Low);
 		}
 
-		public override GpioPinDriveMode DriveMode {
+		public override WD.Gpio.GpioPinDriveMode DriveMode {
 			get {
 				return this.pin.GetDriveMode();
 			}
@@ -41,7 +42,7 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 
 	internal class AnalogIO : SocketInterfaces.AnalogIO {
 		public override double MaxVoltage { get; } = 3.3;
-		public override GpioPinDriveMode DriveMode { get; set; }
+		public override WD.Gpio.GpioPinDriveMode DriveMode { get; set; }
 
 		protected override double ReadInternal() {
 			throw new NotImplementedException();
@@ -63,9 +64,9 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	}
 
 	internal class I2CDevice : SocketInterfaces.I2CDevice {
-		private Windows.Devices.I2C.I2CDevice device;
+		private WD.I2C.I2CDevice device;
 
-        internal I2CDevice(Windows.Devices.I2C.I2CDevice device) {
+        internal I2CDevice(WD.I2C.I2CDevice device) {
 			this.device = device;
 		}
 
@@ -83,9 +84,9 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	}
 
 	internal class SpiDevice : SocketInterfaces.SpiDevice {
-		private Windows.Devices.Spi.SpiDevice device;
+		private WD.Spi.SpiDevice device;
 
-		internal SpiDevice(Windows.Devices.Spi.SpiDevice device) {
+		internal SpiDevice(WD.Spi.SpiDevice device) {
 			this.device = device;
 		}
 
@@ -103,7 +104,30 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 	}
 
 	internal class SerialDevice : SocketInterfaces.SerialDevice {
+		private WD.SerialCommunication.SerialDevice device;
+		private DataWriter writer;
+		private DataReader reader;
 
+		public override string PortName { get { return this.device.PortName; } }
+		public override uint BaudRate { get { return this.device.BaudRate; } set { this.device.BaudRate = value; } }
+		public override ushort DataBits { get { return this.device.DataBits; } set { this.device.DataBits = value; } }
+		public override WD.SerialCommunication.SerialHandshake Handshake { get { return this.device.Handshake; } set { this.device.Handshake = value; } }
+		public override WD.SerialCommunication.SerialParity Parity { get { return this.device.Parity; } set { this.device.Parity = value; } }
+		public override WD.SerialCommunication.SerialStopBitCount StopBits { get { return this.device.StopBits; } set { this.device.StopBits = value; } }
+
+		internal SerialDevice(WD.SerialCommunication.SerialDevice device) {
+			this.device = device;
+			this.writer = new DataWriter(this.device.OutputStream);
+			this.reader = new DataReader(this.device.InputStream);
+		}
+
+		public override void Write(byte[] buffer) {
+			this.writer.WriteBytes(buffer);
+		}
+
+		public override void Read(byte[] buffer) {
+			this.reader.ReadBytes(buffer);
+		}
 	}
 
 	internal class CanDevice : SocketInterfaces.CanDevice {
