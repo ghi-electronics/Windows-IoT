@@ -11,10 +11,6 @@ namespace GHI.Athens.Demo {
 		private DispatcherTimer timer;
 		private TheProfessor hat;
 		private HubAP5 hub;
-		private Button button;
-		private LEDStrip ledStrip;
-		private TempHumidSI70 temp;
-		private LightSense lightSense;
 
 		public MainPage() {
 			this.InitializeComponent();
@@ -22,10 +18,6 @@ namespace GHI.Athens.Demo {
 			Task.Run(async () => {
 				this.hat = await Module.CreateAsync<TheProfessor>();
 				this.hub = await Module.CreateAsync<HubAP5>(this.hat.GetProvidedSocket(3));
-				this.button = await Module.CreateAsync<Button>(this.hub.GetProvidedSocket(6));
-				this.ledStrip = await Module.CreateAsync<LEDStrip>(this.hub.GetProvidedSocket(8));
-				this.lightSense = await Module.CreateAsync<LightSense>(this.hub.GetProvidedSocket(1));
-				this.temp = await Module.CreateAsync<TempHumidSI70>(this.hub.GetProvidedSocket(4));
 
 				await this.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, this.ProgramStarted);
             });
@@ -40,14 +32,6 @@ namespace GHI.Athens.Demo {
 
 		private void Timer_Tick(object sender, object e) {
 			this.timer.Stop();
-
-			if (this.button.IsPressed())
-				this.ledStrip.TurnAllOn();
-			else
-				this.ledStrip.TurnAllOff();
-
-			Debug.WriteLine($"{this.lightSense.GetReading():N2}");
-			Debug.WriteLine($"{this.temp.TakeMeasurement()}");
 
 			this.timer.Start();
 		}
