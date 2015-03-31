@@ -66,14 +66,14 @@ namespace GHI.Athens.Modules {
 
 		public async Task Initialize(ISocket socket) {
 			this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
-			this.shadowRegisters = new byte[0x2D - 0x08];
+			//this.shadowRegisters = new byte[0x2D - 0x08];
 
 			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20));
 
-			this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
+			//this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
 			//this.interrupt.ValueChanged += this.OnInterrupt;
 
-			this.i2c.ReadRegisters(0x08, this.shadowRegisters);
+			//this.i2c.ReadRegisters(0x08, this.shadowRegisters);
 		}
 
 		public void SetPwm(Pin pin, double frequency, double dutyCycle) {
@@ -177,7 +177,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		private bool IsShadowed(Register register) {
-			return ((int)register >= 0x08 && (int)register < 0x10) || ((int)register >= 0x18 && (int)register < 0x2D);
+			return false; // ((int)register >= 0x08 && (int)register < 0x10) || ((int)register >= 0x18 && (int)register < 0x2D);
         }
 
 		private byte ReadRegister(Register register) {

@@ -33,9 +33,9 @@ namespace GHI.Athens.Modules {
 
 			socket = this.CreateSocket(3);
 			socket.AddSupportedTypes(SocketType.A, SocketType.I, SocketType.Y);
-			socket.SetNativePin(SocketPinNumber.Three, 0);
-			socket.SetNativePin(SocketPinNumber.Four, 4);
-			socket.SetNativePin(SocketPinNumber.Five, 1);
+			//DNP'd socket.SetNativePin(SocketPinNumber.Three, 0);
+			//DNP'd socket.SetNativePin(SocketPinNumber.Four, 4);
+			//DNP'd socket.SetNativePin(SocketPinNumber.Five, 1);
 			socket.SetNativePin(SocketPinNumber.Six, 2);
 			socket.SetNativePin(SocketPinNumber.Seven, 5);
 			socket.NativeI2CDeviceId = "I2C5";
