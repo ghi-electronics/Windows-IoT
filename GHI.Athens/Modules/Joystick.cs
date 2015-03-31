@@ -15,7 +15,7 @@ namespace GHI.Athens.Modules {
 
 		public int SampleCount { get; set; } = 5;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.x = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Four);
 			this.y = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Five);
 			this.input = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);

@@ -64,7 +64,7 @@ namespace GHI.Athens.Modules {
 		private Dictionary<Pin, Action<bool>> interruptRegistrations;
 		private byte[] shadowRegisters;
 
-		public async Task Initialize(Socket socket) {
+		public async Task Initialize(ISocket socket) {
 			this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
 			this.shadowRegisters = new byte[0x2D - 0x08];
 

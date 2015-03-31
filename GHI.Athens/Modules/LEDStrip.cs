@@ -9,7 +9,7 @@ namespace GHI.Athens.Modules {
 
 		private DigitalIO[] outputPins;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.outputPins = new DigitalIO[7];
 
 			for (var i = 0; i < 7; i++)

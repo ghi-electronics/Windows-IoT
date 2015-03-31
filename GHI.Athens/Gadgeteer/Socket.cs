@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Windows.Devices.Gpio;
+using WD = Windows.Devices;
 
 namespace GHI.Athens.Gadgeteer {
 	public enum SocketPinNumber {
@@ -38,7 +38,35 @@ namespace GHI.Athens.Gadgeteer {
 		Z
 	}
 
-	public sealed class Socket {
+	public interface ISocket {
+		uint Number { get; }
+
+		IReadOnlyCollection<SocketType> SupportedTypes { get; }
+		IReadOnlyDictionary<SocketPinNumber, int> Pins { get; }
+
+		string NativeI2CDeviceId { get; }
+		string NativeSpiDeviceId { get; }
+		string NativeSerialDeviceId { get; }
+		string NativeCanDeviceId { get; }
+
+		void EnsureTypeIsSupported(SocketType type);
+		bool IsTypeSupported(SocketType type);
+
+		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber);
+		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, WD.Gpio.GpioPinEdge interruptType);
+		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, bool initialValue);
+		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber);
+		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber, double initialVoltage);
+		Task<PwmOutput> CreatePwmOutputAsync(SocketPinNumber pinNumber);
+		Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings);
+		Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber);
+		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings);
+		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber);
+		Task<SerialDevice> CreateSerialDeviceAsync();
+		Task<CanDevice> CreateCanDeviceAsync();
+	}
+
+	public sealed class Socket : ISocket {
 		private Dictionary<SocketPinNumber, int> nativePins;
 		private HashSet<SocketType> supportedTypes;
 
@@ -85,8 +113,8 @@ namespace GHI.Athens.Gadgeteer {
 		public SerialDeviceCreator SerialDeviceCreator { get; set; }
 		public CanDeviceCreator CanDeviceCreator { get; set; }
 
-		private async Task<GpioPin> CreatePin(int pinNumber) {
-			return (await GpioController.GetDefaultAsync()).OpenPin(pinNumber);
+		private async Task<WD.Gpio.GpioPin> CreatePin(int pinNumber) {
+			return (await WD.Gpio.GpioController.GetDefaultAsync()).OpenPin(pinNumber);
 		}
 
 		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber) {
@@ -101,12 +129,12 @@ namespace GHI.Athens.Gadgeteer {
 				result = new NativeInterfaces.DigitalIO(await this.CreatePin(this.Pins[pinNumber]));
 			}
 
-			result.DriveMode = GpioPinDriveMode.Input;
+			result.DriveMode = WD.Gpio.GpioPinDriveMode.Input;
 
 			return result;
 		}
 
-		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, GpioPinEdge interruptType) {
+		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, WD.Gpio.GpioPinEdge interruptType) {
 			var result = await this.CreateDigitalIOAsync(pinNumber);
 
 			result.InterruptType = interruptType;
@@ -117,7 +145,7 @@ namespace GHI.Athens.Gadgeteer {
 		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, bool initialValue) {
 			var result = await this.CreateDigitalIOAsync(pinNumber);
 
-			result.DriveMode = GpioPinDriveMode.Output;
+			result.DriveMode = WD.Gpio.GpioPinDriveMode.Output;
 			result.Value = initialValue;
 
 			return result;
@@ -135,7 +163,7 @@ namespace GHI.Athens.Gadgeteer {
 				result = new NativeInterfaces.AnalogIO();
 			}
 
-			result.DriveMode = GpioPinDriveMode.Input;
+			result.DriveMode = WD.Gpio.GpioPinDriveMode.Input;
 
 			return result;
 		}
@@ -143,7 +171,7 @@ namespace GHI.Athens.Gadgeteer {
 		public async Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber, double initialVoltage) {
 			var result = await this.CreateAnalogIOAsync(pinNumber);
 
-			result.DriveMode = GpioPinDriveMode.Output;
+			result.DriveMode = WD.Gpio.GpioPinDriveMode.Output;
 			result.Voltage = initialVoltage;
 
 			return result;
@@ -158,7 +186,7 @@ namespace GHI.Athens.Gadgeteer {
 			return new NativeInterfaces.PwmOutput();
 		}
 
-		public async Task<I2CDevice> CreateI2CDeviceAsync(Windows.Devices.I2C.I2CConnectionSettings connectionSettings) {
+		public async Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings) {
 			if (this.IsTypeSupported(SocketType.Y) && !this.IsTypeSupported(SocketType.I))
 				return await this.CreateI2CDeviceAsync(connectionSettings, SocketPinNumber.Eight, SocketPinNumber.Nine);
 
@@ -167,13 +195,13 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.I2CDeviceCreator != null)
 				return await this.I2CDeviceCreator(this);
 
-			var infos = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.I2C.I2CBus.GetDeviceSelector(this.NativeI2CDeviceId));
-			var device = await Windows.Devices.I2C.I2CBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
+			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.I2C.I2CBus.GetDeviceSelector(this.NativeI2CDeviceId));
+			var device = await WD.I2C.I2CBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
 
 			return new NativeInterfaces.I2CDevice(device);
 		}
 
-		public async Task<I2CDevice> CreateI2CDeviceAsync(Windows.Devices.I2C.I2CConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber) {
+		public async Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber) {
 			if (sdaPinNumber == SocketPinNumber.Eight && sclPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.I))
 				return await this.CreateI2CDeviceAsync(connectionSettings);
 
@@ -183,7 +211,7 @@ namespace GHI.Athens.Gadgeteer {
 			return new SoftwareInterfaces.I2CDevice(sda, scl, connectionSettings);
 		}
 
-		public async Task<SpiDevice> CreateSpiDeviceAsync(Windows.Devices.Spi.SpiConnectionSettings connectionSettings) {
+		public async Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings) {
 			if (this.IsTypeSupported(SocketType.Y) && ! this.IsTypeSupported(SocketType.S))
 				return await this.CreateSpiDeviceAsync(connectionSettings, SocketPinNumber.Six, SocketPinNumber.Seven, SocketPinNumber.Eight, SocketPinNumber.Nine);
 
@@ -192,13 +220,13 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.SpiDeviceCreator != null)
 				return await this.SpiDeviceCreator(this);
 
-			var infos = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.Spi.SpiBus.GetDeviceSelector(this.NativeSpiDeviceId));
-			var device = await Windows.Devices.Spi.SpiBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
+			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.Spi.SpiBus.GetDeviceSelector(this.NativeSpiDeviceId));
+			var device = await WD.Spi.SpiBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
 
 			return new NativeInterfaces.SpiDevice(device);
 		}
 
-		public async Task<SpiDevice> CreateSpiDeviceAsync(Windows.Devices.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber) {
+		public async Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber) {
 			if (chipSelectPinNumber == SocketPinNumber.Six && masterOutPinNumber == SocketPinNumber.Seven && masterInPinNumber == SocketPinNumber.Eight && clockPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.S))
 				return await this.CreateSpiDeviceAsync(connectionSettings);
 
@@ -216,8 +244,8 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.SerialDeviceCreator != null)
 				return await this.SerialDeviceCreator(this);
 
-			var infos = await Windows.Devices.Enumeration.DeviceInformation.FindAllAsync(Windows.Devices.SerialCommunication.SerialDevice.GetDeviceSelector(this.NativeSerialDeviceId));
-			var device = await Windows.Devices.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
+			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.SerialCommunication.SerialDevice.GetDeviceSelector(this.NativeSerialDeviceId));
+			var device = await WD.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
 
 			return new NativeInterfaces.SerialDevice(device);
 		}

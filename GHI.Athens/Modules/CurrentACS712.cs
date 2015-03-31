@@ -12,7 +12,7 @@ namespace GHI.Athens.Modules {
 
 		private AnalogIO input;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.input = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Five);
 		}
 

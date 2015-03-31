@@ -13,7 +13,7 @@ namespace GHI.Athens.Modules {
 
 		public int Frequency { get; set; } = 25000;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.pwms = new PwmOutput[] {
 				await parentSocket.CreatePwmOutputAsync(SocketPinNumber.Eight),
 				await parentSocket.CreatePwmOutputAsync(SocketPinNumber.Seven)

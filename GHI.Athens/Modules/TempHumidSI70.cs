@@ -24,7 +24,7 @@ namespace GHI.Athens.Modules {
 			this.readBuffer2 = new byte[2];
 		}
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(TempHumidSI70.I2CAddress), SocketPinNumber.Five, SocketPinNumber.Four);
 		}
 

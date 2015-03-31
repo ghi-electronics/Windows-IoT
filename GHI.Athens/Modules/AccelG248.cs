@@ -16,7 +16,7 @@ namespace GHI.Athens.Modules {
 			this.buffer = new byte[1];
 		}
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(AccelG248.I2CAddress));
 			this.i2c.WriteRegister(0x2A, 0x01);
 		}

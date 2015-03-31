@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace GHI.Athens.Gadgeteer {
 	public abstract class Module {
-		private Dictionary<uint, Socket> providedSockets;
+		private Dictionary<uint, ISocket> providedSockets;
 
 		public abstract string Name { get; }
 		public abstract string Manufacturer { get; }
@@ -12,18 +12,18 @@ namespace GHI.Athens.Gadgeteer {
 		public uint ProvidedSockets { get { return (uint)this.providedSockets.Count; } }
 
 		protected Module() {
-			this.providedSockets = new Dictionary<uint, Socket>();
+			this.providedSockets = new Dictionary<uint, ISocket>();
 		}
 
 		protected virtual Task Initialize() {
 			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
-		protected virtual Task Initialize(Socket parentSocket) {
+		protected virtual Task Initialize(ISocket parentSocket) {
 			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
-		protected virtual Task Initialize(params Socket[] parentSockets) {
+		protected virtual Task Initialize(params ISocket[] parentSockets) {
 			throw new InvalidModuleDefinitionException($"This module does not overload the proper {nameof(this.Initialize)} method.");
 		}
 
@@ -35,14 +35,14 @@ namespace GHI.Athens.Gadgeteer {
 			return socket;
 		}
 
-		public Socket GetProvidedSocket(uint socketNumber) {
+		public ISocket GetProvidedSocket(uint socketNumber) {
 			if (!this.providedSockets.ContainsKey(socketNumber))
 				throw new ArgumentException("That socket does not exist.", nameof(socketNumber));
 
 			return this.providedSockets[socketNumber];
 		}
 
-		public static async Task<T> CreateAsync<T>(params Socket[] parentSockets) where T : Module, new() {
+		public static async Task<T> CreateAsync<T>(params ISocket[] parentSockets) where T : Module, new() {
 			var module = new T();
 
 			if (module.RequiredSockets != parentSockets.Length)

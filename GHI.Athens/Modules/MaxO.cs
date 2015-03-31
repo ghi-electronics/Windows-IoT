@@ -18,7 +18,7 @@ namespace GHI.Athens.Modules {
 
 		}
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.boards = 0;
 			this.data = null;
 

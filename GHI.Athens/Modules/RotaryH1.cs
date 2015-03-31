@@ -13,12 +13,12 @@ namespace GHI.Athens.Modules {
 		private DigitalIO enable;
 		private CountMode mode;
 
-		protected Socket socket;
+		protected ISocket socket;
 
 		public override string Name { get; } = "RotaryH1";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.socket = parentSocket;
 
 			this.write1 = new byte[1];

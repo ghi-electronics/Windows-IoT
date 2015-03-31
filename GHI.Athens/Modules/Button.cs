@@ -11,7 +11,7 @@ namespace GHI.Athens.Modules {
 		private DigitalIO inputPin;
 		private DigitalIO outputPin;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);
 			this.outputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
 		}

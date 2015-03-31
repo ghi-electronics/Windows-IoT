@@ -15,7 +15,7 @@ namespace GHI.Athens.Modules {
 
 		private I2CDevice i2c;
 
-		public async Task Initialize(Socket socket) {
+		public async Task Initialize(ISocket socket) {
 			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(this.Address));
 		}
 

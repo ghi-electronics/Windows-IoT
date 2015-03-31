@@ -10,7 +10,7 @@ namespace GHI.Athens.Modules {
 		private AnalogIO input;
 		private DigitalIO enable;
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.input = await parentSocket.CreateAnalogIOAsync(SocketPinNumber.Three);
 			this.enable = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Six, true);
 		}

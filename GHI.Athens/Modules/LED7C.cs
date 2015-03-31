@@ -22,11 +22,12 @@ namespace GHI.Athens.Modules {
 			White
 		}
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.red = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
 			this.green = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Five, false);
 			this.blue = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
 		}
+
 		public void SetColor(Color color) {
 			int c = (int)color;
 

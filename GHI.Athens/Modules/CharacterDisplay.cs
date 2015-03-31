@@ -24,7 +24,7 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "CharacterDisplay";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.lcdRS = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
 			this.lcdE = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
 			this.lcdD4 = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Five, false);

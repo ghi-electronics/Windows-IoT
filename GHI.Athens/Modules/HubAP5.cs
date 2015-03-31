@@ -14,7 +14,7 @@ namespace GHI.Athens.Modules {
 		public override string Name { get; } = "Hub AP5";
 		public override string Manufacturer { get; } = "GHI Electronics, LLC";
 
-		protected async override Task Initialize(Socket parentSocket) {
+		protected async override Task Initialize(ISocket parentSocket) {
 			this.ads = new ADS7830();
 			this.cy8 = new CY8C9560A();
 
