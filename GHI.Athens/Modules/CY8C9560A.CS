@@ -71,7 +71,7 @@ namespace GHI.Athens.Modules {
 			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20));
 
 			this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
-			this.interrupt.ValueChanged += this.OnInterrupt;
+			//this.interrupt.ValueChanged += this.OnInterrupt;
 
 			this.i2c.ReadRegisters(0x08, this.shadowRegisters);
 		}

@@ -25,6 +25,8 @@ namespace GHI.Athens.Modules {
 
 			command[0] |= (byte)((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4);
 
+			this.i2c.WriteRead(command, read);
+
 			return (double)read[0] / 255.0 * 3.3;
 		}
 	}
