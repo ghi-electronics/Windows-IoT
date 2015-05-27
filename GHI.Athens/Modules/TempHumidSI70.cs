@@ -6,9 +6,9 @@ namespace GHI.Athens.Modules {
 	public class TempHumidSI70 : Module {
 		private static byte MeasureHumidityHold { get; } = 0xE5;
 		private static byte ReadTempFromPrevious { get; } = 0xE0;
-		private static byte I2CAddress { get; } = 0x40;
+		private static byte I2cAddress { get; } = 0x40;
 
-		private I2CDevice i2c;
+		private I2cDevice i2c;
 		private byte[] writeBuffer1;
 		private byte[] writeBuffer2;
 		private byte[] readBuffer1;
@@ -25,7 +25,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		protected async override Task Initialize(ISocket parentSocket) {
-			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(TempHumidSI70.I2CAddress), SocketPinNumber.Five, SocketPinNumber.Four);
+			this.i2c = await parentSocket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(TempHumidSI70.I2cAddress), SocketPinNumber.Five, SocketPinNumber.Four);
 		}
 
 		public Measurement TakeMeasurement() {

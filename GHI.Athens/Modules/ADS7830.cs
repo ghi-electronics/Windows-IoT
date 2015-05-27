@@ -13,10 +13,10 @@ namespace GHI.Athens.Modules {
 		public bool A0 { get; set; } = false;
 		public bool A1 { get; set; } = false;
 
-		private I2CDevice i2c;
+		private I2cDevice i2c;
 
 		public async Task Initialize(ISocket socket) {
-			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(this.Address));
+			this.i2c = await socket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(this.Address));
 		}
 
 		public double ReadVoltage(byte channel) {

@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace GHI.Athens.Modules {
 	public class AccelG248 : Module {
-		private static byte I2CAddress { get; } = 0x1C;
+		private static byte I2cAddress { get; } = 0x1C;
 
-		private I2CDevice i2c;
+		private I2cDevice i2c;
 		private byte[] buffer;
 
 		public override string Name { get; } = "AccelG248";
@@ -17,7 +17,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		protected async override Task Initialize(ISocket parentSocket) {
-			this.i2c = await parentSocket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(AccelG248.I2CAddress));
+			this.i2c = await parentSocket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(AccelG248.I2cAddress));
 			this.i2c.WriteRegister(0x2A, 0x01);
 		}
 

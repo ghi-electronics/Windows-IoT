@@ -44,7 +44,7 @@ namespace GHI.Athens.Gadgeteer {
 		IReadOnlyCollection<SocketType> SupportedTypes { get; }
 		IReadOnlyDictionary<SocketPinNumber, int> Pins { get; }
 
-		string NativeI2CDeviceId { get; }
+		string NativeI2cDeviceId { get; }
 		string NativeSpiDeviceId { get; }
 		string NativeSerialDeviceId { get; }
 		string NativeCanDeviceId { get; }
@@ -58,8 +58,8 @@ namespace GHI.Athens.Gadgeteer {
 		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber);
 		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber, double initialVoltage);
 		Task<PwmOutput> CreatePwmOutputAsync(SocketPinNumber pinNumber);
-		Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings);
-		Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber);
+		Task<I2cDevice> CreateI2cDeviceAsync(WD.I2c.I2cConnectionSettings connectionSettings);
+		Task<I2cDevice> CreateI2cDeviceAsync(WD.I2c.I2cConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber);
 		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings);
 		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber);
 		Task<SerialDevice> CreateSerialDeviceAsync();
@@ -98,7 +98,7 @@ namespace GHI.Athens.Gadgeteer {
 		public IReadOnlyCollection<SocketType> SupportedTypes { get { return this.supportedTypes.ToList(); } }
 		public IReadOnlyDictionary<SocketPinNumber, int> Pins { get { return this.nativePins; } }
 
-		public string NativeI2CDeviceId { get; set; }
+		public string NativeI2cDeviceId { get; set; }
 		public string NativeSpiDeviceId { get; set; }
 		public string NativeSerialDeviceId { get; set; }
 		public string NativeCanDeviceId { get; set; }
@@ -108,13 +108,13 @@ namespace GHI.Athens.Gadgeteer {
 		public DigitalIOCreator DigitalIOCreator { get; set; }
 		public AnalogIOCreator AnalogIOCreator { get; set; }
 		public PwmOutputCreator PwmOutputCreator { get; set; }
-		public I2CDeviceCreator I2CDeviceCreator { get; set; }
+		public I2cDeviceCreator I2cDeviceCreator { get; set; }
 		public SpiDeviceCreator SpiDeviceCreator { get; set; }
 		public SerialDeviceCreator SerialDeviceCreator { get; set; }
 		public CanDeviceCreator CanDeviceCreator { get; set; }
 
-		private async Task<WD.Gpio.GpioPin> CreatePin(int pinNumber) {
-			return (await WD.Gpio.GpioController.GetDefaultAsync()).OpenPin(pinNumber);
+		private WD.Gpio.GpioPin CreatePin(int pinNumber) {
+			return WD.Gpio.GpioController.GetDefault().OpenPin(pinNumber);
 		}
 
 		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber) {
@@ -126,7 +126,7 @@ namespace GHI.Athens.Gadgeteer {
 				result = await this.DigitalIOCreator(this, pinNumber);
 			}
 			else {
-				result = new NativeInterfaces.DigitalIO(await this.CreatePin(this.Pins[pinNumber]));
+				result = new NativeInterfaces.DigitalIO(this.CreatePin(this.Pins[pinNumber]));
 			}
 
 			result.DriveMode = WD.Gpio.GpioPinDriveMode.Input;
@@ -186,29 +186,29 @@ namespace GHI.Athens.Gadgeteer {
 			return new NativeInterfaces.PwmOutput();
 		}
 
-		public async Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings) {
+		public async Task<I2cDevice> CreateI2cDeviceAsync(WD.I2c.I2cConnectionSettings connectionSettings) {
 			if (this.IsTypeSupported(SocketType.Y) && !this.IsTypeSupported(SocketType.I))
-				return await this.CreateI2CDeviceAsync(connectionSettings, SocketPinNumber.Eight, SocketPinNumber.Nine);
+				return await this.CreateI2cDeviceAsync(connectionSettings, SocketPinNumber.Eight, SocketPinNumber.Nine);
 
 			this.EnsureTypeIsSupported(SocketType.I);
 
-			if (this.I2CDeviceCreator != null)
-				return await this.I2CDeviceCreator(this);
+			if (this.I2cDeviceCreator != null)
+				return await this.I2cDeviceCreator(this);
 
-			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.I2C.I2CBus.GetDeviceSelector(this.NativeI2CDeviceId));
-			var device = await WD.I2C.I2CBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
+			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.I2c.I2cDevice.GetDeviceSelector(this.NativeI2cDeviceId));
+			var device = await WD.I2c.I2cDevice.FromIdAsync(infos[0].Id, connectionSettings);
 
-			return new NativeInterfaces.I2CDevice(device);
+			return new NativeInterfaces.I2cDevice(device);
 		}
 
-		public async Task<I2CDevice> CreateI2CDeviceAsync(WD.I2C.I2CConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber) {
+		public async Task<I2cDevice> CreateI2cDeviceAsync(WD.I2c.I2cConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber) {
 			if (sdaPinNumber == SocketPinNumber.Eight && sclPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.I))
-				return await this.CreateI2CDeviceAsync(connectionSettings);
+				return await this.CreateI2cDeviceAsync(connectionSettings);
 
 			var sda = await this.CreateDigitalIOAsync(sdaPinNumber);
 			var scl = await this.CreateDigitalIOAsync(sclPinNumber);
 
-			return new SoftwareInterfaces.I2CDevice(sda, scl, connectionSettings);
+			return new SoftwareInterfaces.I2cDevice(sda, scl, connectionSettings);
 		}
 
 		public async Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings) {
@@ -220,8 +220,8 @@ namespace GHI.Athens.Gadgeteer {
 			if (this.SpiDeviceCreator != null)
 				return await this.SpiDeviceCreator(this);
 
-			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.Spi.SpiBus.GetDeviceSelector(this.NativeSpiDeviceId));
-			var device = await WD.Spi.SpiBus.CreateDeviceAsync(infos[0].Id, connectionSettings);
+			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.Spi.SpiDevice.GetDeviceSelector(this.NativeSpiDeviceId));
+			var device = await WD.Spi.SpiDevice.FromIdAsync(infos[0].Id, connectionSettings);
 
 			return new NativeInterfaces.SpiDevice(device);
 		}

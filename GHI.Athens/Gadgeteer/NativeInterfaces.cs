@@ -63,10 +63,10 @@ namespace GHI.Athens.Gadgeteer.NativeInterfaces {
 		}
 	}
 
-	internal class I2CDevice : SocketInterfaces.I2CDevice {
-		private WD.I2C.I2CDevice device;
+	internal class I2cDevice : SocketInterfaces.I2cDevice {
+		private WD.I2c.I2cDevice device;
 
-        internal I2CDevice(WD.I2C.I2CDevice device) {
+        internal I2cDevice(WD.I2c.I2cDevice device) {
 			this.device = device;
 		}
 

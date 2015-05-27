@@ -38,7 +38,7 @@ namespace GHI.Athens.Modules {
 			//DNP'd socket.SetNativePin(SocketPinNumber.Five, 1);
 			socket.SetNativePin(SocketPinNumber.Six, 2);
 			socket.SetNativePin(SocketPinNumber.Seven, 5);
-			socket.NativeI2CDeviceId = "I2C5";
+			socket.NativeI2cDeviceId = "I2C5";
 			socket.AnalogIOCreator = (s, p) => Task.FromResult<AnalogIO>(new IndirectedAnalogIO(p, this.ads));
 
 			await this.ads.Initialize(this.GetProvidedSocket(3));

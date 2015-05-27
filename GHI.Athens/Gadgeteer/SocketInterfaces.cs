@@ -7,7 +7,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 	public delegate Task<DigitalIO> DigitalIOCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<AnalogIO> AnalogIOCreator(Socket socket, SocketPinNumber pinNumber);
 	public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);
-	public delegate Task<I2CDevice> I2CDeviceCreator(Socket socket);
+	public delegate Task<I2cDevice> I2cDeviceCreator(Socket socket);
 	public delegate Task<SpiDevice> SpiDeviceCreator(Socket socket);
 	public delegate Task<SerialDevice> SerialDeviceCreator(Socket socket);
 	public delegate Task<CanDevice> CanDeviceCreator(Socket socket);
@@ -175,7 +175,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 		}
 	}
 
-	public abstract class I2CDevice {
+	public abstract class I2cDevice {
 		private byte[] write1;
 		private byte[] write2;
 		private byte[] read1;
@@ -184,7 +184,7 @@ namespace GHI.Athens.Gadgeteer.SocketInterfaces {
 		public abstract void Read(byte[] buffer);
 		public abstract void WriteRead(byte[] writeBuffer, byte[] readBuffer);
 
-		protected I2CDevice() {
+		protected I2cDevice() {
 			this.write1 = new byte[1];
 			this.write2 = new byte[2];
 			this.read1 = new byte[1];

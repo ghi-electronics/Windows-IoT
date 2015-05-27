@@ -59,7 +59,7 @@ namespace GHI.Athens.Modules {
 			}
 		}
 
-		private I2CDevice i2c;
+		private I2cDevice i2c;
 		private DigitalIO interrupt;
 		private Dictionary<Pin, Action<bool>> interruptRegistrations;
 		private byte[] shadowRegisters;
@@ -68,7 +68,7 @@ namespace GHI.Athens.Modules {
 			this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
 			//this.shadowRegisters = new byte[0x2D - 0x08];
 
-			this.i2c = await socket.CreateI2CDeviceAsync(new Windows.Devices.I2C.I2CConnectionSettings(0x20));
+			this.i2c = await socket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(0x20));
 
 			//this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
 			//this.interrupt.ValueChanged += this.OnInterrupt;
@@ -181,15 +181,15 @@ namespace GHI.Athens.Modules {
         }
 
 		private byte ReadRegister(Register register) {
-			if (this.IsShadowed(register))
-                return this.shadowRegisters[(int)register - 0x08];
+			//if (this.IsShadowed(register))
+            //    return this.shadowRegisters[(int)register - 0x08];
 
 			return this.i2c.ReadRegister((byte)register);
 		}
 
 		private void WriteRegister(Register register, int value) {
-			if (this.IsShadowed(register))
-				this.shadowRegisters[(int)register - 0x08] = (byte)value;
+			//if (this.IsShadowed(register))
+			//	this.shadowRegisters[(int)register - 0x08] = (byte)value;
 
 			this.i2c.WriteRegister((byte)register, (byte)value);
 		}

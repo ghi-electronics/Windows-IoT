@@ -22,7 +22,7 @@ namespace GHI.Athens.Modules {
 			this.boards = 0;
 			this.data = null;
 
-			this.spi = await parentSocket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(0) { Mode = Windows.Devices.Spi.SpiMode.Mode2, ClockInHz = 1000 });
+			this.spi = await parentSocket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(0) { Mode = Windows.Devices.Spi.SpiMode.Mode2, ClockFrequency = 1000 });
 			this.enable = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, false);
 			this.clr = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, true);
 		}
