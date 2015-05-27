@@ -127,6 +127,7 @@
     <Compile Include="Modules\CurrentACS712.cs" />
     <Compile Include="Modules\Joystick.cs" />
     <Compile Include="Modules\CharacterDisplay.cs" />
+    <Compile Include="Modules\PCA9685.cs" />
     <Compile Include="Modules\RotaryH1.cs" />
     <Compile Include="Modules\PulseCount.cs" />
     <Compile Include="Modules\Moisture.cs" />
