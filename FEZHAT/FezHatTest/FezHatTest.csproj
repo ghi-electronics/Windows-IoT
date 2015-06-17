@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{EDFA7455-26EE-4A13-9C53-61E2C9E0F2F5}</ProjectGuid>
+    <ProjectGuid>{3024D152-0599-44EC-A7D2-0C78B2354125}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>FezHatTest</RootNamespace>
@@ -148,9 +148,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\FezHat\FezHat.csproj">
-      <Project>{27cb34e9-343a-4f8c-b962-0daaf783c9bf}</Project>
-      <Name>FezHat</Name>
+    <ProjectReference Include="..\FEZHat\FEZHat.csproj">
+      <Project>{b9a8fc62-69ba-4b85-95d5-5933af411562}</Project>
+      <Name>FEZHat</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

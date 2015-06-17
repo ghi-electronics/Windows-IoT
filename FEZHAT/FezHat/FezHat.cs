@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
@@ -8,20 +9,19 @@ public class FezHat
 {
     private static PCA9685 pwm;
     private static I2cDevice adc;
-    private static I2cDevice si7020;
     private static I2cDevice accelerometer;
     private static GpioPin onBoardLedPin;
     private static GpioPin dcMotorStandbyPin;
-    private static GpioPin[] dcMotorInput1 = new GpioPin[2];
-    private static GpioPin[] dcMotorInput2 = new GpioPin[2];
-    private static GpioPin button1Pin;
-    private static GpioPin button2Pin;
+    private static Dictionary<int, GpioPin> dcMotorInput1 = new Dictionary<int, GpioPin>();
+    private static Dictionary<int, GpioPin> dcMotorInput2 = new Dictionary<int, GpioPin>();
+    private static Dictionary<int, GpioPin> buttons = new Dictionary<int, GpioPin>();
 
     /// <summary>
     /// Initializes the FEZ Hat's features.
     /// </summary>
     /// <returns></returns>
-    public static async Task Initialize() {
+    public static async Task Initialize()
+    {
         var gpioController = GpioController.GetDefault();
         var i2cControllers = await DeviceInformation.FindAllAsync(I2cDevice.GetDeviceSelector("I2C1"));
 
@@ -32,10 +32,6 @@ public class FezHat
         // ADC
         settings = new I2cConnectionSettings(0x48) { BusSpeed = I2cBusSpeed.StandardMode };
         adc = await I2cDevice.FromIdAsync(i2cControllers[0].Id, settings);
-
-        // SI7020 - Humidity & Temperature
-        settings = new I2cConnectionSettings(0x40) { BusSpeed = I2cBusSpeed.StandardMode };
-        si7020 = await I2cDevice.FromIdAsync(i2cControllers[0].Id, settings);
 
         // MMA8453Q - Accelerometer
         settings = new I2cConnectionSettings(0x1C) { BusSpeed = I2cBusSpeed.StandardMode };
@@ -54,32 +50,38 @@ public class FezHat
         dcMotorStandbyPin.Write(GpioPinValue.High);
 
         // A
-        dcMotorInput1[0] = gpioController.OpenPin(27);
-        dcMotorInput1[0].SetDriveMode(GpioPinDriveMode.Output);
-        dcMotorInput2[0] = gpioController.OpenPin(23);
-        dcMotorInput2[0].SetDriveMode(GpioPinDriveMode.Output);
+        dcMotorInput1.Add(14, gpioController.OpenPin(27));
+        dcMotorInput1[14].SetDriveMode(GpioPinDriveMode.Output);
+
+        dcMotorInput2.Add(14, gpioController.OpenPin(23));
+        dcMotorInput2[14].SetDriveMode(GpioPinDriveMode.Output);
+
         DCMotor.SetDirection(DCMotorID.A, DCMotor.Direction.Clockwise);
 
         // B
-        dcMotorInput1[1] = gpioController.OpenPin(6);
-        dcMotorInput1[1].SetDriveMode(GpioPinDriveMode.Output);
-        dcMotorInput2[1] = gpioController.OpenPin(5);
-        dcMotorInput2[1].SetDriveMode(GpioPinDriveMode.Output);
+        dcMotorInput1.Add(13, gpioController.OpenPin(6));
+        dcMotorInput1[13].SetDriveMode(GpioPinDriveMode.Output);
+
+        dcMotorInput2.Add(13, gpioController.OpenPin(5));
+        dcMotorInput2[13].SetDriveMode(GpioPinDriveMode.Output);
+
         DCMotor.SetDirection(DCMotorID.B, DCMotor.Direction.Clockwise);
 
         // Buttons
-        button1Pin = gpioController.OpenPin(18);
-        button2Pin = gpioController.OpenPin(22);
+        buttons.Add(18, gpioController.OpenPin(18));
+        buttons.Add(22, gpioController.OpenPin(22));
     }
 
     /// <summary>
     /// Provides different colors for the LED.
     /// </summary>
-    public class Color {
+    public class Color
+    {
         /// <summary>
         /// Palette of colors.
         /// </summary>
-        public enum Palette : ushort {
+        public enum Palette : ushort
+        {
             Black = 0,
             Blue = 31,
             Cyan = 2047,
@@ -98,7 +100,8 @@ public class FezHat
         /// </summary>
         /// <param name="color">Palette color.</param>
         /// <returns>The Red, Green and Blue values.</returns>
-        public static byte[] RgbFromPalette(Color.Palette color) {
+        public static byte[] RgbFromPalette(Color.Palette color)
+        {
             var ushortColor = (ushort)color;
             var red = (byte)(((ushortColor & 0xF800) >> 11) * 8);
             var green = (byte)(((ushortColor & 0x7E0) >> 5) * 4);
@@ -111,18 +114,21 @@ public class FezHat
         /// </summary>
         /// <param name="color">Palette color.</param>
         /// <returns>Windows UI color.</returns>
-        public static Windows.UI.Color UIColorFromPalette(Color.Palette color) {
+        public static Windows.UI.Color UIColorFromPalette(Color.Palette color)
+        {
             byte[] rgb = RgbFromPalette(color);
             return Windows.UI.Color.FromArgb(255, rgb[0], rgb[1], rgb[2]);
         }
     }
 
-    private class RgbLed {
+    private class RgbLed
+    {
         public int RedPin { get; set; }
         public int GreenPin { get; set; }
         public int BluePin { get; set; }
 
-        public RgbLed(int redPin, int greenPin, int bluePin) {
+        public RgbLed(int redPin, int greenPin, int bluePin)
+        {
             RedPin = redPin;
             GreenPin = greenPin;
             BluePin = bluePin;
@@ -132,7 +138,8 @@ public class FezHat
     /// <summary>
     /// LED identifier.
     /// </summary>
-    public enum LedID {
+    public enum LedID
+    {
         D2 = 0,
         D3,
         DIO24
@@ -146,10 +153,12 @@ public class FezHat
         private static RgbLed[] leds = new RgbLed[2];
         private static Color.Palette color;
 
-        private static void Init() {
-            if (leds[0] == null) {
-                leds[0] = new RgbLed(1, 2, 0);
-                leds[1] = new RgbLed(4, 15, 3);
+        private static void Init()
+        {
+            if (leds[0] == null)
+            {
+                leds[0] = new RgbLed(1, 0, 2);
+                leds[1] = new RgbLed(4, 3, 15);
             }
         }
 
@@ -157,18 +166,22 @@ public class FezHat
         /// Turn on an LED.
         /// </summary>
         /// <param name="id">LED identifier.</param>
-        public static void TurnOn(LedID id) {
-            if (id == LedID.DIO24) {
+        public static void TurnOn(LedID id)
+        {
+            if (id == LedID.DIO24)
+            {
                 onBoardLedPin.Write(GpioPinValue.High);
-            } else {
+            }
+            else
+            {
                 Init();
 
                 RgbLed led = leds[(int)id];
 
                 var rgb = Color.RgbFromPalette(color);
-                var red = Math.Abs((rgb[0] / 255.0) - .99999);
-                var green = Math.Abs((rgb[1] / 255.0) - .99999);
-                var blue = Math.Abs((rgb[2] / 255.0) - .99999);
+                var red = rgb[0] / 255.0;
+                var green = rgb[1] / 255.0;
+                var blue = rgb[2] / 255.0;
 
                 pwm.SetDutyCycle(led.RedPin, red);
                 pwm.SetDutyCycle(led.GreenPin, green);
@@ -181,7 +194,8 @@ public class FezHat
         /// </summary>
         /// <param name="id">LED identifier.</param>
         /// <param name="color">Color to use.</param>
-        public static void TurnOn(LedID id, Color.Palette color) {
+        public static void TurnOn(LedID id, Color.Palette color)
+        {
             Led.color = color;
             TurnOn(id);
         }
@@ -189,7 +203,8 @@ public class FezHat
         /// <summary>
         /// Turn off all LEDs.
         /// </summary>
-        public static void TurnOffAll() {
+        public static void TurnOffAll()
+        {
             TurnOff(LedID.D2);
             TurnOff(LedID.D3);
             TurnOff(LedID.DIO24);
@@ -201,9 +216,12 @@ public class FezHat
         /// <param name="id">LED identifier.</param>
         public static void TurnOff(LedID id)
         {
-            if (id == LedID.DIO24) {
+            if (id == LedID.DIO24)
+            {
                 onBoardLedPin.Write(GpioPinValue.Low);
-            } else {
+            }
+            else
+            {
                 Init();
 
                 pwm.TurnOff(leds[(int)id].RedPin);
@@ -217,11 +235,13 @@ public class FezHat
     /// <summary>
     /// Handles the PWM driver chip.
     /// </summary>
-    public static class Pwm {
+    public static class Pwm
+    {
         /// <summary>
         /// Sets the PWM's frequency.
         /// </summary>
-        public static int Frequency {
+        public static int Frequency
+        {
             get { return pwm.Frequency; }
             set { pwm.Frequency = value; }
         }
@@ -229,7 +249,8 @@ public class FezHat
         /// <summary>
         /// Turns output enabled on or off.
         /// </summary>
-        public static bool OutputEnabled {
+        public static bool OutputEnabled
+        {
             get { return pwm.OutputEnabled; }
             set { pwm.OutputEnabled = value; }
         }
@@ -239,7 +260,8 @@ public class FezHat
         /// </summary>
         /// <param name="channel">Channel to set.</param>
         /// <param name="dutyCycle">Duty cycle to use.</param>
-        public static void SetDutyCycle(int channel, double dutyCycle) {
+        public static void SetDutyCycle(int channel, double dutyCycle)
+        {
             pwm.SetDutyCycle(channel, dutyCycle);
         }
 
@@ -247,7 +269,8 @@ public class FezHat
         /// Turn a channel on.
         /// </summary>
         /// <param name="channel">The channel to turn on.</param>
-        public static void TurnOn(int channel) {
+        public static void TurnOn(int channel)
+        {
             pwm.TurnOn(channel);
         }
 
@@ -255,7 +278,8 @@ public class FezHat
         /// Turn a channel off.
         /// </summary>
         /// <param name="channel">The channel to turn off.</param>
-        public static void TurnOff(int channel) {
+        public static void TurnOff(int channel)
+        {
             pwm.TurnOff(channel);
         }
     }
@@ -263,20 +287,17 @@ public class FezHat
     /// <summary>
     /// Servo motor identifier.
     /// </summary>
-    public enum ServoMotorID : int {
-        // New
-        //S1 = 9,
-        //S2 = 10
-        // Old
-        S1 = 8,
-        S2 = 9,
-        S3 = 10
+    public enum ServoMotorID : int
+    {
+        S1 = 9,
+        S2 = 10
     }
 
     /// <summary>
     /// Controls the servo motors.
     /// </summary>
-    public static class ServoMotor {
+    public static class ServoMotor
+    {
         private static int frequency;
         private static double minAngle;
         private static double maxAngle;
@@ -289,7 +310,8 @@ public class FezHat
         /// <param name="maxPulseWidth">Maximum pulse width.</param>
         /// <param name="minAngle">Minimum angle.</param>
         /// <param name="maxAngle">Maximum angle.</param>
-        public static void Setup(int frequency, int minPulseWidth, int maxPulseWidth, double minAngle, double maxAngle) {
+        public static void Setup(int frequency, int minPulseWidth, int maxPulseWidth, double minAngle, double maxAngle)
+        {
             ServoMotor.frequency = frequency;
             ServoMotor.minAngle = minAngle;
             ServoMotor.maxAngle = maxAngle;
@@ -303,7 +325,8 @@ public class FezHat
         /// </summary>
         /// <param name="id">Servo motor identifier.</param>
         /// <param name="angle">The angle to use.</param>
-        public static void SetPosition(ServoMotorID id, double angle) {
+        public static void SetPosition(ServoMotorID id, double angle)
+        {
             if (angle < minAngle || angle > maxAngle) throw new Exception(nameof(angle) + " must be a value between " + minAngle + " and " + maxAngle + ".");
 
             pwm.Frequency = frequency;
@@ -314,7 +337,8 @@ public class FezHat
         /// Stop the servo motor from moving.
         /// </summary>
         /// <param name="id">Servo motor identifier.</param>
-        public static void Stop(ServoMotorID id) {
+        public static void Stop(ServoMotorID id)
+        {
             pwm.TurnOff((int)id);
         }
     }
@@ -322,7 +346,8 @@ public class FezHat
     /// <summary>
     /// DC motor identifier.
     /// </summary>
-    public enum DCMotorID : int {
+    public enum DCMotorID : int
+    {
         A = 14,
         B = 13
     }
@@ -330,21 +355,28 @@ public class FezHat
     /// <summary>
     /// Controls the DC motors.
     /// </summary>
-    public static class DCMotor {
+    public static class DCMotor
+    {
         private static int frequency = 60;
+        private static Dictionary<int, bool> rotating = new Dictionary<int, bool> {
+            { 14, false },
+            { 13, false }
+        };
 
         /// <summary>
         /// Frequency used by the DC motor.
         /// </summary>
-        public static int Frequency {
+        public static int Frequency
+        {
             set { frequency = pwm.Frequency = value; }
             get { return frequency; }
-        };
+        }
 
         /// <summary>
         /// Direction the motor may rotate.
         /// </summary>
-        public enum Direction {
+        public enum Direction
+        {
             Clockwise,
             CounterClockwise
         }
@@ -355,7 +387,8 @@ public class FezHat
         /// <param name="id">DC motor identifier.</param>
         /// <param name="direction">Clockwise or Counter-Clockwise.</param>
         /// <param name="speed">How fast to rotate.</param>
-        public static void SetRotation(DCMotorID id, Direction direction, double speed) {
+        public static void SetRotation(DCMotorID id, Direction direction, double speed)
+        {
             SetSpeed(id, speed);
             SetDirection(id, direction);
         }
@@ -365,9 +398,16 @@ public class FezHat
         /// </summary>
         /// <param name="id">DC motor identifier.</param>
         /// <param name="speed">The speed to use.</param>
-        public static void SetSpeed(DCMotorID id, double speed) {
+        public static void SetSpeed(DCMotorID id, double speed)
+        {
+            Stop(id);
+
             pwm.Frequency = frequency;
+
+            // This also turns the PWM on
             pwm.SetDutyCycle((int)id, speed);
+
+            rotating[(int)id] = true;
         }
 
         /// <summary>
@@ -375,32 +415,41 @@ public class FezHat
         /// </summary>
         /// <param name="id">DC motor identifier.</param>
         /// <param name="direction">The direction to use.</param>
-        public static void SetDirection(DCMotorID id, Direction direction) {
+        public static void SetDirection(DCMotorID id, Direction direction)
+        {
+            bool wasRotating = rotating[(int)id];
+
+            Stop(id);
+
             pwm.Frequency = frequency;
 
-            var i = (id == DCMotorID.A) ? 0 : 1;
+            dcMotorInput1[(int)id].Write((direction == Direction.Clockwise) ? GpioPinValue.High : GpioPinValue.Low);
+            dcMotorInput2[(int)id].Write((direction == Direction.Clockwise) ? GpioPinValue.Low : GpioPinValue.High);
 
-            if (direction == Direction.Clockwise) {
-                dcMotorInput1[i].Write(GpioPinValue.High);
-                dcMotorInput2[i].Write(GpioPinValue.Low);
-            } else {
-                dcMotorInput1[i].Write(GpioPinValue.Low);
-                dcMotorInput2[i].Write(GpioPinValue.High);
-            }
+            if (wasRotating)
+                Start(id);
+        }
+
+        private static void Start(DCMotorID id)
+        {
+            pwm.TurnOn((int)id);
         }
 
         /// <summary>
         /// Stop a motor from rotating.
         /// </summary>
         /// <param name="id">DC motor identifier.</param>
-        public static void Stop(DCMotorID id) {
+        public static void Stop(DCMotorID id)
+        {
             pwm.TurnOff((int)id);
+            rotating[(int)id] = false;
         }
 
         /// <summary>
         /// Stop all motors from rotating.
         /// </summary>
-        public static void StopAll() {
+        public static void StopAll()
+        {
             Stop(DCMotorID.A);
             Stop(DCMotorID.B);
         }
@@ -409,12 +458,14 @@ public class FezHat
     /// <summary>
     /// Reads the light sensor.
     /// </summary>
-    public static class LightSensor {
+    public static class LightSensor
+    {
         /// <summary>
         /// Get the brightness level.
         /// </summary>
         /// <returns>The brightness level between 0 and 1; 0 being no light and 1 being full brightness.</returns>
-        public static double GetLevel() {
+        public static double GetLevel()
+        {
             return ReadAnalogByChannel(adc, 5);
         }
     }
@@ -422,32 +473,33 @@ public class FezHat
     /// <summary>
     /// Reads the temperature and humidity.
     /// </summary>
-    public static class Weather {
-        private static double temperature;
-        private static double humidity;
-
+    public static class Weather
+    {
         /// <summary>
         /// What scale to use to measure the temperature.
         /// </summary>
-        public enum TemperatureScale {
+        public enum TemperatureScale
+        {
             Celsius,
             Fahrenheit
         }
 
         /// <summary>
-        /// Get the analog temperature in Celsius.
+        /// Get the temperature in Celsius.
         /// </summary>
         /// <returns>Temperature in Celsius.</returns>
-        public static double GetAnalogTemp() {
-            return GetAnalogTemp(TemperatureScale.Celsius);
+        public static double GetTemperature()
+        {
+            return GetTemperature(TemperatureScale.Celsius);
         }
 
         /// <summary>
-        /// Get the analog temperature.
+        /// Get the temperature.
         /// </summary>
         /// <param name="scale">Celsius or Fahrenheit.</param>
         /// <returns>The temperature in the desired scale.</returns>
-        public static double GetAnalogTemp(TemperatureScale scale) {
+        public static double GetTemperature(TemperatureScale scale)
+        {
             var mv = ReadAnalogByChannel(adc, 4) * 3300;
             var celsius = (mv - 450.0) / 19.5;
 
@@ -456,65 +508,15 @@ public class FezHat
             else
                 return (celsius * 1.8) + 32;
         }
-
-        /// <summary>
-        /// Get the temperature from the SI7020 chip in Celsius.
-        /// </summary>
-        /// <returns>Temperature in Celsius.</returns>
-        public static double GetSI7020Temp() {
-            return GetSI7020Temp(TemperatureScale.Celsius);
-        }
-
-        /// <summary>
-        /// Get the temperature from the SI7020 chip.
-        /// </summary>
-        /// <param name="scale">Celsius or Fahrenheit.</param>
-        /// <returns>The temperature in the desired scale.</returns>
-        public static double GetSI7020Temp(TemperatureScale scale) {
-            ReadSI7020();
-
-            if (scale == TemperatureScale.Celsius)
-                return temperature;
-            else
-                return (temperature * 1.8) + 32;
-        }
-
-        /// <summary>
-        /// Get the humidity from the SI7020 chip.
-        /// </summary>
-        /// <returns>Humidity</returns>
-        public static double GetHumidity() {
-            ReadSI7020();
-            return humidity;
-        }
-
-        private static void ReadSI7020() {
-            byte[] writeBuffer1 = new byte[1] { 0xE5 };
-            byte[] writeBuffer2 = new byte[1] { 0xE0 };
-            byte[] readBuffer1 = new byte[2];
-            byte[] readBuffer2 = new byte[2];
-
-            si7020.WriteRead(writeBuffer1, readBuffer1);
-            si7020.WriteRead(writeBuffer2, readBuffer2);
-
-            var rawRH = readBuffer1[0] << 8 | readBuffer1[1];
-            var rawTemp = readBuffer2[0] << 8 | readBuffer2[1];
-
-            temperature = 175.72 * rawTemp / 65536.0 - 46.85;
-            humidity = 125.0 * rawRH / 65536.0 - 6.0;
-
-            if (humidity < 0.0)
-                humidity = 0.0;
-            if (humidity > 100.0)
-                humidity = 100.0;
-        }
     }
 
     /// <summary>
     /// Reads the accelerometer.
     /// </summary>
-    public static class Accelerometer {
-        private static double ReadAxis(byte register) {
+    public static class Accelerometer
+    {
+        private static double ReadAxis(byte register)
+        {
             byte[] data = new byte[2];
             accelerometer.WriteRead(new byte[1] { register }, data);
 
@@ -530,7 +532,8 @@ public class FezHat
         /// Reads the X axis.
         /// </summary>
         /// <returns>Value representing the X axis.</returns>
-        public static double ReadX() {
+        public static double ReadX()
+        {
             return ReadAxis(0x1);
         }
 
@@ -538,7 +541,8 @@ public class FezHat
         /// Reads the Y axis.
         /// </summary>
         /// <returns>Value representing the Y axis.</returns>
-        public static double ReadY() {
+        public static double ReadY()
+        {
             return ReadAxis(0x3);
         }
 
@@ -546,7 +550,8 @@ public class FezHat
         /// Reads the Z axis.
         /// </summary>
         /// <returns>Value representing the Z axis.</returns>
-        public static double ReadZ() {
+        public static double ReadZ()
+        {
             return ReadAxis(0x5);
         }
     }
@@ -554,35 +559,46 @@ public class FezHat
     /// <summary>
     /// Button identifier.
     /// </summary>
-    public enum ButtonID {
-        DIO18 = 0,
-        DIO22
+    public enum ButtonID
+    {
+        DIO18 = 18,
+        DIO22 = 22
     }
 
     /// <summary>
     /// Handles the button interaction.
     /// </summary>
-    public static class Button {
+    public static class Button
+    {
         private static bool initialized = false;
-        private static bool[] pressed = new bool[] { false, false };
+        private static Dictionary<int, bool> pressed = new Dictionary<int, bool>() {
+            { 18, false },
+            { 22, false }
+        };
 
-        private static void Initalize() {
-            if (!initialized) {
-                if (button1Pin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
-                    button1Pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+        private static void Initalize()
+        {
+            if (!initialized)
+            {
+                // DIO18
+
+                if (buttons[18].IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+                    buttons[18].SetDriveMode(GpioPinDriveMode.InputPullUp);
                 else
-                    button1Pin.SetDriveMode(GpioPinDriveMode.Input);
+                    buttons[18].SetDriveMode(GpioPinDriveMode.Input);
 
-                button1Pin.DebounceTimeout = TimeSpan.FromMilliseconds(50);
-                button1Pin.ValueChanged += button1Pin_ValueChanged;
+                buttons[18].DebounceTimeout = TimeSpan.FromMilliseconds(50);
+                buttons[18].ValueChanged += button1Pin_ValueChanged;
 
-                if (button2Pin.IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
-                    button2Pin.SetDriveMode(GpioPinDriveMode.InputPullUp);
+                // DIO22
+
+                if (buttons[22].IsDriveModeSupported(GpioPinDriveMode.InputPullUp))
+                    buttons[22].SetDriveMode(GpioPinDriveMode.InputPullUp);
                 else
-                    button2Pin.SetDriveMode(GpioPinDriveMode.Input);
-                
-                button2Pin.DebounceTimeout = TimeSpan.FromMilliseconds(50);
-                button2Pin.ValueChanged += button2Pin_ValueChanged;
+                    buttons[22].SetDriveMode(GpioPinDriveMode.Input);
+
+                buttons[22].DebounceTimeout = TimeSpan.FromMilliseconds(50);
+                buttons[22].ValueChanged += button2Pin_ValueChanged;
 
                 initialized = true;
             }
@@ -593,25 +609,30 @@ public class FezHat
         /// </summary>
         /// <param name="id">Button identifier.</param>
         /// <returns>True if the button is pressed, otherwise false.</returns>
-        public static bool IsPressed(ButtonID id) {
+        public static bool IsPressed(ButtonID id)
+        {
             Initalize();
             return pressed[(int)id];
         }
 
-        private static void button1Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args) {
-            pressed[0] = (args.Edge == GpioPinEdge.FallingEdge);
+        private static void button1Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        {
+            pressed[sender.PinNumber] = (args.Edge == GpioPinEdge.FallingEdge);
         }
 
-        private static void button2Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args) {
-            pressed[1] = (args.Edge == GpioPinEdge.FallingEdge);
+        private static void button2Pin_ValueChanged(GpioPin sender, GpioPinValueChangedEventArgs args)
+        {
+            pressed[sender.PinNumber] = (args.Edge == GpioPinEdge.FallingEdge);
         }
     }
 
     /// <summary>
     /// Expansion header pins.
     /// </summary>
-    public static class Expansion {
-        public enum Pin : int {
+    public static class Expansion
+    {
+        public enum Pin : int
+        {
             /// <summary>
             /// Digital Input/Output (channel 0)
             /// </summary>
@@ -674,8 +695,10 @@ public class FezHat
     /// <summary>
     /// Terminal block header pins.
     /// </summary>
-    public static class TerminalBlock {
-        public enum Pin : int {
+    public static class TerminalBlock
+    {
+        public enum Pin : int
+        {
             /// <summary>
             /// Analog In (channel 6)
             /// </summary>
@@ -703,7 +726,8 @@ public class FezHat
         }
     }
 
-    private static double ReadAnalogByChannel(I2cDevice device, int channel) {
+    private static double ReadAnalogByChannel(I2cDevice device, int channel)
+    {
         if (channel < 0 || channel > 7) throw new ArgumentOutOfRangeException(nameof(channel));
 
         byte[] write = new byte[1] { (byte)(0x80 | 0x0C) };

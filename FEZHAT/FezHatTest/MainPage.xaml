@@ -8,8 +8,6 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <FlyoutBase.AttachedFlyout>
-            <MenuFlyout/>
-        </FlyoutBase.AttachedFlyout>
+
     </Grid>
 </Page>

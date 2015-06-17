@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="3ffab3d3-12d1-4a78-be1b-9b904323dfc0"
+    Name="2fc795b2-35a1-4854-8a13-d81eec1db205"
     Publisher="CN=GHI"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="3ffab3d3-12d1-4a78-be1b-9b904323dfc0" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="2fc795b2-35a1-4854-8a13-d81eec1db205" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>FezHatTest</DisplayName>
