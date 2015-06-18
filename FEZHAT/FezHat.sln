@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.22823.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FEZHat", "FEZHat\FEZHat.csproj", "{B9A8FC62-69BA-4B85-95D5-5933AF411562}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FezHat", "FEZHat\FezHat.csproj", "{B9A8FC62-69BA-4B85-95D5-5933AF411562}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FezHatTest", "FezHatTest\FezHatTest.csproj", "{3024D152-0599-44EC-A7D2-0C78B2354125}"
 EndProject

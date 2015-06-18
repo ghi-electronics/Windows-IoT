@@ -20,13 +20,72 @@ namespace FezHatTest
 
         public async void Initialize()
         {
-            
+            var rotary = new RotaryH1();
+            while (true)
+            {
+                Debug.WriteLine("Count: " + rotary.GetCount());
+                await Task.Delay(2000);
+            }
+
+            /*
             await FezHat.Initialize();
 
             FezHat.ServoMotor.Setup(50, 1000, 2000, 0, 180);
             FezHat.Led.TurnOffAll();
 
             await Task.Delay(2000);
+
+            // Test expansion pins
+
+            FezHat.Gpio.SetDriveMode(FezHat.Gpio.Pin.DIO0, FezHat.Gpio.DriveMode.Output);
+            FezHat.Gpio.SetDriveMode(FezHat.Gpio.Pin.DIO1, FezHat.Gpio.DriveMode.Output);
+            FezHat.Gpio.SetDriveMode(FezHat.Gpio.Pin.DIO16, FezHat.Gpio.DriveMode.Output);
+            FezHat.Gpio.SetDriveMode(FezHat.Gpio.Pin.DIO26, FezHat.Gpio.DriveMode.Output);
+
+            var toggle = true;
+
+            while (true)
+            {
+                Debug.WriteLine("---------------------------------------------------------------------------------------------");
+
+                FezHat.Gpio.Write(FezHat.Gpio.Pin.DIO0, toggle ? FezHat.Gpio.Value.High : FezHat.Gpio.Value.Low);
+                FezHat.Gpio.Write(FezHat.Gpio.Pin.DIO1, toggle ? FezHat.Gpio.Value.High : FezHat.Gpio.Value.Low);
+                FezHat.Gpio.Write(FezHat.Gpio.Pin.DIO16, toggle ? FezHat.Gpio.Value.High : FezHat.Gpio.Value.Low);
+                FezHat.Gpio.Write(FezHat.Gpio.Pin.DIO26, toggle ? FezHat.Gpio.Value.High : FezHat.Gpio.Value.Low);
+
+                Debug.WriteLine("DIO0: " + FezHat.Gpio.Read(FezHat.Gpio.Pin.DIO0).ToString());
+                Debug.WriteLine("DIO1: " + FezHat.Gpio.Read(FezHat.Gpio.Pin.DIO1).ToString());
+                Debug.WriteLine("DIO16: " + FezHat.Gpio.Read(FezHat.Gpio.Pin.DIO16).ToString());
+                Debug.WriteLine("DIO26: " + FezHat.Gpio.Read(FezHat.Gpio.Pin.DIO26).ToString());
+
+                if (toggle)
+                {
+                    FezHat.Pwm.TurnOn(FezHat.Pwm.Pin.PWM5);
+                    FezHat.Pwm.TurnOn(FezHat.Pwm.Pin.PWM6);
+                    FezHat.Pwm.TurnOn(FezHat.Pwm.Pin.PWM7);
+                    FezHat.Pwm.TurnOn(FezHat.Pwm.Pin.PWM11);
+                    FezHat.Pwm.TurnOn(FezHat.Pwm.Pin.PWM12);
+                }
+                else
+                {
+                    FezHat.Pwm.TurnOff(FezHat.Pwm.Pin.PWM5);
+                    FezHat.Pwm.TurnOff(FezHat.Pwm.Pin.PWM6);
+                    FezHat.Pwm.TurnOff(FezHat.Pwm.Pin.PWM7);
+                    FezHat.Pwm.TurnOff(FezHat.Pwm.Pin.PWM11);
+                    FezHat.Pwm.TurnOff(FezHat.Pwm.Pin.PWM12);
+                }
+
+                Debug.WriteLine("AIn1: " + FezHat.Adc.Read(FezHat.Adc.Pin.AIn1).ToString("F3"));
+                Debug.WriteLine("AIn2: " + FezHat.Adc.Read(FezHat.Adc.Pin.AIn2).ToString("F3"));
+                Debug.WriteLine("AIn3: " + FezHat.Adc.Read(FezHat.Adc.Pin.AIn3).ToString("F3"));
+                Debug.WriteLine("AIn6: " + FezHat.Adc.Read(FezHat.Adc.Pin.AIn6).ToString("F3"));
+                Debug.WriteLine("AIn7: " + FezHat.Adc.Read(FezHat.Adc.Pin.AIn7).ToString("F3"));
+
+                toggle = !toggle;
+                await Task.Delay(2000);
+            }
+
+            // Test everything
 
             while (true)
             {
@@ -100,6 +159,7 @@ namespace FezHatTest
 
                 await Task.Delay(50);
             }
+            */
         }
     }
 }

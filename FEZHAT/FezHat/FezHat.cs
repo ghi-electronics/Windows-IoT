@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.I2c;
 using Windows.Devices.Gpio;
+using Windows.Devices.Spi;
 
 public class FezHat
 {
@@ -15,6 +17,7 @@ public class FezHat
     private static Dictionary<int, GpioPin> dcMotorInput1 = new Dictionary<int, GpioPin>();
     private static Dictionary<int, GpioPin> dcMotorInput2 = new Dictionary<int, GpioPin>();
     private static Dictionary<int, GpioPin> buttons = new Dictionary<int, GpioPin>();
+    private static GpioController gpioController;
 
     /// <summary>
     /// Initializes the FEZ Hat's features.
@@ -22,7 +25,7 @@ public class FezHat
     /// <returns></returns>
     public static async Task Initialize()
     {
-        var gpioController = GpioController.GetDefault();
+        gpioController = GpioController.GetDefault();
         var i2cControllers = await DeviceInformation.FindAllAsync(I2cDevice.GetDeviceSelector("I2C1"));
 
         // PWM driver
@@ -70,6 +73,277 @@ public class FezHat
         // Buttons
         buttons.Add(18, gpioController.OpenPin(18));
         buttons.Add(22, gpioController.OpenPin(22));
+    }
+
+    /// <summary>
+    /// Analog to Digital Converter (ADC)
+    /// </summary>
+    public static class Adc
+    {
+        public enum Pin
+        {
+            /// <summary>
+            /// Analog In (channel 1)
+            /// </summary>
+            AIn1 = 1,
+            /// <summary>
+            /// Analog In (channel 2)
+            /// </summary>
+            AIn2 = 2,
+            /// <summary>
+            /// Analog In (channel 3)
+            /// </summary>
+            AIn3 = 3,
+            /// <summary>
+            /// Analog In (channel 6)
+            /// </summary>
+            AIn6 = 6,
+            /// <summary>
+            /// Analog In (channel 7)
+            /// </summary>
+            AIn7 = 7
+        }
+
+        /// <summary>
+        /// Read an analog channel.
+        /// </summary>
+        /// <param name="channel">Channel to read.</param>
+        /// <returns>The voltage on the channel.</returns>
+        public static double Read(Pin pin)
+        {
+            int channel = (int)pin;
+            byte[] write = new byte[1] { (byte)(0x80 | 0x0C) };
+            byte[] read = new byte[1];
+
+            write[0] |= (byte)((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4);
+
+            adc.WriteRead(write, read);
+            return (double)read[0] / 255;
+        }
+    }
+
+    /// <summary>
+    /// General Purpose Input/Output (GPIO)
+    /// </summary>
+    public static class Gpio
+    {
+        private static Dictionary<int, GpioPin> pins = new Dictionary<int, GpioPin>();
+
+        private static GpioPin GetPin(int channel)
+        {
+            GpioPin pin = null;
+
+            if (pins.ContainsKey(channel))
+            {
+                pin = pins[channel];
+            }
+            else
+            {
+                try
+                {
+                    pin = gpioController.OpenPin((int)channel);
+                }
+                catch (Exception e) { };
+
+                if (pin == null)
+                    throw new Exception(nameof(pin) + " is not valid");
+
+                pins.Add(channel, pin);
+            }
+
+            return pin;
+        }
+
+        public enum Pin
+        {
+            /// <summary>
+            /// Digital Input/Output (channel 0)
+            /// </summary>
+            DIO0 = 0,
+            /// <summary>
+            /// Digital Input/Output (channel 1)
+            /// </summary>
+            DIO1 = 1,
+            /// <summary>
+            /// Digital Input/Output (channel 16)
+            /// </summary>
+            DIO16 = 16,
+            /// <summary>
+            /// Digital Input/Output (channel 26)
+            /// </summary>
+            DIO26 = 26
+        }
+
+        public enum Value
+        {
+            Low = 0,
+            High
+        }
+
+        public enum DriveMode
+        {
+            Input = 0,
+            Output,
+            InputPullUp,
+            InputPullDown,
+            OutputStrongLow,
+            OutputStrongLowPullUp,
+            OutputStrongHigh,
+            OutputStrongHighPullDown
+        }
+
+        /// <summary>
+        /// Sets the drive mode.
+        /// </summary>
+        /// <param name="channel">The channel to set.</param>
+        /// <param name="mode">The mode to use.</param>
+        public static void SetDriveMode(Pin pin, DriveMode mode)
+        {
+            GetPin((int)pin).SetDriveMode((GpioPinDriveMode)mode);
+        }
+
+        /// <summary>
+        /// Write a value.
+        /// </summary>
+        /// <param name="channel">The channel to write to.</param>
+        /// <param name="value">The value to write.</param>
+        public static void Write(Pin pin, Value value)
+        {
+            GetPin((int)pin).Write((GpioPinValue)value);
+        }
+
+        /// <summary>
+        /// Read a value.
+        /// </summary>
+        /// <param name="channel">The channel to read.</param>
+        /// <returns>True for High, false for Low.</returns>
+        public static Value Read(Pin pin)
+        {
+            return (Value)GetPin((int)pin).Read();
+        }
+    }
+
+    /// <summary>
+    /// Serial Peripheral Interface (SPI)
+    /// </summary>
+    public static class Spi
+    {
+        public enum Pin
+        {
+            /// <summary>
+            /// Master Output, Slave Input (output from master).
+            /// </summary>
+            MOSI = 19,
+            /// <summary>
+            /// Master Input, Slave Output (output from slave).
+            /// </summary>
+            MISO = 21,
+            /// <summary>
+            /// Serial Clock (output from master).
+            /// </summary>
+            SCLK = 23,
+            /// <summary>
+            /// Chip Select (CS)
+            /// </summary>
+            CS = 25
+        }
+    }
+
+    /// <summary>
+    /// Inter-Integrated Circuit
+    /// </summary>
+    public static class I2c
+    {
+        public enum Pin
+        {
+            /// <summary>
+            /// Serial Data Signal
+            /// </summary>
+            SDA = 3,
+            /// <summary>
+            /// Serial Clock
+            /// </summary>
+            SCL = 5
+        }
+    }
+
+    /// <summary>
+    /// Pulse-Width Modulation (PWM)
+    /// </summary>
+    public static class Pwm
+    {
+        /// <summary>
+        /// Pluse-Width Modulation pins.
+        /// </summary>
+        public enum Pin
+        {
+            /// <summary>
+            /// Pluse-Width Modulation (channel 5)
+            /// </summary>
+            PWM5 = 5,
+            /// <summary>
+            /// Pluse-Width Modulation (channel 6)
+            /// </summary>
+            PWM6 = 6,
+            /// <summary>
+            /// Pluse-Width Modulation (channel 7)
+            /// </summary>
+            PWM7 = 7,
+            /// <summary>
+            /// Pluse-Width Modulation (channel 11)
+            /// </summary>
+            PWM11 = 11,
+            /// <summary>
+            /// Pluse-Width Modulation (channel 22)
+            /// </summary>
+            PWM12 = 12
+        }
+
+        /// <summary>
+        /// Sets the PWM's frequency.
+        /// </summary>
+        public static int Frequency
+        {
+            get { return pwm.Frequency; }
+            set { pwm.Frequency = value; }
+        }
+
+        /// <summary>
+        /// Turns output enabled on or off.
+        /// </summary>
+        public static bool OutputEnabled
+        {
+            get { return pwm.OutputEnabled; }
+            set { pwm.OutputEnabled = value; }
+        }
+
+        /// <summary>
+        /// Set's the PWM's duty cycle.
+        /// </summary>
+        /// <param name="channel">Channel to set.</param>
+        /// <param name="dutyCycle">Duty cycle to use.</param>
+        public static void SetDutyCycle(Pin pin, double dutyCycle)
+        {
+            pwm.SetDutyCycle((int)pin, dutyCycle);
+        }
+
+        /// <summary>
+        /// Turn a channel on.
+        /// </summary>
+        /// <param name="channel">The channel to turn on.</param>
+        public static void TurnOn(Pin pin)
+        {
+            pwm.TurnOn((int)pin);
+        }
+
+        /// <summary>
+        /// Turn a channel off.
+        /// </summary>
+        /// <param name="channel">The channel to turn off.</param>
+        public static void TurnOff(Pin pin)
+        {
+            pwm.TurnOff((int)pin);
+        }
     }
 
     /// <summary>
@@ -228,59 +502,6 @@ public class FezHat
                 pwm.TurnOff(leds[(int)id].GreenPin);
                 pwm.TurnOff(leds[(int)id].BluePin);
             }
-        }
-    }
-
-    // Simple class to wrap the PCA9685 driver (it also hides the servo methods).
-    /// <summary>
-    /// Handles the PWM driver chip.
-    /// </summary>
-    public static class Pwm
-    {
-        /// <summary>
-        /// Sets the PWM's frequency.
-        /// </summary>
-        public static int Frequency
-        {
-            get { return pwm.Frequency; }
-            set { pwm.Frequency = value; }
-        }
-
-        /// <summary>
-        /// Turns output enabled on or off.
-        /// </summary>
-        public static bool OutputEnabled
-        {
-            get { return pwm.OutputEnabled; }
-            set { pwm.OutputEnabled = value; }
-        }
-
-        /// <summary>
-        /// Set's the PWM's duty cycle.
-        /// </summary>
-        /// <param name="channel">Channel to set.</param>
-        /// <param name="dutyCycle">Duty cycle to use.</param>
-        public static void SetDutyCycle(int channel, double dutyCycle)
-        {
-            pwm.SetDutyCycle(channel, dutyCycle);
-        }
-
-        /// <summary>
-        /// Turn a channel on.
-        /// </summary>
-        /// <param name="channel">The channel to turn on.</param>
-        public static void TurnOn(int channel)
-        {
-            pwm.TurnOn(channel);
-        }
-
-        /// <summary>
-        /// Turn a channel off.
-        /// </summary>
-        /// <param name="channel">The channel to turn off.</param>
-        public static void TurnOff(int channel)
-        {
-            pwm.TurnOff(channel);
         }
     }
 
@@ -466,7 +687,7 @@ public class FezHat
         /// <returns>The brightness level between 0 and 1; 0 being no light and 1 being full brightness.</returns>
         public static double GetLevel()
         {
-            return ReadAnalogByChannel(adc, 5);
+            return Adc.Read((Adc.Pin)5);
         }
     }
 
@@ -500,7 +721,7 @@ public class FezHat
         /// <returns>The temperature in the desired scale.</returns>
         public static double GetTemperature(TemperatureScale scale)
         {
-            var mv = ReadAnalogByChannel(adc, 4) * 3300;
+            var mv = Adc.Read((Adc.Pin)4) * 3300;
             var celsius = (mv - 450.0) / 19.5;
 
             if (scale == TemperatureScale.Celsius)
@@ -624,118 +845,5 @@ public class FezHat
         {
             pressed[sender.PinNumber] = (args.Edge == GpioPinEdge.FallingEdge);
         }
-    }
-
-    /// <summary>
-    /// Expansion header pins.
-    /// </summary>
-    public static class Expansion
-    {
-        public enum Pin : int
-        {
-            /// <summary>
-            /// Digital Input/Output (channel 0)
-            /// </summary>
-            DIO0 = 0,
-            /// <summary>
-            /// Digital Input/Output (channel 1)
-            /// </summary>
-            DIO1 = 1,
-            /// <summary>
-            /// Analog In (channel 1)
-            /// </summary>
-            AIn1 = 1,
-            /// <summary>
-            /// Analog In (channel 2)
-            /// </summary>
-            AIn2 = 2,
-            /// <summary>
-            /// Analog In (channel 3)
-            /// </summary>
-            AIn3 = 3,
-            /// <summary>
-            /// Pluse-Width Modulation (channel 5)
-            /// </summary>
-            PWM5 = 5,
-            /// <summary>
-            /// Pluse-Width Modulation (channel 6)
-            /// </summary>
-            PWM6 = 6,
-            /// <summary>
-            /// Pluse-Width Modulation (channel 7)
-            /// </summary>
-            PWM7 = 7,
-            /// <summary>
-            /// Master Output, Slave Input (output from master).
-            /// </summary>
-            MOSI = 19,
-            /// <summary>
-            /// Master Input, Slave Output (output from slave).
-            /// </summary>
-            MISO = 21,
-            /// <summary>
-            /// Serial Clock (output from master).
-            /// </summary>
-            SCLK = 23,
-            /// <summary>
-            /// Chip Select (CS)
-            /// </summary>
-            CS = 25,
-            /// <summary>
-            /// Serial Data Signal
-            /// </summary>
-            SDA = 3,
-            /// <summary>
-            /// Serial Clock
-            /// </summary>
-            SCL = 5
-        }
-    }
-
-    /// <summary>
-    /// Terminal block header pins.
-    /// </summary>
-    public static class TerminalBlock
-    {
-        public enum Pin : int
-        {
-            /// <summary>
-            /// Analog In (channel 6)
-            /// </summary>
-            AIn6 = 6,
-            /// <summary>
-            /// Analog In (channel 7)
-            /// </summary>
-            AIn7 = 7,
-            /// <summary>
-            /// Digital Input/Output (channel 16)
-            /// </summary>
-            DIO16 = 16,
-            /// <summary>
-            /// Digital Input/Output (channel 26)
-            /// </summary>
-            DIO26 = 26,
-            /// <summary>
-            /// Pluse-Width Modulation (channel 11)
-            /// </summary>
-            PWM11 = 11,
-            /// <summary>
-            /// Pluse-Width Modulation (channel 22)
-            /// </summary>
-            PWM12 = 22
-        }
-    }
-
-    private static double ReadAnalogByChannel(I2cDevice device, int channel)
-    {
-        if (channel < 0 || channel > 7) throw new ArgumentOutOfRangeException(nameof(channel));
-
-        byte[] write = new byte[1] { (byte)(0x80 | 0x0C) };
-        byte[] read = new byte[1];
-
-        write[0] |= (byte)((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4);
-
-        device.WriteRead(write, read);
-        return (double)read[0] / 255;
     }
 }
