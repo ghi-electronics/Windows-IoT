@@ -1,33 +1,43 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
-using System.Threading.Tasks;
+﻿using System;
+using Windows.Devices.I2c;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Drivers {
 	public class ADS7830 {
-		private static byte CmdSdSe { get; } = 0x80;
-		private static byte CmdPdOff { get; } = 0x00;
-		private static byte CmdPdOn { get; } = 0x04;
+        private I2cDevice device;
+        private bool disposed;
+        private byte[] read;
+        private byte[] write;
 
-		private byte Address { get { return (byte)(0x48 | (this.A0 ? 1 : 0) | (this.A1 ? 2 : 0)); } }
+        public static byte GetAddress(bool a0, bool a1) => (byte)(0x48 | (a0 ? 1 : 0) | (a1 ? 2 : 0));
 
-		public bool A0 { get; set; } = false;
-		public bool A1 { get; set; } = false;
+        public void Dispose() => this.Dispose(true);
 
-		private I2cDevice i2c;
+        public ADS7830(I2cDevice device) {
+            this.device = device;
+            this.disposed = false;
+            this.read = new byte[1];
+            this.write = new byte[1];
+        }
 
-		public async Task Initialize(ISocket socket) {
-			this.i2c = await socket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(this.Address));
-		}
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
+                    this.device.Dispose();
+                }
 
-		public double ReadVoltage(byte channel) {
-			var command = new byte[] { (byte)(ADS7830.CmdSdSe | ADS7830.CmdPdOn) };
-			var read = new byte[1];
+                this.disposed = true;
+            }
+        }
 
-			command[0] |= (byte)((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4);
+        public double Read(int channel) {
+            if (this.disposed) throw new ObjectDisposedException(nameof(ADS7830));
+            if (channel > 8 || channel < 0) throw new ArgumentOutOfRangeException(nameof(channel));
 
-			this.i2c.WriteRead(command, read);
+            this.write[0] =(byte)( 0x84 | ((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4));
 
-			return (double)read[0] / 255.0 * 3.3;
-		}
-	}
+            this.device.WriteRead(this.write, this.read);
+
+            return this.read[0] / 255.0;
+        }
+    }
 }

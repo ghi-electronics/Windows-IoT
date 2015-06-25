@@ -1,8 +1,7 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using Windows.Devices.Gpio;
+using Windows.Devices.I2c;
 
 namespace GHI.Athens.Modules {
 	public class CY8C9560A {
@@ -59,25 +58,45 @@ namespace GHI.Athens.Modules {
 			}
 		}
 
-		private I2cDevice i2c;
-		private DigitalIO interrupt;
+		private I2cDevice device;
+		private GpioPin interrupt;
 		private Dictionary<Pin, Action<bool>> interruptRegistrations;
 		private byte[] shadowRegisters;
+        private bool disposed;
 
-		public async Task Initialize(ISocket socket) {
-			this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
-			//this.shadowRegisters = new byte[0x2D - 0x08];
+        public static byte GetAddress(bool a0, bool a1, bool a2, bool a3, bool a4, bool a5, bool a6) => (byte)((a0 ? 1 : 0) | (a1 ? 2 : 0) | (a2 ? 4 : 0) | (a3 ? 8 : 0) | (a4 ? 16 : 0) | (a5 ? 32 : 0) | (a6 ? 64 : 0));
 
-			this.i2c = await socket.CreateI2cDeviceAsync(new Windows.Devices.I2c.I2cConnectionSettings(0x20));
+        public void Dispose() => this.Dispose(true);
 
-			//this.interrupt = await socket.CreateDigitalIOAsync(SocketPinNumber.Three, Windows.Devices.Gpio.GpioPinEdge.RisingEdge);
-			//this.interrupt.ValueChanged += this.OnInterrupt;
+        public CY8C9560A(I2cDevice device, GpioPin interrupt) {
+            this.device = device;
+            this.interrupt = interrupt;
+            this.disposed = false;
 
-			//this.i2c.ReadRegisters(0x08, this.shadowRegisters);
-		}
+            this.interruptRegistrations = new Dictionary<Pin, Action<bool>>();
+            //this.shadowRegisters = new byte[0x2D - 0x08];
 
-		public void SetPwm(Pin pin, double frequency, double dutyCycle) {
-			this.WriteRegister(Register.PortSelect, pin.Port);
+            this.interrupt.ValueChanged += this.OnInterrupt;
+
+            //this.i2c.ReadRegisters(0x08, this.shadowRegisters);
+        }
+
+        protected virtual void Dispose(bool disposing) {
+            if (!this.disposed) {
+                if (disposing) {
+                    this.device.Dispose();
+                    this.interrupt.Dispose();
+                }
+
+                this.disposed = true;
+            }
+        }
+
+        public void SetPwm(Pin pin, double frequency, double dutyCycle) {
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+            if (dutyCycle < 0.0 || dutyCycle > 1.0) throw new ArgumentOutOfRangeException(nameof(dutyCycle));
+
+            this.WriteRegister(Register.PortSelect, pin.Port);
 
 			this.SetBits(Register.PinStrongDrive, pin.Mask);
 			this.SetBits(Register.InterruptMask, pin.Mask);
@@ -122,7 +141,9 @@ namespace GHI.Athens.Modules {
 		}
 
 		public void SetOutput(Pin pin) {
-			this.WriteRegister(Register.PortSelect, pin.Port);
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+
+            this.WriteRegister(Register.PortSelect, pin.Port);
 
 			this.ClearBits(Register.SelectPwmForOutput, pin.Mask);
 			this.ClearBits(Register.PinDirection, pin.Mask);
@@ -131,7 +152,9 @@ namespace GHI.Athens.Modules {
 		}
 
 		public void SetInput(Pin pin) {
-			this.WriteRegister(Register.PortSelect, pin.Port);
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+
+            this.WriteRegister(Register.PortSelect, pin.Port);
 
 			this.ClearBits(Register.SelectPwmForOutput, pin.Mask);
 			this.SetBits(Register.PinDirection, pin.Mask);
@@ -143,7 +166,9 @@ namespace GHI.Athens.Modules {
 		}
 
 		public void SetInterrupt(Pin pin, Action<bool> onInterrupt) {
-			this.SetInput(pin);
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+
+            this.SetInput(pin);
 
 			this.ClearBits(Register.InterruptMask, pin.Mask);
 
@@ -151,11 +176,15 @@ namespace GHI.Athens.Modules {
 		}
 
 		public bool ReadDigital(Pin pin) {
-			return (this.i2c.ReadRegister((byte)(Register.InputPort0 + pin.Port)) & pin.Mask) != 0;
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+
+            return (this.ReadRegister(Register.InputPort0 + pin.Port) & pin.Mask) != 0;
 		}
 
 		public void WriteDigital(Pin pin, bool value) {
-			if (value) {
+            if (this.disposed) throw new ObjectDisposedException(nameof(CY8C9560A));
+
+            if (value) {
 				this.SetBits(Register.OutputPort0 + pin.Port, pin.Mask);
 			}
 			else {
@@ -163,8 +192,11 @@ namespace GHI.Athens.Modules {
 			}
 		}
 
-		private void OnInterrupt(DigitalIO sender, DigitalIOValueChangedEventArgs e) {
-			var ports = this.i2c.ReadRegisters((byte)Register.InterruptPort0, 8);
+		private void OnInterrupt(GpioPin sender, GpioPinValueChangedEventArgs e) {
+            if (e.Edge != GpioPinEdge.RisingEdge)
+                return;
+
+			var ports = this.ReadRegisters(Register.InterruptPort0, 8);
 
 			for (byte i = 0; i < 8; i++) {
 				for (byte j = 0; j < 8; j++) {
@@ -181,17 +213,25 @@ namespace GHI.Athens.Modules {
         }
 
 		private byte ReadRegister(Register register) {
-			//if (this.IsShadowed(register))
+            return this.ReadRegisters(register, 1)[0];
+        }
+
+        private byte[] ReadRegisters(Register register, int count) {
+            //if (this.IsShadowed(register))
             //    return this.shadowRegisters[(int)register - 0x08];
 
-			return this.i2c.ReadRegister((byte)register);
-		}
+            var result = new byte[count];
 
-		private void WriteRegister(Register register, int value) {
-			//if (this.IsShadowed(register))
-			//	this.shadowRegisters[(int)register - 0x08] = (byte)value;
+            this.device.WriteRead(new byte[] { (byte)register }, result);
 
-			this.i2c.WriteRegister((byte)register, (byte)value);
+            return result;
+        }
+
+        private void WriteRegister(Register register, int value) {
+            //if (this.IsShadowed(register))
+            //	this.shadowRegisters[(int)register - 0x08] = (byte)value;
+
+            this.device.WriteRead(new byte[] { (byte)register }, new byte[] { (byte)value });
 		}
 
 		private void SetBits(Register register, int mask) {
