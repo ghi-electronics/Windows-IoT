@@ -14,8 +14,9 @@ namespace GHIElectronics.UAP.Shields {
         private PCA9685 pwm;
         private ADS7830 analog;
         private MMA8453 accelerometer;
-        private GpioPin[] digitalPins;
         private GpioPin motorEnable;
+        private GpioPin dio16;
+        private GpioPin dio26;
         private GpioPin dio24;
         private GpioPin dio18;
         private GpioPin dio22;
@@ -145,15 +146,14 @@ namespace GHIElectronics.UAP.Shields {
                     this.analog.Dispose();
                     this.accelerometer.Dispose();
                     this.motorEnable.Dispose();
+                    this.dio16.Dispose();
+                    this.dio26.Dispose();
                     this.dio24.Dispose();
                     this.dio18.Dispose();
                     this.dio22.Dispose();
 
                     this.MotorA.Dispose();
                     this.MotorB.Dispose();
-
-                    foreach (var d in this.digitalPins)
-                        d.Dispose();
                 }
 
                 this.disposed = true;
@@ -175,8 +175,8 @@ namespace GHIElectronics.UAP.Shields {
             hat.pwm = new PCA9685(await I2cDevice.FromIdAsync(i2cController.Id, new I2cConnectionSettings(PCA9685.GetAddress(true, true, true, true, true, true))), gpioController.OpenPin(13));
             hat.pwm.OutputEnabled = true;
 
-            hat.digitalPins = new GpioPin[] { gpioController.OpenPin(0), gpioController.OpenPin(1), gpioController.OpenPin(16), gpioController.OpenPin(26) };
-
+            hat.dio16 = gpioController.OpenPin(16);
+            hat.dio26 = gpioController.OpenPin(26);
             hat.dio24 = gpioController.OpenPin(24);
             hat.dio18 = gpioController.OpenPin(18);
             hat.dio22 = gpioController.OpenPin(22);
@@ -221,10 +221,12 @@ namespace GHIElectronics.UAP.Shields {
         public void WriteDigital(DigitalPin pin, bool state) {
             if (!Enum.IsDefined(typeof(DigitalPin), pin)) throw new ArgumentException(nameof(pin));
 
-            if (this.digitalPins[(int)pin].GetDriveMode() != GpioPinDriveMode.Output)
-                this.digitalPins[(int)pin].SetDriveMode(GpioPinDriveMode.Output);
+            var gpioPin = pin == DigitalPin.DIO16 ? this.dio16 : this.dio26;
 
-            this.digitalPins[(int)pin].Write(state ? GpioPinValue.High : GpioPinValue.Low);
+            if (gpioPin.GetDriveMode() != GpioPinDriveMode.Output)
+                gpioPin.SetDriveMode(GpioPinDriveMode.Output);
+
+            gpioPin.Write(state ? GpioPinValue.High : GpioPinValue.Low);
         }
 
         /// <summary>
@@ -235,10 +237,12 @@ namespace GHIElectronics.UAP.Shields {
         public bool ReadDigital(DigitalPin pin) {
             if (!Enum.IsDefined(typeof(DigitalPin), pin)) throw new ArgumentException(nameof(pin));
 
-            if (this.digitalPins[(int)pin].GetDriveMode() != GpioPinDriveMode.Input)
-                this.digitalPins[(int)pin].SetDriveMode(GpioPinDriveMode.Input);
+            var gpioPin = pin == DigitalPin.DIO16 ? this.dio16 : this.dio26;
 
-            return this.digitalPins[(int)pin].Read() == GpioPinValue.High;
+            if (gpioPin.GetDriveMode() != GpioPinDriveMode.Input)
+                gpioPin.SetDriveMode(GpioPinDriveMode.Input);
+
+            return gpioPin.Read() == GpioPinValue.High;
         }
 
         /// <summary>
@@ -288,10 +292,6 @@ namespace GHIElectronics.UAP.Shields {
         /// The possible digital pins.
         /// </summary>
         public enum DigitalPin {
-            /// <summary>A digital pin.</summary>
-            DIO0,
-            /// <summary>A digital pin.</summary>
-            DIO1,
             /// <summary>A digital pin.</summary>
             DIO16,
             /// <summary>A digital pin.</summary>
