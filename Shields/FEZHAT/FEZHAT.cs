@@ -174,6 +174,7 @@ namespace GHIElectronics.UAP.Shields {
 
             hat.pwm = new PCA9685(await I2cDevice.FromIdAsync(i2cController.Id, new I2cConnectionSettings(PCA9685.GetAddress(true, true, true, true, true, true))), gpioController.OpenPin(13));
             hat.pwm.OutputEnabled = true;
+            hat.pwm.Frequency = 1500;
 
             hat.dio16 = gpioController.OpenPin(16);
             hat.dio26 = gpioController.OpenPin(26);
@@ -463,6 +464,9 @@ namespace GHIElectronics.UAP.Shields {
                 if (maximumAngle < 0) throw new ArgumentOutOfRangeException(nameof(maximumAngle));
                 if (minimumPulseWidth >= maximumPulseWidth) throw new ArgumentException(nameof(minimumPulseWidth));
                 if (minimumAngle >= maximumAngle) throw new ArgumentException(nameof(minimumAngle));
+
+                if (this.pwm.Frequency != 50)
+                    this.pwm.Frequency = 50;
 
                 this.minAngle = minimumAngle;
                 this.maxAngle = maximumAngle;
