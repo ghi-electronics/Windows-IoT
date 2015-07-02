@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer {
 	public class CY8C9560A {
 		private enum Register : byte {
 			InputPort0 = 0x00,

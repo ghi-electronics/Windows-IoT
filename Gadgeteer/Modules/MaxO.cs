@@ -1,9 +1,8 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class MaxO : Module {
 		private SpiDevice spi;
 		private DigitalIO enable;
@@ -11,8 +10,8 @@ namespace GHI.Athens.Modules {
 		private byte[] data;
 		private int boards;
 
-		public override string Name { get; } = "MaxO";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "MaxO";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public MaxO() {
 

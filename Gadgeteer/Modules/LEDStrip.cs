@@ -1,11 +1,11 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class LEDStrip : Module {
-		public override string Name { get; } = "LED Strip";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "LED Strip";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		private DigitalIO[] outputPins;
 
@@ -26,12 +26,22 @@ namespace GHI.Athens.Modules {
 				p.SetLow();
 		}
 
-		public void TurnOn(uint led) {
-			this.outputPins[led].SetHigh();
+		public void TurnOn(int led) {
+            if (led < 0 || led > 7) throw new ArgumentOutOfRangeException(nameof(led));
+
+            this.outputPins[led].SetHigh();
 		}
 
-		public void TurnOff(uint led) {
+		public void TurnOff(int led) {
+            if (led < 0 || led > 7) throw new ArgumentOutOfRangeException(nameof(led));
+
 			this.outputPins[led].SetLow();
 		}
+
+        public void Set(int led, bool state) {
+            if (led < 0 || led > 7) throw new ArgumentOutOfRangeException(nameof(led));
+
+            this.outputPins[led].Write(state);
+        }
 	}
 }

@@ -1,11 +1,10 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class LED7C : Module {
-		public override string Name { get; } = "LED7C";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "LED7C";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		private DigitalIO red;
 		private DigitalIO green;
@@ -29,7 +28,7 @@ namespace GHI.Athens.Modules {
 		}
 
 		public void SetColor(Color color) {
-			int c = (int)color;
+			var c = (int)color;
 
 			this.red.Write((c & 4) != 0);
 			this.green.Write((c & 2) != 0);

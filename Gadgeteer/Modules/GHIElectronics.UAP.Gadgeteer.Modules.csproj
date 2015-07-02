@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{0A7B3E54-C9FE-4B09-AF4F-65DD9BF7C5DF}</ProjectGuid>
+    <ProjectGuid>{4A226297-7AC4-4138-B38A-3833E1D88F8E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GHIElectronics.UAP.Drivers</RootNamespace>
-    <AssemblyName>GHIElectronics.UAP.Drivers</AssemblyName>
+    <RootNamespace>GHIElectronics.UAP.Gadgeteer.Modules</RootNamespace>
+    <AssemblyName>GHIElectronics.UAP.Gadgeteer.Modules</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10069.0</TargetPlatformVersion>
@@ -109,20 +109,42 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="ADS7830.cs" />
+    <Compile Include="AccelG248.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="CY8C9560A.cs" />
-    <Compile Include="MMA8453.cs" />
-    <Compile Include="PCA9535.cs" />
-    <Compile Include="PCA9685.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
+    <Compile Include="Button.cs" />
+    <Compile Include="CharacterDisplay.cs" />
+    <Compile Include="CurrentACS712.cs" />
+    <Compile Include="HubAP5.cs" />
+    <Compile Include="Joystick.cs" />
+    <Compile Include="LED7C.cs" />
+    <Compile Include="LED7R.cs" />
+    <Compile Include="LEDStrip.cs" />
+    <Compile Include="LightSense.cs" />
+    <Compile Include="MaxO.cs" />
+    <Compile Include="Moisture.cs" />
+    <Compile Include="MotorDriverL298.cs" />
+    <Compile Include="PulseCount.cs" />
+    <Compile Include="RotaryH1.cs" />
+    <Compile Include="TempHumidSI70.cs" />
+    <Compile Include="GadgeteerCream.cs" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10069.0">
       <Name>Windows IoT Extension SDK</Name>
     </SDKReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Drivers\GHIElectronics.UAP.Drivers.csproj">
+      <Project>{0a7b3e54-c9fe-4b09-af4f-65dd9bf7c5df}</Project>
+      <Name>GHIElectronics.UAP.Drivers</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Core\GHIElectronics.UAP.Gadgeteer.Core.csproj">
+      <Project>{6496d954-e8fb-4a2d-91c1-e0fbe21b98cc}</Project>
+      <Name>GHIElectronics.UAP.Gadgeteer.Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

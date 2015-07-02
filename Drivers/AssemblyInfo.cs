@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Windows UAP Drivers")]
+[assembly: AssemblyTitle("GHIElectronics.UAP.Drivers")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GHI Electronics, LLC")]

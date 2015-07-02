@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("GHIElectronics.UAP.Shields.FEZHAT")]
+[assembly: AssemblyTitle("GHIElectronics.UAP.Gadgeteer.Modules")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("GHI Electronics, LLC")]
-[assembly: AssemblyProduct("GHI Electronics FEZHAT")]
+[assembly: AssemblyProduct("GHI Electronics Gadgeteer Modules")]
 [assembly: AssemblyCopyright("Copyright © GHI Electronics, LLC 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

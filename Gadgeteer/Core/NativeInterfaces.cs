@@ -1,136 +1,165 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using WD = Windows.Devices;
 
-namespace GHI.Athens.Gadgeteer.NativeInterfaces {
-	internal class DigitalIO : SocketInterfaces.DigitalIO {
-		private WD.Gpio.GpioPin pin;
+namespace GHIElectronics.UAP.Gadgeteer.NativeInterfaces {
+    public class DigitalIO : SocketInterfaces.DigitalIO {
+        private WD.Gpio.GpioPin pin;
 
-		internal DigitalIO(WD.Gpio.GpioPin pin) {
-			this.pin = pin;
-		}
+        public static Task<WD.Gpio.GpioPin> CreateInterfaceAsync(int pinNumber) {
+            return Task.FromResult(WD.Gpio.GpioController.GetDefault().OpenPin(pinNumber));
+        }
 
-		private void OnInterrupt(WD.Gpio.GpioPin sender, WD.Gpio.GpioPinValueChangedEventArgs e) {
-			this.OnValueChanged(e.Edge == WD.Gpio.GpioPinEdge.RisingEdge);
-		}
+        public DigitalIO(WD.Gpio.GpioPin pin) {
+            this.pin = pin;
+        }
 
-		protected override void AddInterrupt() {
-			this.pin.ValueChanged += this.OnInterrupt;
-		}
+        private void OnInterrupt(WD.Gpio.GpioPin sender, WD.Gpio.GpioPinValueChangedEventArgs e) => this.OnValueChanged(e.Edge == WD.Gpio.GpioPinEdge.RisingEdge);
 
-		protected override void RemoveInterrupt() {
-			this.pin.ValueChanged -= this.OnInterrupt;
-		}
+        protected override void EnableInterrupt() => this.pin.ValueChanged += this.OnInterrupt;
+        protected override void DisableInterrupt() => this.pin.ValueChanged -= this.OnInterrupt;
 
-		protected override bool ReadInternal() {
-			return this.pin.Read() == WD.Gpio.GpioPinValue.High;
-		}
+        protected override bool ReadInternal() => this.pin.Read() == WD.Gpio.GpioPinValue.High;
+        protected override void WriteInternal(bool value) => this.pin.Write(value ? WD.Gpio.GpioPinValue.High : WD.Gpio.GpioPinValue.Low);
 
-		protected override void WriteInternal(bool value) {
-			this.pin.Write(value ? WD.Gpio.GpioPinValue.High : WD.Gpio.GpioPinValue.Low);
-		}
+        public override WD.Gpio.GpioPinDriveMode DriveMode {
+            get {
+                return this.pin.GetDriveMode();
+            }
+            set {
+                this.pin.SetDriveMode(value);
+            }
+        }
+    }
 
-		public override WD.Gpio.GpioPinDriveMode DriveMode {
-			get {
-				return this.pin.GetDriveMode();
-			}
-			set {
-				this.pin.SetDriveMode(value);
-			}
-		}
-	}
+    public class AnalogIO : SocketInterfaces.AnalogIO {
+        public override double MaxVoltage => 3.3;
 
-	internal class AnalogIO : SocketInterfaces.AnalogIO {
-		public override double MaxVoltage { get; } = 3.3;
-		public override WD.Gpio.GpioPinDriveMode DriveMode { get; set; }
+        protected override double ReadInternal() {
+            throw new NotSupportedException();
+        }
 
-		protected override double ReadInternal() {
-			throw new NotImplementedException();
-		}
+        protected override void WriteInternal(double voltage) {
+            throw new NotSupportedException();
+        }
 
-		protected override void WriteInternal(double voltage) {
-			throw new NotImplementedException();
-		}
-	}
+        public override WD.Gpio.GpioPinDriveMode DriveMode {
+            get {
+                return WD.Gpio.GpioPinDriveMode.Input;
+            }
+            set {
+                throw new NotSupportedException();
+            }
+        }
+    }
 
-	internal class PwmOutput : SocketInterfaces.PwmOutput {
-		protected override void SetEnabled(bool state) {
-			throw new NotImplementedException();
-		}
+    public class PwmOutput : SocketInterfaces.PwmOutput {
+        protected override void SetEnabled(bool state) {
+            throw new NotSupportedException();
+        }
 
-		protected override void SetValues(double frequency, double dutyCycle) {
-			throw new NotImplementedException();
-		}
-	}
+        protected override void SetValues(double frequency, double dutyCycle) {
+            throw new NotSupportedException();
+        }
+    }
 
-	internal class I2cDevice : SocketInterfaces.I2cDevice {
-		private WD.I2c.I2cDevice device;
+    public class I2cDevice : SocketInterfaces.I2cDevice {
+        private WD.I2c.I2cDevice device;
 
-        internal I2cDevice(WD.I2c.I2cDevice device) {
-			this.device = device;
-		}
+        public static async Task<WD.I2c.I2cDevice> CreateInterfaceAsync(string deviceId, WD.I2c.I2cConnectionSettings connectionSettings) {
+            var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.I2c.I2cDevice.GetDeviceSelector(deviceId));
 
-		public override void Write(byte[] buffer) {
-			this.device.Write(buffer);
-		}
+            return await WD.I2c.I2cDevice.FromIdAsync(infos[0].Id, connectionSettings);
+        }
 
-		public override void Read(byte[] buffer) {
-			this.device.Read(buffer);
-		}
+        public I2cDevice(WD.I2c.I2cDevice device) {
+            this.device = device;
+        }
 
-		public override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
-			this.device.WriteRead(writeBuffer, readBuffer);
-		}
-	}
+        public override void Write(byte[] buffer) {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
 
-	internal class SpiDevice : SocketInterfaces.SpiDevice {
-		private WD.Spi.SpiDevice device;
+            this.device.Write(buffer);
+        }
 
-		internal SpiDevice(WD.Spi.SpiDevice device) {
-			this.device = device;
-		}
+        public override void Read(byte[] buffer) {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
 
-		protected override void WriteRead(byte[] writeBuffer, byte[] readBuffer) {
-			if (writeBuffer != null && readBuffer != null) {
-				this.device.TransferFullDuplex(writeBuffer, readBuffer);
-			}
-			else if (writeBuffer != null) {
-				this.device.Write(writeBuffer);
-			}
-			else if (readBuffer != null) {
-				this.device.Read(readBuffer);
-			}
-		}
-	}
+            this.device.Read(buffer);
+        }
 
-	internal class SerialDevice : SocketInterfaces.SerialDevice {
-		private WD.SerialCommunication.SerialDevice device;
-		private DataWriter writer;
-		private DataReader reader;
+        public override void WriteThenRead(byte[] writeBuffer, byte[] readBuffer) {
+            if (writeBuffer == null) throw new ArgumentNullException(nameof(writeBuffer));
+            if (readBuffer == null) throw new ArgumentNullException(nameof(readBuffer));
 
-		public override string PortName { get { return this.device.PortName; } }
-		public override uint BaudRate { get { return this.device.BaudRate; } set { this.device.BaudRate = value; } }
-		public override ushort DataBits { get { return this.device.DataBits; } set { this.device.DataBits = value; } }
-		public override WD.SerialCommunication.SerialHandshake Handshake { get { return this.device.Handshake; } set { this.device.Handshake = value; } }
-		public override WD.SerialCommunication.SerialParity Parity { get { return this.device.Parity; } set { this.device.Parity = value; } }
-		public override WD.SerialCommunication.SerialStopBitCount StopBits { get { return this.device.StopBits; } set { this.device.StopBits = value; } }
+            this.device.WriteRead(writeBuffer, readBuffer);
+        }
+    }
 
-		internal SerialDevice(WD.SerialCommunication.SerialDevice device) {
-			this.device = device;
-			this.writer = new DataWriter(this.device.OutputStream);
-			this.reader = new DataReader(this.device.InputStream);
-		}
+    public class SpiDevice : SocketInterfaces.SpiDevice {
+        private WD.Spi.SpiDevice device;
 
-		public override void Write(byte[] buffer) {
-			this.writer.WriteBytes(buffer);
-		}
+        public static async Task<WD.Spi.SpiDevice> CreateInterfaceAsync(string deviceId, WD.Spi.SpiConnectionSettings connectionSettings) {
+            var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.Spi.SpiDevice.GetDeviceSelector(deviceId));
 
-		public override void Read(byte[] buffer) {
-			this.reader.ReadBytes(buffer);
-		}
-	}
+            return await WD.Spi.SpiDevice.FromIdAsync(infos[0].Id, connectionSettings);
+        }
 
-	internal class CanDevice : SocketInterfaces.CanDevice {
+        public SpiDevice(WD.Spi.SpiDevice device) {
+            this.device = device;
+        }
 
-	}
+        public override void Write(byte[] buffer) {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+
+            this.device.Write(buffer);
+        }
+
+        public override void Read(byte[] buffer) {
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
+
+            this.device.Read(buffer);
+        }
+
+        public override void WriteAndRead(byte[] writeBuffer, byte[] readBuffer) {
+            if (writeBuffer == null) throw new ArgumentNullException(nameof(writeBuffer));
+            if (readBuffer == null) throw new ArgumentNullException(nameof(readBuffer));
+
+            this.device.TransferFullDuplex(writeBuffer, readBuffer);
+        }
+
+        public override void WriteThenRead(byte[] writeBuffer, byte[] readBuffer) {
+            if (writeBuffer == null) throw new ArgumentNullException(nameof(writeBuffer));
+            if (readBuffer == null) throw new ArgumentNullException(nameof(readBuffer));
+
+            this.device.TransferFullDuplex(writeBuffer, readBuffer);
+        }
+    }
+
+    public class SerialDevice : SocketInterfaces.SerialDevice {
+        private WD.SerialCommunication.SerialDevice device;
+        private DataWriter writer;
+        private DataReader reader;
+
+        public static async Task<WD.SerialCommunication.SerialDevice> CreateInterfaceAsync(string deviceId, WD.Spi.SpiConnectionSettings connectionSettings) {
+            var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.SerialCommunication.SerialDevice.GetDeviceSelector(deviceId));
+
+            return await WD.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
+        }
+
+        public SerialDevice(WD.SerialCommunication.SerialDevice device) {
+            this.device = device;
+            this.writer = new DataWriter(this.device.OutputStream);
+            this.reader = new DataReader(this.device.InputStream);
+        }
+
+        public override void Write(byte[] buffer) {
+            this.writer.WriteBytes(buffer);
+        }
+
+        public override void Read(byte[] buffer) {
+            this.reader.ReadBytes(buffer);
+        }
+    }
 }

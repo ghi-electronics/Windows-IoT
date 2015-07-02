@@ -1,16 +1,15 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class AccelG248 : Module {
-		private static byte I2cAddress { get; } = 0x1C;
+		private static byte I2cAddress => 0x1C;
 
 		private I2cDevice i2c;
 		private byte[] buffer;
 
-		public override string Name { get; } = "AccelG248";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "AccelG248";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public AccelG248() {
 			this.buffer = new byte[1];

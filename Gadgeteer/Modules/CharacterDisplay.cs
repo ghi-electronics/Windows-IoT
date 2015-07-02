@@ -1,15 +1,14 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class CharacterDisplay : Module {
-		private static uint[] RowOffsets { get; } = new uint[4] { 0x00, 0x40, 0x14, 0x54 };
-		private static uint DisplayOnCommand { get; } = 0x0C;
-		private static uint ClearDisplayCommand { get; } = 0x01;
-		private static uint CursorHomeCommand { get; } = 0x02;
-		private static uint SetCursorCommand { get; } = 0x80;
+		private static uint[] RowOffsets => new uint[4] { 0x00, 0x40, 0x14, 0x54 };
+		private static uint DisplayOnCommand => 0x0C;
+		private static uint ClearDisplayCommand => 0x01;
+		private static uint CursorHomeCommand => 0x02;
+		private static uint SetCursorCommand => 0x80;
 
 		private DigitalIO lcdRS;
 		private DigitalIO lcdE;
@@ -21,8 +20,8 @@ namespace GHI.Athens.Modules {
 
 		private uint currentRow;
 
-		public override string Name { get; } = "CharacterDisplay";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "CharacterDisplay";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		protected async override Task Initialize(ISocket parentSocket) {
 			this.lcdRS = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);

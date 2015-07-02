@@ -1,11 +1,10 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class Moisture : Module {
-		public override string Name { get; } = "Moisture";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "Moisture";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		private AnalogIO input;
 		private DigitalIO enable;

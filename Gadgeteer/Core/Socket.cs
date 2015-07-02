@@ -1,11 +1,11 @@
-﻿using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WD = Windows.Devices;
 
-namespace GHI.Athens.Gadgeteer {
+namespace GHIElectronics.UAP.Gadgeteer {
 	public enum SocketPinNumber {
 		Three = 3,
 		Four,
@@ -39,15 +39,11 @@ namespace GHI.Athens.Gadgeteer {
 	}
 
 	public interface ISocket {
-		uint Number { get; }
-
-		IReadOnlyCollection<SocketType> SupportedTypes { get; }
-		IReadOnlyDictionary<SocketPinNumber, int> Pins { get; }
+		int Number { get; }
 
 		string NativeI2cDeviceId { get; }
 		string NativeSpiDeviceId { get; }
 		string NativeSerialDeviceId { get; }
-		string NativeCanDeviceId { get; }
 
 		void EnsureTypeIsSupported(SocketType type);
 		bool IsTypeSupported(SocketType type);
@@ -63,14 +59,27 @@ namespace GHI.Athens.Gadgeteer {
 		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings);
 		Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber);
 		Task<SerialDevice> CreateSerialDeviceAsync();
-		Task<CanDevice> CreateCanDeviceAsync();
 	}
 
 	public sealed class Socket : ISocket {
 		private Dictionary<SocketPinNumber, int> nativePins;
 		private HashSet<SocketType> supportedTypes;
 
-		internal Socket(uint socketNumber) {
+        public string NativeSerialDeviceId { get; set; }
+        public string NativeI2cDeviceId { get; set; }
+        public string NativeSpiDeviceId { get; set; }
+        public int NativeSpiChipSelectPin { get; set; }
+
+        public int Number { get; }
+
+        public DigitalIOCreator DigitalIOCreator { get; set; }
+        public AnalogIOCreator AnalogIOCreator { get; set; }
+        public PwmOutputCreator PwmOutputCreator { get; set; }
+        public I2cDeviceCreator I2cDeviceCreator { get; set; }
+        public SpiDeviceCreator SpiDeviceCreator { get; set; }
+        public SerialDeviceCreator SerialDeviceCreator { get; set; }
+
+        public Socket(int socketNumber) {
 			this.nativePins = new Dictionary<SocketPinNumber, int>();
 			this.supportedTypes = new HashSet<SocketType>();
 
@@ -95,39 +104,22 @@ namespace GHI.Athens.Gadgeteer {
 			this.nativePins[pinNumber] = nativePinNumber;
 		}
 
-		public IReadOnlyCollection<SocketType> SupportedTypes { get { return this.supportedTypes.ToList(); } }
-		public IReadOnlyDictionary<SocketPinNumber, int> Pins { get { return this.nativePins; } }
-
-		public string NativeI2cDeviceId { get; set; }
-		public string NativeSpiDeviceId { get; set; }
-		public string NativeSerialDeviceId { get; set; }
-		public string NativeCanDeviceId { get; set; }
-
-		public uint Number { get; }
-
-		public DigitalIOCreator DigitalIOCreator { get; set; }
-		public AnalogIOCreator AnalogIOCreator { get; set; }
-		public PwmOutputCreator PwmOutputCreator { get; set; }
-		public I2cDeviceCreator I2cDeviceCreator { get; set; }
-		public SpiDeviceCreator SpiDeviceCreator { get; set; }
-		public SerialDeviceCreator SerialDeviceCreator { get; set; }
-		public CanDeviceCreator CanDeviceCreator { get; set; }
-
 		private WD.Gpio.GpioPin CreatePin(int pinNumber) {
 			return WD.Gpio.GpioController.GetDefault().OpenPin(pinNumber);
 		}
 
 		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber) {
-			this.EnsureTypeIsSupported((int)pinNumber <= 5 ? SocketType.X : SocketType.Y);
-
 			DigitalIO result;
 
-			if (this.DigitalIOCreator != null) {
-				result = await this.DigitalIOCreator(this, pinNumber);
-			}
-			else {
-				result = new NativeInterfaces.DigitalIO(this.CreatePin(this.Pins[pinNumber]));
-			}
+            if (this.nativePins.ContainsKey(pinNumber)) {
+                result = new NativeInterfaces.DigitalIO(this.CreatePin(this.nativePins[pinNumber]));
+            }
+            else if (this.DigitalIOCreator != null) {
+                result = await this.DigitalIOCreator(this, pinNumber);
+            }
+            else {
+                throw new UnsupportedPinModeException();
+            }
 
 			result.DriveMode = WD.Gpio.GpioPinDriveMode.Input;
 
@@ -212,7 +204,7 @@ namespace GHI.Athens.Gadgeteer {
 		}
 
 		public async Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings) {
-			if (this.IsTypeSupported(SocketType.Y) && ! this.IsTypeSupported(SocketType.S))
+			if (this.IsTypeSupported(SocketType.Y) && !this.IsTypeSupported(SocketType.S))
 				return await this.CreateSpiDeviceAsync(connectionSettings, SocketPinNumber.Six, SocketPinNumber.Seven, SocketPinNumber.Eight, SocketPinNumber.Nine);
 
 			this.EnsureTypeIsSupported(SocketType.S);
@@ -248,15 +240,6 @@ namespace GHI.Athens.Gadgeteer {
 			var device = await WD.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
 
 			return new NativeInterfaces.SerialDevice(device);
-		}
-
-		public async Task<CanDevice> CreateCanDeviceAsync() {
-			this.EnsureTypeIsSupported(SocketType.C);
-
-			if (this.CanDeviceCreator != null)
-				return await this.CanDeviceCreator(this);
-
-			return new NativeInterfaces.CanDevice();
 		}
 	}
 }

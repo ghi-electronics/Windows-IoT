@@ -1,12 +1,11 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class TempHumidSI70 : Module {
-		private static byte MeasureHumidityHold { get; } = 0xE5;
-		private static byte ReadTempFromPrevious { get; } = 0xE0;
-		private static byte I2cAddress { get; } = 0x40;
+		private static byte MeasureHumidityHold => 0xE5;
+		private static byte ReadTempFromPrevious => 0xE0;
+		private static byte I2cAddress => 0x40;
 
 		private I2cDevice i2c;
 		private byte[] writeBuffer1;
@@ -14,8 +13,8 @@ namespace GHI.Athens.Modules {
 		private byte[] readBuffer1;
 		private byte[] readBuffer2;
 
-		public override string Name { get; } = "TempHumid SI70";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "TempHumid SI70";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public TempHumidSI70() {
 			this.writeBuffer1 = new byte[1] { TempHumidSI70.MeasureHumidityHold };
@@ -29,8 +28,8 @@ namespace GHI.Athens.Modules {
 		}
 
 		public Measurement TakeMeasurement() {
-			this.i2c.WriteRead(this.writeBuffer1, this.readBuffer1);
-			this.i2c.WriteRead(this.writeBuffer2, this.readBuffer2);
+			this.i2c.WriteThenRead(this.writeBuffer1, this.readBuffer1);
+			this.i2c.WriteThenRead(this.writeBuffer2, this.readBuffer2);
 
 			var rawTemperature = this.readBuffer2[0] << 8 | this.readBuffer2[1];
 			var rawHumidity = this.readBuffer1[0] << 8 | this.readBuffer1[1];

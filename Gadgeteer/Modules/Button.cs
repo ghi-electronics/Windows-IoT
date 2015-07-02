@@ -1,26 +1,46 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
+using Windows.Foundation;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class Button : Module {
-		public override string Name { get; } = "Button";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+        public override string Name => "Button";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		private DigitalIO inputPin;
 		private DigitalIO outputPin;
 
-		protected async override Task Initialize(ISocket parentSocket) {
-			this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);
+        public event TypedEventHandler<Button, object> Pressed;
+        public event TypedEventHandler<Button, object> Released;
+
+        protected async override Task Initialize(ISocket parentSocket) {
 			this.outputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
+			this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, GpioPinEdge.FallingEdge | GpioPinEdge.RisingEdge);
+
+            this.inputPin.ValueChanged += (s, e) => {
+                if (e.Value) {
+                    this.Released?.Invoke(this, null);
+                }
+                else {
+                    this.Pressed?.Invoke(this, null);
+                }
+            };
 		}
 
 		public bool IsPressed() {
 			return !this.inputPin.Read();
 		}
 
-		public void SetLed(bool state) {
+        public void TurnOnLed() {
+            this.outputPin.SetHigh();
+        }
+
+        public void TurnOffLed() {
+            this.outputPin.SetLow();
+        }
+
+        public void SetLed(bool state) {
 			this.outputPin.Write(state);
 		}
 	}

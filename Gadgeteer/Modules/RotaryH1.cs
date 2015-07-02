@@ -1,9 +1,8 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class RotaryH1 : Module {
 		private byte[] write1;
 		private byte[] write2;
@@ -15,8 +14,8 @@ namespace GHI.Athens.Modules {
 
 		protected ISocket socket;
 
-		public override string Name { get; } = "RotaryH1";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "RotaryH1";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		protected async override Task Initialize(ISocket parentSocket) {
 			this.socket = parentSocket;
@@ -75,7 +74,7 @@ namespace GHI.Athens.Modules {
 		private int Read4(Command command, Register register) {
 			this.write1[0] = (byte)((byte)command | (byte)register);
 
-			this.spi.TransferFullDuplex(this.write1, this.read5);
+			this.spi.WriteAndRead(this.write1, this.read5);
 
 			return (this.read5[1] << 24) + (this.read5[2] << 16) + (this.read5[3] << 8) + this.read5[4];
 		}

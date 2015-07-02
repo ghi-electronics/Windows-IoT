@@ -1,8 +1,7 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class Joystick : Module {
 		private double offsetX;
 		private double offsetY;
@@ -10,8 +9,8 @@ namespace GHI.Athens.Modules {
 		private AnalogIO y;
 		private DigitalIO input;
 
-		public override string Name { get; } = "Joystick";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "Joystick";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public int SampleCount { get; set; } = 5;
 

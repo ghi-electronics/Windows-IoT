@@ -1,12 +1,11 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class CurrentACS712 : Module {
-		public override string Name { get; } = "CurrentACS712";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "CurrentACS712";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public uint SampleCount { get; set; } = 10;
 

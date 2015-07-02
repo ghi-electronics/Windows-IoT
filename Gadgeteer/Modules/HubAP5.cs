@@ -1,30 +1,28 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Drivers;
+using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
+using Windows.Devices.I2c;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class HubAP5 : Module {
-		private ADS7830 ads;
-		private CY8C9560A cy8;
+		private ADS7830 analog;
+		private CY8C9560A gpio;
 		private List<Dictionary<SocketPinNumber, CY8C9560A.Pin>> map;
 
-		public override string Name { get; } = "Hub AP5";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "Hub AP5";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		protected async override Task Initialize(ISocket parentSocket) {
-			this.ads = new ADS7830();
-			this.cy8 = new CY8C9560A();
-
-			await this.ads.Initialize(parentSocket);
-			await this.cy8.Initialize(parentSocket);
+            this.analog = new ADS7830(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(ADS7830.GetAddress(false, false))));
+            this.gpio = new CY8C9560A(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(CY8C9560A.GetAddress(false, false, false, false, false, true, false))), null);
 
 			this.map = this.CreatePinMap();
 
 			Socket socket;
-			for (var i = 0U; i < 8; i++) {
+			for (var i = 0; i < 8; i++) {
 				socket = this.CreateSocket(i + 1);
 				socket.AddSupportedTypes(SocketType.Y);
 
@@ -35,9 +33,9 @@ namespace GHI.Athens.Modules {
 					socket.AddSupportedTypes(SocketType.P);
 				}
 
-				socket.DigitalIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<DigitalIO>(new IndirectedDigitalIO(this.GetPin(indirectedSocket, indirectedPin), this.cy8));
-				socket.AnalogIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogIO>(new IndirectedAnalogIO(this.GetChannel(indirectedSocket, indirectedPin), this.GetPin(indirectedSocket, indirectedPin), this.ads, this.cy8));
-				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(this.GetPin(indirectedSocket, indirectedPin), this.cy8));
+				socket.DigitalIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<DigitalIO>(new IndirectedDigitalIO(this.GetPin(indirectedSocket, indirectedPin), this.gpio));
+				socket.AnalogIOCreator = (indirectedSocket, indirectedPin) => Task.FromResult<AnalogIO>(new IndirectedAnalogIO(this.GetChannel(indirectedSocket, indirectedPin), this.GetPin(indirectedSocket, indirectedPin), this.analog, this.gpio));
+				socket.PwmOutputCreator = (indirectedSocket, indirectedPin) => Task.FromResult<PwmOutput>(new IndirectedPwmOutput(this.GetPin(indirectedSocket, indirectedPin), this.gpio));
 			}
 		}
 
@@ -139,12 +137,12 @@ namespace GHI.Athens.Modules {
 				this.cy8.SetOutput(this.pin);
 			}
 
-			protected override void AddInterrupt() {
+			protected override void EnableInterrupt() {
 				this.isInterrupt = true;
 				this.cy8.SetInterrupt(this.pin, this.OnValueChanged);
 			}
 
-			protected override void RemoveInterrupt() {
+			protected override void DisableInterrupt() {
 				this.isInterrupt = false;
 				this.cy8.SetInput(this.pin);
 			}
@@ -184,7 +182,7 @@ namespace GHI.Athens.Modules {
 			private ADS7830 ads;
 			private CY8C9560A cy8;
 
-			public override double MaxVoltage { get; } = 3.3;
+			public override double MaxVoltage => 3.3;
 
 			public IndirectedAnalogIO(byte channel, CY8C9560A.Pin pin, ADS7830 ads, CY8C9560A cy8) {
 				this.ads = ads;
@@ -195,7 +193,7 @@ namespace GHI.Athens.Modules {
 			}
 
 			protected override double ReadInternal() {
-				return this.ads.ReadVoltage(this.channel);
+				return this.ads.Read(this.channel);
 			}
 
 			protected override void WriteInternal(double voltage) {

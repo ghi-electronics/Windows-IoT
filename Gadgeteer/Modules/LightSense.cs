@@ -1,11 +1,10 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class LightSense : Module {
-		public override string Name { get; } = "LightSense";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "LightSense";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		private AnalogIO input;
 

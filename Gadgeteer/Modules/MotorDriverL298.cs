@@ -1,15 +1,14 @@
-﻿using GHI.Athens.Gadgeteer;
-using GHI.Athens.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHI.Athens.Modules {
+namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class MotorDriverL298 : Module {
 		private PwmOutput[] pwms;
 		private DigitalIO[] directions;
 
-		public override string Name { get; } = "MotorDriverL298";
-		public override string Manufacturer { get; } = "GHI Electronics, LLC";
+		public override string Name => "MotorDriverL298";
+		public override string Manufacturer => "GHI Electronics, LLC";
 
 		public int Frequency { get; set; } = 25000;
 
@@ -31,7 +30,6 @@ namespace GHI.Athens.Modules {
 			Motor1 = 0,
 			Motor2 = 1,
 		}
-
 
 		public void StopAll() {
 			this.SetSpeed(Motor.Motor1, 0);
