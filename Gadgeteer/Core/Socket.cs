@@ -104,15 +104,11 @@ namespace GHIElectronics.UAP.Gadgeteer {
 			this.nativePins[pinNumber] = nativePinNumber;
 		}
 
-		private WD.Gpio.GpioPin CreatePin(int pinNumber) {
-			return WD.Gpio.GpioController.GetDefault().OpenPin(pinNumber);
-		}
-
 		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber) {
 			DigitalIO result;
 
             if (this.nativePins.ContainsKey(pinNumber)) {
-                result = new NativeInterfaces.DigitalIO(this.CreatePin(this.nativePins[pinNumber]));
+                result = new NativeInterfaces.DigitalIO(await NativeInterfaces.DigitalIO.CreateInterfaceAsync(this.nativePins[pinNumber]));
             }
             else if (this.DigitalIOCreator != null) {
                 result = await this.DigitalIOCreator(this, pinNumber);
