@@ -6,7 +6,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 	public class RotaryH1 : Module {
 		private byte[] write1;
 		private byte[] write2;
-		private byte[] read5;
+		private byte[] read4;
 
 		private SpiDevice spi;
 		private DigitalIO enable;
@@ -22,9 +22,9 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 
 			this.write1 = new byte[1];
 			this.write2 = new byte[2];
-			this.read5 = new byte[5];
+			this.read4 = new byte[4];
 
-			this.spi = await this.socket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(0) { Mode = Windows.Devices.Spi.SpiMode.Mode2, ClockFrequency = 1000 });
+			this.spi = await this.socket.CreateSpiDeviceAsync(new Windows.Devices.Spi.SpiConnectionSettings(parentSocket.NativeSpiChipSelectPin) { Mode = Windows.Devices.Spi.SpiMode.Mode0, ClockFrequency = 1000000 });
 			this.enable = await this.socket.CreateDigitalIOAsync(SocketPinNumber.Five, true);
 
 			this.Write(Command.Clear, Register.Mode0);
@@ -41,7 +41,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 		public int GetCount() {
 			this.Write(Command.Load, Register.Output);
 
-			return this.Read4(Command.Read, Register.Output);
+			return this.Read(Command.Read, Register.Output);
 		}
 
 		public void ResetCount() {
@@ -71,12 +71,12 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 			}
 		}
 
-		private int Read4(Command command, Register register) {
+		private int Read(Command command, Register register) {
 			this.write1[0] = (byte)((byte)command | (byte)register);
 
-			this.spi.WriteAndRead(this.write1, this.read5);
+			this.spi.WriteThenRead(this.write1, this.read4);
 
-			return (this.read5[1] << 24) + (this.read5[2] << 16) + (this.read5[3] << 8) + this.read5[4];
+			return (this.read4[0] << 24) + (this.read4[1] << 16) + (this.read4[2] << 8) + this.read4[3];
 		}
 
 		private void Write(Command command, Register register) {

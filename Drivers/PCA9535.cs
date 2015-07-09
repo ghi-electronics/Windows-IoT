@@ -108,12 +108,12 @@ namespace GHIElectronics.UAP.Drivers {
 
             if (state) {
                 if (pin < 8) {
-                    this.out0 &= (byte)(1 << pin);
+                    this.out0 |= (byte)(1 << pin);
 
                     this.WriteRegister(Register.OutputPort0, this.out0);
                 }
                 else {
-                    this.out1 &= (byte)(1 << (pin - 10));
+                    this.out1 |= (byte)(1 << (pin - 10));
 
                     this.WriteRegister(Register.OutputPort1, this.out1);
                 }
@@ -138,12 +138,12 @@ namespace GHIElectronics.UAP.Drivers {
 
             if (driveMode == GpioPinDriveMode.Input) {
                 if (pin < 8) {
-                    this.config0 &= (byte)(1 << pin);
+                    this.config0 |= (byte)(1 << pin);
 
                     this.WriteRegister(Register.ConfigurationPort0, this.config0);
                 }
                 else {
-                    this.config1 &= (byte)(1 << (pin - 10));
+                    this.config1 |= (byte)(1 << (pin - 10));
 
                     this.WriteRegister(Register.ConfigurationPort1, this.config1);
                 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
+using Windows.Devices.SerialCommunication;
 using Windows.Foundation;
 
 namespace GHIElectronics.UAP.Gadgeteer.SocketInterfaces {
@@ -140,7 +141,8 @@ namespace GHIElectronics.UAP.Gadgeteer.SocketInterfaces {
         protected abstract void SetValues(double frequency, double dutyCycle);
 
         public void Set(double frequency, double dutyCycle) {
-            this.SetValues(frequency, dutyCycle);
+            if (this.Enabled)
+                this.SetValues(frequency, dutyCycle);
 
             this.frequency = frequency;
             this.dutyCycle = dutyCycle;
@@ -151,9 +153,9 @@ namespace GHIElectronics.UAP.Gadgeteer.SocketInterfaces {
                 return this.enabled;
             }
             set {
-                this.SetEnabled(value);
-
                 this.enabled = value;
+
+                this.SetEnabled(value);
             }
         }
 
@@ -251,11 +253,29 @@ namespace GHIElectronics.UAP.Gadgeteer.SocketInterfaces {
     }
 
     public abstract class SerialDevice {
+        public abstract uint BaudRate { get; set; }
+        public abstract ushort DataBits { get; set; }
+        public abstract SerialHandshake Handshake { get; set; }
+        public abstract SerialParity Parity { get; set; }
+        public abstract SerialStopBitCount StopBits { get; set; }
+
         public abstract void Write(byte[] buffer);
         public abstract void Read(byte[] buffer);
 
         protected SerialDevice() {
 
+        }
+
+        public byte ReadByte() {
+            var buffer = new byte[1];
+
+            this.Read(buffer);
+
+            return buffer[0];
+        }
+
+        public void WriteByte(byte data) {
+            this.Write(new byte[] { data });
         }
     }
 }

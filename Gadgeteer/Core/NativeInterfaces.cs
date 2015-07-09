@@ -133,7 +133,7 @@ namespace GHIElectronics.UAP.Gadgeteer.NativeInterfaces {
             if (writeBuffer == null) throw new ArgumentNullException(nameof(writeBuffer));
             if (readBuffer == null) throw new ArgumentNullException(nameof(readBuffer));
 
-            this.device.TransferFullDuplex(writeBuffer, readBuffer);
+            this.device.TransferSequential(writeBuffer, readBuffer);
         }
     }
 
@@ -142,7 +142,13 @@ namespace GHIElectronics.UAP.Gadgeteer.NativeInterfaces {
         private DataWriter writer;
         private DataReader reader;
 
-        public static async Task<WD.SerialCommunication.SerialDevice> CreateInterfaceAsync(string deviceId, WD.Spi.SpiConnectionSettings connectionSettings) {
+        public override uint BaudRate { get { return this.device.BaudRate; } set { this.device.BaudRate = value; } }
+        public override ushort DataBits { get { return this.device.DataBits; } set { this.device.DataBits = value; } }
+        public override WD.SerialCommunication.SerialHandshake Handshake { get { return this.device.Handshake; } set { this.device.Handshake = value; } }
+        public override WD.SerialCommunication.SerialParity Parity { get { return this.device.Parity; } set { this.device.Parity = value; } }
+        public override WD.SerialCommunication.SerialStopBitCount StopBits { get { return this.device.StopBits; } set { this.device.StopBits = value; } }
+
+        public static async Task<WD.SerialCommunication.SerialDevice> CreateInterfaceAsync(string deviceId) {
             var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.SerialCommunication.SerialDevice.GetDeviceSelector(deviceId));
 
             return await WD.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);

@@ -36,6 +36,10 @@ namespace GHIElectronics.UAP.Gadgeteer {
 			return socket;
 		}
 
+        public virtual void SetDebugLed(bool state) {
+            throw new NotSupportedException();
+        }
+
 		public ISocket GetProvidedSocket(int socketNumber) {
 			if (!this.providedSockets.ContainsKey(socketNumber))
 				throw new ArgumentException("That socket does not exist.", nameof(socketNumber));

@@ -15,7 +15,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
         private Dictionary<int, Dictionary<SocketPinNumber, int>> analogMap;
         private Dictionary<int, Dictionary<SocketPinNumber, int>> pwmMap;
         private Dictionary<int, Tuple<int, int>> analogSharedMap;
-        private Dictionary<int, Tuple<int, int>> pwmSharedMap;
+        private Dictionary<int, Tuple<int, int, int, int>> pwmSharedMap;
 
         public override string Name => "Gadgeteer Cream";
         public override string Manufacturer => "GHI Electronics, LLC";
@@ -29,11 +29,16 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             this.pwmSharedMap = GadgeteerCream.CreatePwmSharedMap();
 
             this.analog = new ADS7830(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(ADS7830.GetAddress(false, false))));
-            this.pwm = new PCA9685(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9685.GetAddress(true, true, true, true, true, true))), null);
+            this.pwm = new PCA9685(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9685.GetAddress(true, true, true, true, true, true))));
 
             this.gpios = new PCA9535[2];
-            this.gpios[0] = new PCA9535(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9535.GetAddress(true, true, false))), null);
-            this.gpios[1] = new PCA9535(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9535.GetAddress(true, false, true))), null);
+            this.gpios[0] = new PCA9535(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9535.GetAddress(true, true, false))), await NativeInterfaces.DigitalIO.CreateInterfaceAsync(22));
+            this.gpios[1] = new PCA9535(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9535.GetAddress(true, false, true))), await NativeInterfaces.DigitalIO.CreateInterfaceAsync(26));
+
+            for (var i = 2; i <= 7; i++) {
+                this.gpios[0].SetDriveMode(i, GpioPinDriveMode.Output);
+                this.gpios[0].Write(i, true);
+            }
 
             Socket socket;
 
@@ -62,13 +67,13 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             socket.DigitalIOCreator = this.DigitalIOCreator;
 
             socket = this.CreateSocket(5);
-            socket.AddSupportedTypes(SocketType.A, SocketType.X);
+            socket.AddSupportedTypes(SocketType.A);
             socket.SetNativePin(SocketPinNumber.Three, 12);
             socket.DigitalIOCreator = this.DigitalIOCreator;
             socket.AnalogIOCreator = this.AnalogIOCreator;
 
             socket = this.CreateSocket(6);
-            socket.AddSupportedTypes(SocketType.A, SocketType.X);
+            socket.AddSupportedTypes(SocketType.A);
             socket.SetNativePin(SocketPinNumber.Three, 16);
             socket.DigitalIOCreator = this.DigitalIOCreator;
             socket.AnalogIOCreator = this.AnalogIOCreator;
@@ -92,11 +97,28 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             socket.DigitalIOCreator = this.DigitalIOCreator;
         }
 
+        public override void SetDebugLed(bool state) {
+            if (state) {
+                this.pwm.TurnOn(15);
+            }
+            else {
+                this.pwm.TurnOff(15);
+            }
+        }
+
         private Task<DigitalIO> DigitalIOCreator(Socket socket, SocketPinNumber pinNumber) {
             if (!this.gpioMap.ContainsKey(socket.Number)) throw new UnsupportedPinModeException();
             if (!this.gpioMap[socket.Number].ContainsKey(pinNumber)) throw new UnsupportedPinModeException();
 
             var pin = this.gpioMap[socket.Number][pinNumber];
+
+            if (this.pwmMap.ContainsKey(socket.Number) && this.pwmMap[socket.Number].ContainsKey(pinNumber)) {
+                var channel = this.pwmMap[socket.Number][pinNumber];
+                var shared = this.pwmSharedMap[channel];
+
+                this.gpios[shared.Item3 - 1].SetDriveMode(shared.Item4, GpioPinDriveMode.Output);
+                this.gpios[shared.Item3 - 1].Write(shared.Item4, true);
+            }
 
             return Task.FromResult<DigitalIO>(new IndirectedDigitalIO(pin.Item2, this.gpios[pin.Item1 - 1]));
         }
@@ -132,12 +154,15 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 
             this.gpios[shared.Item1 - 1].SetDriveMode(shared.Item2, GpioPinDriveMode.Input);
 
+            this.gpios[shared.Item3 - 1].SetDriveMode(shared.Item4, GpioPinDriveMode.Output);
+            this.gpios[shared.Item3 - 1].Write(shared.Item4, false);
+
             return Task.FromResult<PwmOutput>(new IndirectedPwmOutput(channel, this.pwm));
         }
 
         private static Dictionary<int, Dictionary<SocketPinNumber, Tuple<int, int>>> CreateGpioMap() {
             var s1 = new Dictionary<SocketPinNumber, Tuple<int, int>>();
-            s1.Add(SocketPinNumber.Six, Tuple.Create(2, 0));
+            s1.Add(SocketPinNumber.Six, Tuple.Create(2, 7));
 
             var s2 = new Dictionary<SocketPinNumber, Tuple<int, int>>();
             s2.Add(SocketPinNumber.Three, Tuple.Create(2, 5));
@@ -162,7 +187,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             var s7 = new Dictionary<SocketPinNumber, Tuple<int, int>>();
             s7.Add(SocketPinNumber.Four, Tuple.Create(2, 11));
             s7.Add(SocketPinNumber.Five, Tuple.Create(2, 10));
-            s7.Add(SocketPinNumber.Six, Tuple.Create(2, 11));
+            s7.Add(SocketPinNumber.Six, Tuple.Create(2, 12));
             s7.Add(SocketPinNumber.Seven, Tuple.Create(1, 12));
             s7.Add(SocketPinNumber.Eight, Tuple.Create(1, 11));
             s7.Add(SocketPinNumber.Nine, Tuple.Create(1, 10));
@@ -190,7 +215,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             var s6 = new Dictionary<SocketPinNumber, int>();
             s6.Add(SocketPinNumber.Three, 2);
             s6.Add(SocketPinNumber.Four, 0);
-            s6.Add(SocketPinNumber.Six, 1);
+            s6.Add(SocketPinNumber.Five, 1);
 
             return new Dictionary<int, Dictionary<SocketPinNumber, int>>() { { 5, s5 }, { 6, s6 } };
         }
@@ -213,19 +238,19 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             return new Dictionary<int, Tuple<int, int>>() {
                 { 4, Tuple.Create(0, 12) },
                 { 5, Tuple.Create(2, 14) },
-                { 2, Tuple.Create(0, 15) },
+                { 2, Tuple.Create(0, 16) },
                 { 0, Tuple.Create(2, 13) },
             };
         }
 
-        private static Dictionary<int, Tuple<int, int>> CreatePwmSharedMap() {
-            return new Dictionary<int, Tuple<int, int>>() {
-                { 2, Tuple.Create(1, 12) },
-                { 1, Tuple.Create(1, 11) },
-                { 0, Tuple.Create(1, 10) },
-                { 3, Tuple.Create(1, 15) },
-                { 4, Tuple.Create(1, 14) },
-                { 5, Tuple.Create(1, 13) },
+        private static Dictionary<int, Tuple<int, int, int, int>> CreatePwmSharedMap() {
+            return new Dictionary<int, Tuple<int, int, int, int>>() {
+                { 2, Tuple.Create(1, 12, 1, 5) },
+                { 1, Tuple.Create(1, 11, 1, 6) },
+                { 0, Tuple.Create(1, 10, 1, 7) },
+                { 3, Tuple.Create(1, 15, 1, 2) },
+                { 4, Tuple.Create(1, 14, 1, 3) },
+                { 5, Tuple.Create(1, 13, 1, 4) },
             };
         }
 
@@ -237,6 +262,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             public IndirectedDigitalIO(int channel, PCA9535 pca) {
                 this.pin = channel;
                 this.gpio = pca;
+                this.driveMode = GpioPinDriveMode.Input;
             }
 
             private void OnPinChanged(PCA9535 sender, PCA9535.PinChangedEventArgs e) {
@@ -301,7 +327,6 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
                 get {
                     return GpioPinDriveMode.Input;
                 }
-
                 set {
                     if (value != GpioPinDriveMode.Input)
                         throw new NotSupportedException();
@@ -319,14 +344,22 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
             }
 
             protected override void SetEnabled(bool state) {
-                if (!state)
+                if (state) {
+                    this.SetValues(this.Frequency, this.DutyCycle);
+                } else {
                     this.pwm.TurnOff(this.channel);
+                }
             }
 
             protected override void SetValues(double frequency, double dutyCycle) {
                 this.pwm.Frequency = (int)frequency;
 
-                this.pwm.SetDutyCycle(this.channel, dutyCycle);
+                if (dutyCycle != 1.0) {
+                    this.pwm.SetDutyCycle(this.channel, dutyCycle);
+                }
+                else {
+                    this.pwm.TurnOn(this.channel);
+                }
             }
         }
     }

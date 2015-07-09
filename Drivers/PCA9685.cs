@@ -23,6 +23,10 @@ namespace GHIElectronics.UAP.Drivers {
 
         public void Dispose() => this.Dispose(true);
 
+        public PCA9685(I2cDevice device) : this(device, null) {
+
+        }
+
         public PCA9685(I2cDevice device, GpioPin outputEnable) {
             this.write5 = new byte[5];
             this.write2 = new byte[2];
@@ -33,8 +37,10 @@ namespace GHIElectronics.UAP.Drivers {
             this.device = device;
             this.outputEnable = outputEnable;
 
-            this.outputEnable.SetDriveMode(GpioPinDriveMode.Output);
-            this.outputEnable.Write(GpioPinValue.Low);
+            if (this.outputEnable != null) {
+                this.outputEnable.SetDriveMode(GpioPinDriveMode.Output);
+                this.outputEnable.Write(GpioPinValue.Low);
+            }
 
             this.WriteRegister(Register.Mode1, 0x20);
             this.WriteRegister(Register.Mode2, 0x06);
@@ -44,7 +50,7 @@ namespace GHIElectronics.UAP.Drivers {
             if (!this.disposed) {
                 if (disposing) {
                     this.device.Dispose();
-                    this.outputEnable.Dispose();
+                    this.outputEnable?.Dispose();
                 }
 
                 this.disposed = true;
@@ -76,7 +82,7 @@ namespace GHIElectronics.UAP.Drivers {
 
         public bool OutputEnabled {
             get {
-                return this.outputEnable.Read() == GpioPinValue.Low;
+                return this.outputEnable?.Read() == GpioPinValue.Low;
             }
             set {
                 if (this.disposed) throw new ObjectDisposedException(nameof(PCA9685));

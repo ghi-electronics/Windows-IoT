@@ -41,11 +41,12 @@ namespace GHIElectronics.UAP.Gadgeteer {
 	public interface ISocket {
 		int Number { get; }
 
+		string NativeSerialDeviceId { get; }
 		string NativeI2cDeviceId { get; }
 		string NativeSpiDeviceId { get; }
-		string NativeSerialDeviceId { get; }
+        int NativeSpiChipSelectPin { get; }
 
-		void EnsureTypeIsSupported(SocketType type);
+        void EnsureTypeIsSupported(SocketType type);
 		bool IsTypeSupported(SocketType type);
 
 		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber);
@@ -183,11 +184,8 @@ namespace GHIElectronics.UAP.Gadgeteer {
 			if (this.I2cDeviceCreator != null)
 				return await this.I2cDeviceCreator(this);
 
-			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.I2c.I2cDevice.GetDeviceSelector(this.NativeI2cDeviceId));
-			var device = await WD.I2c.I2cDevice.FromIdAsync(infos[0].Id, connectionSettings);
-
-			return new NativeInterfaces.I2cDevice(device);
-		}
+            return new NativeInterfaces.I2cDevice(await NativeInterfaces.I2cDevice.CreateInterfaceAsync(this.NativeI2cDeviceId, connectionSettings));
+        }
 
 		public async Task<I2cDevice> CreateI2cDeviceAsync(WD.I2c.I2cConnectionSettings connectionSettings, SocketPinNumber sdaPinNumber, SocketPinNumber sclPinNumber) {
 			if (sdaPinNumber == SocketPinNumber.Eight && sclPinNumber == SocketPinNumber.Nine && this.IsTypeSupported(SocketType.I))
@@ -208,10 +206,7 @@ namespace GHIElectronics.UAP.Gadgeteer {
 			if (this.SpiDeviceCreator != null)
 				return await this.SpiDeviceCreator(this);
 
-			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.Spi.SpiDevice.GetDeviceSelector(this.NativeSpiDeviceId));
-			var device = await WD.Spi.SpiDevice.FromIdAsync(infos[0].Id, connectionSettings);
-
-			return new NativeInterfaces.SpiDevice(device);
+            return new NativeInterfaces.SpiDevice(await NativeInterfaces.SpiDevice.CreateInterfaceAsync(this.NativeSpiDeviceId, connectionSettings));
 		}
 
 		public async Task<SpiDevice> CreateSpiDeviceAsync(WD.Spi.SpiConnectionSettings connectionSettings, SocketPinNumber chipSelectPinNumber, SocketPinNumber masterOutPinNumber, SocketPinNumber masterInPinNumber, SocketPinNumber clockPinNumber) {
@@ -232,10 +227,7 @@ namespace GHIElectronics.UAP.Gadgeteer {
 			if (this.SerialDeviceCreator != null)
 				return await this.SerialDeviceCreator(this);
 
-			var infos = await WD.Enumeration.DeviceInformation.FindAllAsync(WD.SerialCommunication.SerialDevice.GetDeviceSelector(this.NativeSerialDeviceId));
-			var device = await WD.SerialCommunication.SerialDevice.FromIdAsync(infos[0].Id);
-
-			return new NativeInterfaces.SerialDevice(device);
-		}
+            return new NativeInterfaces.SerialDevice(await NativeInterfaces.SerialDevice.CreateInterfaceAsync(this.NativeSerialDeviceId));
+        }
 	}
 }
