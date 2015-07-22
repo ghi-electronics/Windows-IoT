@@ -126,7 +126,7 @@
     <Compile Include="PulseCount.cs" />
     <Compile Include="RotaryH1.cs" />
     <Compile Include="TempHumidSI70.cs" />
-    <Compile Include="GadgeteerCream.cs" />
+    <Compile Include="FEZCream.cs" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10069.0">

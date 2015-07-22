@@ -7,7 +7,7 @@ using Windows.Devices.I2c;
 using System.Collections.Generic;
 
 namespace GHIElectronics.UAP.Gadgeteer.Modules {
-    public class GadgeteerCream : Module {
+    public class FEZCream : Module {
         private ADS7830 analog;
         private PCA9685 pwm;
         private PCA9535[] gpios;
@@ -17,7 +17,7 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
         private Dictionary<int, Tuple<int, int>> analogSharedMap;
         private Dictionary<int, Tuple<int, int, int, int>> pwmSharedMap;
 
-        public override string Name => "Gadgeteer Cream";
+        public override string Name => "FEZ Cream";
         public override string Manufacturer => "GHI Electronics, LLC";
         public override int RequiredSockets => 0;
 

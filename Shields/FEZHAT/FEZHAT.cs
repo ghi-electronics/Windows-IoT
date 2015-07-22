@@ -453,8 +453,8 @@ namespace GHIElectronics.UAP.Shields {
             /// <summary>
             /// Sets the limits of the servo.
             /// </summary>
-            /// <param name="minimumPulseWidth">The minimum pulse widith in milliseconds.</param>
-            /// <param name="maximumPulseWidth">The maximum pulse widith in milliseconds.</param>
+            /// <param name="minimumPulseWidth">The minimum pulse width in milliseconds.</param>
+            /// <param name="maximumPulseWidth">The maximum pulse width in milliseconds.</param>
             /// <param name="minimumAngle">The minimum angle of input passed to Position.</param>
             /// <param name="maximumAngle">The maximum angle of input passed to Position.</param>
             public void SetLimits(int minimumPulseWidth, int maximumPulseWidth, double minimumAngle, double maximumAngle) {
