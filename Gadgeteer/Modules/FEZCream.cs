@@ -22,11 +22,11 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
         public override int RequiredSockets => 0;
 
         protected async override Task Initialize() {
-            this.gpioMap = GadgeteerCream.CreateGpioMap();
-            this.analogMap = GadgeteerCream.CreateAnalogMap();
-            this.pwmMap = GadgeteerCream.CreatePwmMap();
-            this.analogSharedMap = GadgeteerCream.CreateAnalogSharedMap();
-            this.pwmSharedMap = GadgeteerCream.CreatePwmSharedMap();
+            this.gpioMap = FEZCream.CreateGpioMap();
+            this.analogMap = FEZCream.CreateAnalogMap();
+            this.pwmMap = FEZCream.CreatePwmMap();
+            this.analogSharedMap = FEZCream.CreateAnalogSharedMap();
+            this.pwmSharedMap = FEZCream.CreatePwmSharedMap();
 
             this.analog = new ADS7830(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(ADS7830.GetAddress(false, false))));
             this.pwm = new PCA9685(await NativeInterfaces.I2cDevice.CreateInterfaceAsync("I2C1", new I2cConnectionSettings(PCA9685.GetAddress(true, true, true, true, true, true))));

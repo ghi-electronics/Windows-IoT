@@ -61,7 +61,7 @@ namespace GHIElectronics.UAP.Gadgeteer {
 		private I2cDevice device;
 		private GpioPin interrupt;
 		private Dictionary<Pin, Action<bool>> interruptRegistrations;
-		private byte[] shadowRegisters;
+		//private byte[] shadowRegisters;
         private bool disposed;
 
         public static byte GetAddress(bool a0, bool a1, bool a2, bool a3, bool a4, bool a5, bool a6) => (byte)((a0 ? 1 : 0) | (a1 ? 2 : 0) | (a2 ? 4 : 0) | (a3 ? 8 : 0) | (a4 ? 16 : 0) | (a5 ? 32 : 0) | (a6 ? 64 : 0));
