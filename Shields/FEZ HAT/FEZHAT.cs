@@ -7,7 +7,7 @@ using Windows.Devices.I2c;
 
 namespace GHIElectronics.UAP.Shields {
     /// <summary>
-    /// A helper class for the FEZHAT.
+    /// A helper class for the FEZ HAT.
     /// </summary>
     public class FEZHAT : IDisposable {
         private bool disposed;
@@ -161,7 +161,7 @@ namespace GHIElectronics.UAP.Shields {
         }
 
         /// <summary>
-        /// Creates a new instance of the FEZHAT.
+        /// Creates a new instance of the FEZ HAT.
         /// </summary>
         /// <returns>The new instance.</returns>
         public static async Task<FEZHAT> CreateAsync() {
