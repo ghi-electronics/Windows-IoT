@@ -43,5 +43,10 @@ namespace GHIElectronics.UAP.Gadgeteer.Modules {
 
             this.outputPins[led].Write(state);
         }
+
+		public void SetAll(bool state) {
+			foreach (var p in this.outputPins)
+				p.Write(state);
+		}
 	}
 }
