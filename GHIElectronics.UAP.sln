@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Gadgetee
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Gadgeteer.Modules", "Gadgeteer\Modules\GHIElectronics.UAP.Gadgeteer.Modules.csproj", "{E5B6AE8E-39CE-4605-AFDD-30C7FABAB052}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Shields.FEZHAT", "Shields\FEZHAT\GHIElectronics.UAP.Shields.FEZHAT.csproj", "{173D0FFA-C307-4247-9F2A-7C82F50C1B2E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Shields.FEZHAT", "Shields\FEZ HAT\GHIElectronics.UAP.Shields.FEZHAT.csproj", "{173D0FFA-C307-4247-9F2A-7C82F50C1B2E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
