@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using GIS = GHIElectronics.UAP.Shields;
@@ -14,17 +13,19 @@ namespace GHIElectronics.UAP.Examples.FEZHAT {
 		public MainPage() {
 			this.InitializeComponent();
 
-			Task.Run(async () => {
-				this.hat = await GIS.FEZHAT.CreateAsync();
+			this.Setup();
+		}
 
-				this.hat.S1.SetLimits(500, 2400, 0, 180);
-				this.hat.S2.SetLimits(500, 2400, 0, 180);
+		private async void Setup() {
+			this.hat = await GIS.FEZHAT.CreateAsync();
 
-				this.timer = new DispatcherTimer();
-				this.timer.Interval = TimeSpan.FromMilliseconds(100);
-				this.timer.Tick += this.OnTick;
-				this.timer.Start();
-			});
+			this.hat.S1.SetLimits(500, 2400, 0, 180);
+			this.hat.S2.SetLimits(500, 2400, 0, 180);
+
+			this.timer = new DispatcherTimer();
+			this.timer.Interval = TimeSpan.FromMilliseconds(100);
+			this.timer.Tick += this.OnTick;
+			this.timer.Start();
 		}
 
 		private void OnTick(object sender, object e) {
