@@ -1,8 +1,8 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class CurrentACS712 : Module {
 		public override string Name => "CurrentACS712";
 		public override string Manufacturer => "GHI Electronics, LLC";

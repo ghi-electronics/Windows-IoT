@@ -1,8 +1,8 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class CharacterDisplay : Module {
 		private static uint[] RowOffsets => new uint[4] { 0x00, 0x40, 0x14, 0x54 };
 		private static uint DisplayOnCommand => 0x0C;

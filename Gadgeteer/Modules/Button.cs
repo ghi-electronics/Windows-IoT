@@ -1,9 +1,9 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Foundation;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class Button : Module {
         public override string Name => "Button";
 		public override string Manufacturer => "GHI Electronics, LLC";

@@ -1,7 +1,7 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class Moisture : Module {
 		public override string Name => "Moisture";
 		public override string Manufacturer => "GHI Electronics, LLC";

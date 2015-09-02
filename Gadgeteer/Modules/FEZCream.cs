@@ -1,12 +1,12 @@
-﻿using GHIElectronics.UAP.Drivers;
-using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Drivers;
+using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 using System;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using System.Collections.Generic;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
     public class FEZCream : Module {
         private ADS7830 analog;
         private PCA9685 pwm;

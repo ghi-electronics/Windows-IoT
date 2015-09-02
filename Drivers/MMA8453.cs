@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.Devices.I2c;
 
-namespace GHIElectronics.UAP.Drivers {
+namespace GHIElectronics.UWP.Drivers {
 	public class MMA8453 {
         private I2cDevice device;
         private byte[] write;

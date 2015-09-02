@@ -1,8 +1,8 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer.SoftwareInterfaces {
+namespace GHIElectronics.UWP.Gadgeteer.SoftwareInterfaces {
     internal class I2cDevice : SocketInterfaces.I2cDevice {
         private byte readAddress;
         private byte writeAddress;

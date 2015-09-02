@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{4F8363C5-C860-4CB8-B007-9977467D2296}</ProjectGuid>
+    <ProjectGuid>{173D0FFA-C307-4247-9F2A-7C82F50C1B2E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GHIElectronics.UAP.Shields.FEZUtility</RootNamespace>
-    <AssemblyName>GHIElectronics.UAP.Shields.FEZUtility</AssemblyName>
+    <RootNamespace>GHIElectronics.UWP.Shields.FEZHAT</RootNamespace>
+    <AssemblyName>GHIElectronics.UWP.Shields.FEZHAT</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
@@ -113,9 +113,9 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FEZUtility.cs" />
+    <Compile Include="FEZHAT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="Properties\GHIElectronics.UAP.Shields.FEZUtility.rd.xml" />
+    <Content Include="Properties\GHIElectronics.UWP.Shields.FEZHAT.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10240.0">
@@ -123,9 +123,9 @@
     </SDKReference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Drivers\GHIElectronics.UAP.Drivers.csproj">
+    <ProjectReference Include="..\..\Drivers\GHIElectronics.UWP.LowLevelDrivers.csproj">
       <Project>{12b58484-f52b-484a-85a3-e3763e366511}</Project>
-      <Name>GHIElectronics.UAP.Drivers</Name>
+      <Name>GHIElectronics.UWP.LowLevelDrivers</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

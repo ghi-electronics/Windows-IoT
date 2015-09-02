@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer {
+namespace GHIElectronics.UWP.Gadgeteer {
 	public abstract class Module {
 		private Dictionary<int, ISocket> providedSockets;
 

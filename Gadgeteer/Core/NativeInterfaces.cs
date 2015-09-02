@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Windows.Storage.Streams;
 using WD = Windows.Devices;
 
-namespace GHIElectronics.UAP.Gadgeteer.NativeInterfaces {
+namespace GHIElectronics.UWP.Gadgeteer.NativeInterfaces {
     public class DigitalIO : SocketInterfaces.DigitalIO {
         private WD.Gpio.GpioPin pin;
 

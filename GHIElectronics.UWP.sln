@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Drivers", "Drivers\GHIElectronics.UAP.Drivers.csproj", "{12B58484-F52B-484A-85A3-E3763E366511}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UWP.LowLevelDrivers", "Drivers\GHIElectronics.UWP.LowLevelDrivers.csproj", "{12B58484-F52B-484A-85A3-E3763E366511}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Gadgeteer.Core", "Gadgeteer\Core\GHIElectronics.UAP.Gadgeteer.Core.csproj", "{B92005D3-7F69-4FBC-AD73-DCFB5ED7FF01}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UWP.Gadgeteer.Core", "Gadgeteer\Core\GHIElectronics.UWP.Gadgeteer.Core.csproj", "{B92005D3-7F69-4FBC-AD73-DCFB5ED7FF01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Gadgeteer.Modules", "Gadgeteer\Modules\GHIElectronics.UAP.Gadgeteer.Modules.csproj", "{E5B6AE8E-39CE-4605-AFDD-30C7FABAB052}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UWP.Gadgeteer.Modules", "Gadgeteer\Modules\GHIElectronics.UWP.Gadgeteer.Modules.csproj", "{E5B6AE8E-39CE-4605-AFDD-30C7FABAB052}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Shields.FEZHAT", "Shields\FEZ HAT\GHIElectronics.UAP.Shields.FEZHAT.csproj", "{173D0FFA-C307-4247-9F2A-7C82F50C1B2E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UWP.Shields.FEZHAT", "Shields\FEZ HAT\GHIElectronics.UWP.Shields.FEZHAT.csproj", "{173D0FFA-C307-4247-9F2A-7C82F50C1B2E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UAP.Shields.FEZUtility", "Shields\FEZ Utility\GHIElectronics.UAP.Shields.FEZUtility.csproj", "{4F8363C5-C860-4CB8-B007-9977467D2296}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GHIElectronics.UWP.Shields.FEZUtility", "Shields\FEZ Utility\GHIElectronics.UWP.Shields.FEZUtility.csproj", "{4F8363C5-C860-4CB8-B007-9977467D2296}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

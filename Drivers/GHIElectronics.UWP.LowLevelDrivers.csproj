@@ -7,8 +7,8 @@
     <ProjectGuid>{12B58484-F52B-484A-85A3-E3763E366511}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GHIElectronics.UAP.Drivers</RootNamespace>
-    <AssemblyName>GHIElectronics.UAP.Drivers</AssemblyName>
+    <RootNamespace>GHIElectronics.UWP.LowLevelDrivers</RootNamespace>
+    <AssemblyName>GHIElectronics.UWP.LowLevelDrivers</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
@@ -119,7 +119,7 @@
     <Compile Include="PCA9535.cs" />
     <Compile Include="PCA9685.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="Properties\GHIElectronics.UAP.Drivers.rd.xml" />
+    <Content Include="Properties\GHIElectronics.UWP.Drivers.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10240.0">

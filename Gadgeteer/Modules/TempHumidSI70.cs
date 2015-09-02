@@ -1,7 +1,7 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System.Threading.Tasks;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class TempHumidSI70 : Module {
 		private static byte MeasureHumidityHold => 0xE5;
 		private static byte ReadTempFromPrevious => 0xE0;

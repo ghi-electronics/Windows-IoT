@@ -1,11 +1,11 @@
-﻿using GHIElectronics.UAP.Drivers;
+﻿using GHIElectronics.UWP.Drivers;
 using System;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
-namespace GHIElectronics.UAP.Shields {
+namespace GHIElectronics.UWP.Shields {
     /// <summary>
     /// A helper class for the FEZ HAT.
     /// </summary>

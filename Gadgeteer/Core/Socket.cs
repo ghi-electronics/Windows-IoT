@@ -1,11 +1,11 @@
-﻿using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WD = Windows.Devices;
 
-namespace GHIElectronics.UAP.Gadgeteer {
+namespace GHIElectronics.UWP.Gadgeteer {
 	public enum SocketPinNumber {
 		Three = 3,
 		Four,

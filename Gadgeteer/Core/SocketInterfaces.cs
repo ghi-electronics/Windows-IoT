@@ -4,7 +4,7 @@ using Windows.Devices.Gpio;
 using Windows.Devices.SerialCommunication;
 using Windows.Foundation;
 
-namespace GHIElectronics.UAP.Gadgeteer.SocketInterfaces {
+namespace GHIElectronics.UWP.Gadgeteer.SocketInterfaces {
     public delegate Task<DigitalIO> DigitalIOCreator(Socket socket, SocketPinNumber pinNumber);
     public delegate Task<AnalogIO> AnalogIOCreator(Socket socket, SocketPinNumber pinNumber);
     public delegate Task<PwmOutput> PwmOutputCreator(Socket socket, SocketPinNumber pinNumber);

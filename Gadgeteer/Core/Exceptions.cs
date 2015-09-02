@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GHIElectronics.UAP.Gadgeteer {
+namespace GHIElectronics.UWP.Gadgeteer {
 	public class SocketInterfaceCreationException : Exception {
 		public SocketInterfaceCreationException() { }
 		public SocketInterfaceCreationException(string message) : base(message) { }

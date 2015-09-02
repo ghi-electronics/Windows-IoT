@@ -2,7 +2,7 @@
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
-namespace GHIElectronics.UAP.Drivers {
+namespace GHIElectronics.UWP.Drivers {
 	public class PCA9685 {
 		private I2cDevice device;
 		private GpioPin outputEnable;

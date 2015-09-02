@@ -3,7 +3,7 @@ using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 using Windows.Foundation;
 
-namespace GHIElectronics.UAP.Drivers {
+namespace GHIElectronics.UWP.Drivers {
     public class PCA9535 {
         public class PinChangedEventArgs : EventArgs {
             public int Pin { get; }

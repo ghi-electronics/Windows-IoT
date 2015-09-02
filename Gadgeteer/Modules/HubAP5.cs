@@ -1,12 +1,12 @@
-﻿using GHIElectronics.UAP.Drivers;
-using GHIElectronics.UAP.Gadgeteer.SocketInterfaces;
+﻿using GHIElectronics.UWP.Drivers;
+using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
 
-namespace GHIElectronics.UAP.Gadgeteer.Modules {
+namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class HubAP5 : Module {
 		private ADS7830 analog;
 		private CY8C9560A gpio;

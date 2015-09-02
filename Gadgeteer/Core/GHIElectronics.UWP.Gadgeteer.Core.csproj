@@ -7,8 +7,8 @@
     <ProjectGuid>{B92005D3-7F69-4FBC-AD73-DCFB5ED7FF01}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>GHIElectronics.UAP.Gadgeteer.Core</RootNamespace>
-    <AssemblyName>GHIElectronics.UAP.Gadgeteer.Core</AssemblyName>
+    <RootNamespace>GHIElectronics.UWP.Gadgeteer.Core</RootNamespace>
+    <AssemblyName>GHIElectronics.UWP.Gadgeteer.Core</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.10240.0</TargetPlatformVersion>
@@ -120,7 +120,7 @@
     <Compile Include="Socket.cs" />
     <Compile Include="SocketInterfaces.cs" />
     <Compile Include="SoftwareInterfaces.cs" />
-    <Content Include="Properties\GHIElectronics.UAP.Gadgeteer.Core.rd.xml" />
+    <Content Include="Properties\GHIElectronics.UWP.Gadgeteer.Core.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10240.0">
