@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>GHIElectronics.UWP.Gadgeteer.Core</id>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <authors>GHI Electronics, LLC</authors>
     <owners>GHI Electronics, LLC</owners>
     <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>

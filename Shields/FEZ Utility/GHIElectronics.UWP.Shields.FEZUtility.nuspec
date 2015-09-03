@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>GHIElectronics.UWP.Shields.FEZUtility</id>
-    <version>0.0.4</version>
+    <version>0.0.5</version>
     <authors>GHI Electronics, LLC</authors>
     <owners>GHI Electronics, LLC</owners>
     <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>
@@ -14,7 +14,7 @@
     <copyright>Copyright GHI Electronics, LLC 2015</copyright>
     <tags>UWP Rasberry Pi RaspberryPi IoT FEZ FEZUtility</tags>
     <dependencies>
-      <dependency id="GHIElectronics.UWP.LowLevelDrivers" version="0.0.4" />
+      <dependency id="GHIElectronics.UWP.LowLevelDrivers" version="0.0.5" />
     </dependencies>
   </metadata>
 </package>
