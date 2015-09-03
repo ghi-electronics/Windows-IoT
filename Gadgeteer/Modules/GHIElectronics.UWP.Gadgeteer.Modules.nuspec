@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>GHIElectronics.UWP.Gadgeteer.Modules</id>
+    <version>0.0.4</version>
+    <authors>GHI Electronics, LLC</authors>
+    <owners>GHI Electronics, LLC</owners>
+    <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>
+    <iconUrl>https://www.ghielectronics.com/downloads/marketing/logo/GHILogo-Vertical.png</iconUrl>
+	<licenseUrl>https://bitbucket.org/ghi_elect/windows-iot/raw/master/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>UWP drivers for GHI Electronics Gadgeteer modules and mainboards.</description>
+    <releaseNotes>Initial release.</releaseNotes>
+    <copyright>Copyright GHI Electronics, LLC 2015</copyright>
+    <tags>UWP IoT Gadgeteer</tags>
+    <dependencies>
+      <dependency id="GHIElectronics.UWP.LowLevelDrivers" version="0.0.4" />
+      <dependency id="GHIElectronics.UWP.Gadgeteer.Core" version="0.0.4" />
+    </dependencies>
+  </metadata>
+</package>

@@ -122,12 +122,6 @@
       <Name>Windows IoT Extensions for the UWP</Name>
     </SDKReference>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\Drivers\GHIElectronics.UWP.LowLevelDrivers.csproj">
-      <Project>{12b58484-f52b-484a-85a3-e3763e366511}</Project>
-      <Name>GHIElectronics.UWP.LowLevelDrivers</Name>
-    </ProjectReference>
-  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
