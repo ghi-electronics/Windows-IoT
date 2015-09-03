@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GHIElectronics.UWP.Drivers;
+using GHIElectronics.UWP.LowLevelDrivers;
 using Windows.Devices.Enumeration;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;

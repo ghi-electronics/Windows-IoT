@@ -119,7 +119,7 @@
     <Compile Include="PCA9535.cs" />
     <Compile Include="PCA9685.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Content Include="Properties\GHIElectronics.UWP.Drivers.rd.xml" />
+    <Content Include="Properties\GHIElectronics.UWP.LowLevelDrivers.rd.xml" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="WindowsIoT, Version=10.0.10240.0">

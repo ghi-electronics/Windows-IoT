@@ -1,4 +1,4 @@
-﻿using GHIElectronics.UWP.Drivers;
+﻿using GHIElectronics.UWP.LowLevelDrivers;
 using System;
 using System.Threading.Tasks;
 using Windows.Devices.Enumeration;

@@ -1,4 +1,4 @@
-﻿using GHIElectronics.UWP.Drivers;
+﻿using GHIElectronics.UWP.LowLevelDrivers;
 using GHIElectronics.UWP.Gadgeteer.SocketInterfaces;
 using System;
 using System.Collections.Generic;

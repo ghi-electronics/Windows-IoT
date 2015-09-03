@@ -1,7 +1,7 @@
 ﻿using System;
 using Windows.Devices.I2c;
 
-namespace GHIElectronics.UWP.Drivers {
+namespace GHIElectronics.UWP.LowLevelDrivers {
 	public class ADS7830 {
 		private I2cDevice device;
 		private bool disposed;
