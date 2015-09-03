@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Devices.Gpio;
 using Windows.Devices.I2c;
+using GHIElectronics.UWP.LowLevelDrivers;
 
 namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class HubAP5 : Module {
