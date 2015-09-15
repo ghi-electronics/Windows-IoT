@@ -50,7 +50,6 @@ namespace GHIElectronics.UWP.GadgeteerCore {
 		bool IsTypeSupported(SocketType type);
 
 		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber);
-		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, WD.Gpio.GpioPinEdge interruptType);
 		Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, bool initialValue);
 		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber);
 		Task<AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber, double initialVoltage);
@@ -119,14 +118,6 @@ namespace GHIElectronics.UWP.GadgeteerCore {
             }
 
 			result.DriveMode = WD.Gpio.GpioPinDriveMode.Input;
-
-			return result;
-		}
-
-		public async Task<DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, WD.Gpio.GpioPinEdge interruptType) {
-			var result = await this.CreateDigitalIOAsync(pinNumber);
-
-			result.InterruptType = interruptType;
 
 			return result;
 		}

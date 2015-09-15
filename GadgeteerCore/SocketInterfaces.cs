@@ -26,7 +26,6 @@ namespace GHIElectronics.UWP.GadgeteerCore.SocketInterfaces {
         protected abstract void DisableInterrupt();
 
         public abstract GpioPinDriveMode DriveMode { get; set; }
-        public GpioPinEdge InterruptType { get; set; }
 
         public event TypedEventHandler<DigitalIO, DigitalIOValueChangedEventArgs> ValueChanged {
             add {
@@ -81,8 +80,7 @@ namespace GHIElectronics.UWP.GadgeteerCore.SocketInterfaces {
         }
 
         protected void OnValueChanged(bool e) {
-            if ((e && (this.InterruptType & GpioPinEdge.RisingEdge) != 0) || (!e && (this.InterruptType & GpioPinEdge.FallingEdge) != 0))
-                this.valueChanged?.Invoke(this, new DigitalIOValueChangedEventArgs() { When = DateTime.UtcNow, Value = e });
+            this.valueChanged?.Invoke(this, new DigitalIOValueChangedEventArgs() { When = DateTime.UtcNow, Value = e });
         }
     }
 

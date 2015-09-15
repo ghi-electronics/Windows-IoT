@@ -17,7 +17,7 @@ namespace GHIElectronics.UWP.Gadgeteer.Modules {
 		}
 
 		public double GetReading() {
-			return this.input.ReadProportion() / 1.6;
+			return this.input.ReadProportion() * 1.6;
 		}
 	}
 }
