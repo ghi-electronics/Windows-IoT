@@ -18,7 +18,7 @@ namespace GHIElectronics.UWP.Gadgeteer.Modules {
 
         protected async override Task Initialize(ISocket parentSocket) {
             this.outputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Four, false);
-            this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three, GpioPinEdge.FallingEdge | GpioPinEdge.RisingEdge);
+            this.inputPin = await parentSocket.CreateDigitalIOAsync(SocketPinNumber.Three);
 
             this.inputPin.ValueChanged += (s, e) => {
                 if (e.Value) {
