@@ -1,7 +1,7 @@
 ﻿{
   "dependencies": {
-    "GHIElectronics.UWP.GadgeteerCore": "0.0.5",
-    "GHIElectronics.UWP.LowLevelDrivers": "0.0.5",
+    "GHIElectronics.UWP.GadgeteerCore": "0.0.6",
+    "GHIElectronics.UWP.LowLevelDrivers": "0.0.6",
     "Microsoft.NETCore.UniversalWindowsPlatform": "5.0.0"
   },
   "frameworks": {

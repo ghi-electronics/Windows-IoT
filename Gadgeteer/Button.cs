@@ -1,6 +1,5 @@
 ﻿using GHIElectronics.UWP.GadgeteerCore;
 using System.Threading.Tasks;
-using Windows.Devices.Gpio;
 using Windows.Foundation;
 
 using GSI = GHIElectronics.UWP.GadgeteerCore.SocketInterfaces;
