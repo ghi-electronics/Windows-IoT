@@ -182,6 +182,8 @@ namespace GHIElectronics.UWP.Shields {
             hat.dio18 = gpioController.OpenPin(18);
             hat.dio22 = gpioController.OpenPin(22);
 
+            hat.dio16.SetDriveMode(GpioPinDriveMode.Input);
+            hat.dio26.SetDriveMode(GpioPinDriveMode.Input);
             hat.dio24.SetDriveMode(GpioPinDriveMode.Output);
             hat.dio18.SetDriveMode(GpioPinDriveMode.Input);
             hat.dio22.SetDriveMode(GpioPinDriveMode.Input);
@@ -504,8 +506,8 @@ namespace GHIElectronics.UWP.Shields {
                 set {
                     this.pwm.SetDutyCycle(this.pwmChannel, 0);
 
-                    this.direction1.Write(speed > 0 ? GpioPinValue.High : GpioPinValue.Low);
-                    this.direction2.Write(speed > 0 ? GpioPinValue.Low : GpioPinValue.High);
+                    this.direction1.Write(value > 0 ? GpioPinValue.High : GpioPinValue.Low);
+                    this.direction2.Write(value > 0 ? GpioPinValue.Low : GpioPinValue.High);
 
                     this.pwm.SetDutyCycle(this.pwmChannel, Math.Abs(value));
 

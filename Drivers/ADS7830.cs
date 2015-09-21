@@ -33,7 +33,7 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
 			if (this.disposed) throw new ObjectDisposedException(nameof(ADS7830));
 			if (channel > 8 || channel < 0) throw new ArgumentOutOfRangeException(nameof(channel));
 
-			this.write[0] =(byte)( 0x84 | ((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4));
+			this.write[0] = (byte)(0x84 | ((channel % 2 == 0 ? channel / 2 : (channel - 1) / 2 + 4) << 4));
 
 			this.device.WriteRead(this.write, this.read);
 
