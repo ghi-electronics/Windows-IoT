@@ -77,6 +77,8 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
 				this.WriteRegister(Register.Prescale, (byte)(25000000 / (4096 * value) - 1));
 
 				this.WriteRegister(Register.Mode1, mode);
+
+				this.WriteRegister(Register.Mode1, (byte)(mode | 0x80));
 			}
 		}
 
