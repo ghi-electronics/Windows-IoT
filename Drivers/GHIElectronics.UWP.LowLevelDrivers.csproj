@@ -114,6 +114,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ADS7830.cs" />
+    <Compile Include="CAT24C32.cs" />
     <Compile Include="CY8C9560A.cs" />
     <Compile Include="MMA8453.cs" />
     <Compile Include="PCA9535.cs" />
