@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>GHIElectronics.UWP.LowLevelDrivers</id>
-    <version>0.0.6</version>
+    <version>0.0.8</version>
     <authors>GHI Electronics, LLC</authors>
     <owners>GHI Electronics, LLC</owners>
     <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>
@@ -10,7 +10,7 @@
 	<licenseUrl>https://bitbucket.org/ghi_elect/windows-iot/raw/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Low level IC drivers for UWP.</description>
-    <releaseNotes>Initial release.</releaseNotes>
+    <releaseNotes>Added a CAT24C32 driver and set the RESTART bit when changing the PWM frequency on the PCA9685.</releaseNotes>
     <copyright>Copyright GHI Electronics, LLC 2015</copyright>
     <tags>UWP</tags>
   </metadata>
