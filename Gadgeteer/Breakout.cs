@@ -19,7 +19,9 @@ namespace GHIElectronics.UWP.Gadgeteer.Modules {
         }
 
         public async Task<GSI.DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber) => await this.socket.CreateDigitalIOAsync(pinNumber);
+        public async Task<GSI.DigitalIO> CreateDigitalIOAsync(SocketPinNumber pinNumber, bool initialValue) => await this.socket.CreateDigitalIOAsync(pinNumber, initialValue);
         public async Task<GSI.AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber) => await this.socket.CreateAnalogIOAsync(pinNumber);
+        public async Task<GSI.AnalogIO> CreateAnalogIOAsync(SocketPinNumber pinNumber, double initialVoltage) => await this.socket.CreateAnalogIOAsync(pinNumber, initialVoltage);
         public async Task<GSI.PwmOutput> CreatePwmOutputAsync(SocketPinNumber pinNumber) => await this.socket.CreatePwmOutputAsync(pinNumber);
         public async Task<GSI.I2cDevice> CreateI2cDeviceAsync(I2cConnectionSettings settings) => await this.socket.CreateI2cDeviceAsync(settings);
         public async Task<GSI.SpiDevice> CreateSpiDeviceAsync(SpiConnectionSettings settings) => await this.socket.CreateSpiDeviceAsync(settings);
