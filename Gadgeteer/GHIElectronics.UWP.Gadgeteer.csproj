@@ -114,6 +114,20 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AccelG248.cs" />
+    <Compile Include="RFIDReader.cs" />
+    <Compile Include="XBeeAdapter.cs" />
+    <Compile Include="RS485.cs" />
+    <Compile Include="RS232.cs" />
+    <Compile Include="USBSerialSP.cs" />
+    <Compile Include="USBSerial.cs" />
+    <Compile Include="Tunes.cs" />
+    <Compile Include="RelayX1.cs" />
+    <Compile Include="GasSense.cs" />
+    <Compile Include="Load.cs" />
+    <Compile Include="Extender.cs" />
+    <Compile Include="BreakoutTB10.cs" />
+    <Compile Include="Breakout.cs" />
+    <Compile Include="BreadBoardX1.cs" />
     <Compile Include="Button.cs" />
     <Compile Include="CharacterDisplay.cs" />
     <Compile Include="CurrentACS712.cs" />
