@@ -47,7 +47,7 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
             if (value > 511.0)
                 value = value - 1024.0;
 
-            value /= 512.0;
+            value /= 256.0;
 
             return value;
         }

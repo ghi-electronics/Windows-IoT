@@ -116,6 +116,8 @@
     <Compile Include="ADS7830.cs" />
     <Compile Include="CAT24C32.cs" />
     <Compile Include="CY8C9560A.cs" />
+    <Compile Include="HC595.cs" />
+    <Compile Include="LS7366R.cs" />
     <Compile Include="MMA8453.cs" />
     <Compile Include="PCA9535.cs" />
     <Compile Include="PCA9685.cs" />

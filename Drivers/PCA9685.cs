@@ -100,9 +100,19 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
 
 		public void TurnOff(int channel) {
 			this.SetChannel(channel, 0x0000, 0x1000);
-		}
+        }
 
-		public void SetDutyCycle(int channel, double dutyCycle) {
+        public void TurnAllOn() {
+            for (var i = 0; i < 16; i++)
+                this.TurnOn(i);
+        }
+
+        public void TurnAllOff() {
+            for (var i = 0; i < 16; i++)
+                this.TurnOff(i);
+        }
+
+        public void SetDutyCycle(int channel, double dutyCycle) {
 			if (dutyCycle < 0.0 || dutyCycle > 1.0) throw new ArgumentOutOfRangeException(nameof(dutyCycle));
 
 			if (dutyCycle == 1.0) {
