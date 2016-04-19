@@ -231,7 +231,7 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
             //if (this.IsShadowed(register))
             //	this.shadowRegisters[(int)register - 0x08] = (byte)value;
 
-            this.device.WriteRead(new byte[] { (byte)register }, new byte[] { (byte)value });
+            this.device.Write(new byte[] { (byte)register, (byte)value });
 		}
 
 		private void SetBits(Register register, int mask) {
