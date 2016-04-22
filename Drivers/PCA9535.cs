@@ -43,6 +43,8 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
 
         public void Dispose() => this.Dispose(true);
 
+        public PCA9535(I2cDevice device) : this(device, null) { }
+
         public PCA9535(I2cDevice device, GpioPin interrupt) {
             this.write2 = new byte[2];
             this.write1 = new byte[1];
@@ -55,17 +57,19 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
             this.config1 = 0xFF;
 
             this.device = device;
-            this.interrupt = interrupt;
 
-            this.interrupt.SetDriveMode(GpioPinDriveMode.Input);
-            this.interrupt.ValueChanged += this.OnInterruptValueChanged;
+            if (interrupt != null) {
+                this.interrupt = interrupt;
+                this.interrupt.SetDriveMode(GpioPinDriveMode.Input);
+                this.interrupt.ValueChanged += this.OnInterruptValueChanged;
+            }
         }
 
         protected virtual void Dispose(bool disposing) {
             if (!this.disposed) {
                 if (disposing) {
                     this.device.Dispose();
-                    this.interrupt.Dispose();
+                    this.interrupt?.Dispose();
                 }
 
                 this.disposed = true;
