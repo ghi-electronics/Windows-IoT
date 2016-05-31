@@ -191,8 +191,8 @@ namespace GHIElectronics.UWP.GadgeteerCore.SoftwareInterfaces {
         private DigitalIO masterOut;
         private DigitalIO masterIn;
         private DigitalIO clock;
-        private bool clockEdge;
-        private bool clockPolarity;
+        private bool captureOnRisingEdge;
+        private bool clockActiveState;
 
         internal SpiDevice(DigitalIO chipSelect, DigitalIO masterOut, DigitalIO masterIn, DigitalIO clock, Windows.Devices.Spi.SpiConnectionSettings settings) {
             if (settings.DataBitLength != 8) throw new NotSupportedException("Only 8 data bits are supported.");
@@ -202,8 +202,13 @@ namespace GHIElectronics.UWP.GadgeteerCore.SoftwareInterfaces {
             this.masterIn = masterIn;
             this.clock = clock;
 
-            this.clockEdge = (((int)settings.Mode) & 0x01) > 0;
-            this.clockPolarity = (((int)settings.Mode) & 0x02) == 0;
+            this.clockActiveState = (((int)settings.Mode) & 0x02) == 0;
+            this.captureOnRisingEdge = ((((int)settings.Mode) & 0x01) == 0);
+
+            this.clock.Write(!this.clockActiveState);
+            this.masterIn.Read();
+            this.masterOut.Write(true);
+            this.chipSelect.Write(true);
         }
 
         public override void Write(byte[] buffer) {
@@ -233,56 +238,49 @@ namespace GHIElectronics.UWP.GadgeteerCore.SoftwareInterfaces {
             this.WriteRead(writeBuffer, readBuffer, true);
         }
 
-        public void WriteRead(byte[] writeBuffer, byte[] readBuffer, bool deselectAfter) {
-            var writeLength = writeBuffer.Length;
-            var readLength = 0;
+        private void WriteRead(byte[] writeBuffer, byte[] readBuffer, bool deselectAfter) {
+            if (writeBuffer == null && readBuffer == null) throw new InvalidOperationException($"At least one of {nameof(writeBuffer)} and {nameof(readBuffer)} must not be null.");
 
-            if (readBuffer != null) {
-                readLength = readBuffer.Length;
+            var writeLength = writeBuffer?.Length ?? 0;
+            var readLength = readBuffer?.Length ?? 0;
 
-                for (int i = 0; i < readLength; i++)
-                    readBuffer[i] = 0;
-            }
+            if (readBuffer != null)
+                Array.Clear(readBuffer, 0, readLength);
 
+            this.clock.Write(!this.clockActiveState);
             this.chipSelect.Write(false);
 
-            for (var i = 0; i < (writeLength < readLength ? readLength : writeLength); i++) {
-                byte w = 0;
-
-                if (i < writeLength)
-                    w = writeBuffer[i];
-
+            for (var i = 0; i < Math.Max(readLength, writeLength); i++) {
                 byte mask = 0x80;
+                var w = i < writeLength && writeBuffer != null ? writeBuffer[i] : (byte)0;
+                var r = false;
 
-                for (int j = 0; j < 8; j++) {
-                    if (this.clockEdge) {
-                        this.clock.Write(this.clockPolarity);
+                for (var j = 0; j < 8; j++) {
+                    if (this.captureOnRisingEdge) {
+                        this.clock.Write(!this.clockActiveState);
 
                         this.masterOut.Write((w & mask) != 0);
+                        r = this.masterIn.Read();
 
-                        this.clock.Write(!this.clockPolarity);
-
-                        if (readBuffer != null)
-                            readBuffer[i] |= (this.masterIn.Read() ? mask : (byte)0x00);
+                        this.clock.Write(this.clockActiveState);
                     }
                     else {
-                        this.clock.Write(this.clockPolarity);
-
-                        if (readBuffer != null)
-                            readBuffer[i] |= (this.masterIn.Read() ? mask : (byte)0x00);
-
-                        this.clock.Write(!this.clockPolarity);
+                        this.clock.Write(this.clockActiveState);
 
                         this.masterOut.Write((w & mask) != 0);
+                        r = this.masterIn.Read();
+
+                        this.clock.Write(!this.clockActiveState);
                     }
+
+                    if (i < readLength && readBuffer != null && r)
+                        readBuffer[i] |= mask;
 
                     mask >>= 1;
                 }
-
-                this.masterOut.Write(false);
-
-                this.clock.Write(this.clockPolarity);
             }
+
+            this.clock.Write(!this.clockActiveState);
 
             if (deselectAfter)
                 this.chipSelect.Write(true);
