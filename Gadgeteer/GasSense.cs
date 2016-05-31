@@ -5,8 +5,6 @@ using GSI = GHIElectronics.UWP.GadgeteerCore.SocketInterfaces;
 
 namespace GHIElectronics.UWP.Gadgeteer.Modules {
 	public class GasSense : Module {
-		private double offsetX;
-		private double offsetY;
 		private GSI.AnalogIO input;
 		private GSI.DigitalIO enable;
 
