@@ -95,7 +95,7 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
         private void OnPinValueChanged(int pin, bool newState) => this.PinChanged?.Invoke(this, new PinChangedEventArgs(pin, newState));
 
         public bool Read(int pin) {
-            if (this.disposed) throw new ObjectDisposedException(nameof(PCA9685));
+            if (this.disposed) throw new ObjectDisposedException(nameof(PCA9535));
             if (!((pin >= 0 && pin <= 7) || (pin >= 10 && pin <= 17))) throw new ArgumentOutOfRangeException(nameof(pin));
 
             if (pin < 8) {
@@ -107,7 +107,7 @@ namespace GHIElectronics.UWP.LowLevelDrivers {
         }
 
         public void Write(int pin, bool state) {
-            if (this.disposed) throw new ObjectDisposedException(nameof(PCA9685));
+            if (this.disposed) throw new ObjectDisposedException(nameof(PCA9535));
             if (!((pin >= 0 && pin <= 7) || (pin >= 10 && pin <= 17))) throw new ArgumentOutOfRangeException(nameof(pin));
 
             if (state) {
