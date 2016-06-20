@@ -1,17 +1,21 @@
 <?xml version="1.0"?>
-<package >
-  <metadata>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="3.4">
     <id>GHIElectronics.UWP.LowLevelDrivers</id>
-    <version>0.0.9</version>
-    <authors>GHI Electronics, LLC</authors>
-    <owners>GHI Electronics, LLC</owners>
+    <version>0.1.0</version>
+    <authors>GHI Electronics LLC</authors>
+    <owners>GHI Electronics LLC</owners>
     <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>
     <iconUrl>https://www.ghielectronics.com/downloads/marketing/logo/GHILogo-Vertical.png</iconUrl>
 	<licenseUrl>https://bitbucket.org/ghi_elect/windows-iot/raw/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Low level IC drivers for UWP.</description>
-    <releaseNotes>Added a driver for the 74HC595 and LS7366R, added TurnAllOff and TurnAllOn to PCA9685, and fixed result scaling in MMA8453.</releaseNotes>
+    <releaseNotes>Updated target SDK, added UniversalWindowsPlatform dependency, added 74HC595 and LS7366R, added TurnAllOff and TurnAllOn to PCA9685, added ReadRaw to ADS7830, made the interrupt pin optional on the PCA9535, fixed result scaling in MMA8453, and fixed WriteRegister in CY8C9560A.</releaseNotes>
     <copyright>Copyright GHI Electronics, LLC 2016</copyright>
-    <tags>UWP</tags>
+    <tags>UWP IoT FEZ</tags>
+    <dependencies>
+      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="5.1.0" />
+    </dependencies>
   </metadata>
 </package>

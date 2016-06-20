@@ -1,20 +1,22 @@
 <?xml version="1.0"?>
-<package >
-  <metadata>
+
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata minClientVersion="3.4">
     <id>GHIElectronics.UWP.Shields.FEZHAT</id>
-    <version>0.0.8</version>
-    <authors>GHI Electronics, LLC</authors>
-    <owners>GHI Electronics, LLC</owners>
+    <version>0.1.0</version>
+    <authors>GHI Electronics LLC</authors>
+    <owners>GHI Electronics LLC</owners>
     <projectUrl>https://bitbucket.org/ghi_elect/windows-iot</projectUrl>
     <iconUrl>https://www.ghielectronics.com/downloads/marketing/logo/GHILogo-Vertical.png</iconUrl>
 	<licenseUrl>https://bitbucket.org/ghi_elect/windows-iot/raw/master/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>UWP driver for the FEZ HAT.</description>
-    <releaseNotes>Fixed setting the motor speed and the initialization of DIO16 and DIO26.</releaseNotes>
-    <copyright>Copyright GHI Electronics, LLC 2015</copyright>
-    <tags>UWP Rasberry Pi RaspberryPi IoT FEZ FEZHAT</tags>
+    <releaseNotes>Updated target SDK and added UniversalWindowsPlatform dependency.</releaseNotes>
+    <copyright>Copyright GHI Electronics, LLC 2016</copyright>
+    <tags>UWP Rasberry Pi RaspberryPi IoT FEZ FEZHAT Hat</tags>
     <dependencies>
-      <dependency id="GHIElectronics.UWP.LowLevelDrivers" version="0.0.8" />
+      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="5.1.0" />
+      <dependency id="GHIElectronics.UWP.LowLevelDrivers" version="0.1.0" />
     </dependencies>
   </metadata>
 </package>
